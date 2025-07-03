@@ -1,0 +1,15 @@
+# Abaikan venv dan file bawaan Python
+backend/venv/
+__pycache__/
+*.pyc
+
+# Abaikan file environment dan database lokal
+.env
+db.sqlite3
+
+# Abaikan file VSCode
+.vscode/
+
+# Abaikan file OS
+.DS_Store
+Thumbs.db
