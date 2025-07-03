@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../controllers/page_controller.dart'; 
 
 class CheckoutPage extends StatefulWidget {
-  CheckoutPage({super.key});
+  const CheckoutPage({super.key});
 
   @override
   State<CheckoutPage> createState() => _CheckoutPageState();
@@ -19,7 +19,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFFF),
+      backgroundColor: const Color(0x0fffffff),
       body: Column(
         children: [
           const HeaderPages(), // Tetap di atas
