@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 // import 'package:google_fonts/google_fonts.dart';
 // import 'package:get/get.dart';
 // import '../controllers/page_controller.dart';
-import '../widgets/header_bar.dart';
-import '../widgets/cart.dart';
+import '../header_bar.dart';
+import 'cart.dart';
 
 class ShoppingCart extends StatelessWidget {
   const ShoppingCart({super.key});

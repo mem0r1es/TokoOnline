@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../services/cart_service.dart';
+import '../../../controllers/cart_controller.dart';
 import 'billing.dart';
 
 class CartPages extends StatelessWidget {

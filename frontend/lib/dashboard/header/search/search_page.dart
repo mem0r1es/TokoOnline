@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
-import '../services/cart_service.dart';
-import '../services/auth_service.dart';
-import '../widgets/product_model.dart';
+import '../../../controllers/cart_controller.dart';
+import '../../../controllers/auth_controller.dart';
+import '../shop/product_model.dart';
 
 class SearchResultPage extends StatelessWidget {
   final String query;

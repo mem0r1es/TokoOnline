@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 // import 'package:flutter_web/widgets/billing.dart';
-import '../widgets/header_bar.dart';
-import '../widgets/isi.dart' ;
-import '../widgets/our_product.dart';
-import '../widgets/about_page.dart';
-import '../widgets/contact_page.dart';
+import 'header/header_bar.dart';
+import 'isi.dart' ;
+import 'header/shop/our_product.dart';
+import 'header/about/about_page.dart';
+import 'header/contact/contact_page.dart';
 // import '../widgets/billing.dart';// Pastikan path ini sesuai dengan struktur proyek And
 
 class DashboardPage extends StatelessWidget {

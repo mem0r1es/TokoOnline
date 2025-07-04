@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_web/widgets/header_bar.dart';
+import 'package:flutter_web/dashboard/header/header_bar.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../controllers/page_controller.dart'; 
+import '../../../controllers/page_controller.dart'; 
 
 class CheckoutPage extends StatefulWidget {
   const CheckoutPage({super.key});

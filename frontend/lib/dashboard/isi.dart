@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart'; 
 import 'package:get/get.dart';
-import '../pages/shops.dart';
+import 'header/shop/shops.dart';
 
 class Isi extends StatelessWidget {
   const Isi({super.key});

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
-import '../services/cart_service.dart';
-import '../services/auth_service.dart';
-import '../services/product_service.dart';
-import '../controllers/page_controller.dart';
-import '../widgets/product_model.dart';
+import '../../../controllers/cart_controller.dart';
+import '../../../controllers/auth_controller.dart';
+import '../../../controllers/product_controller.dart';
+import '../../../controllers/page_controller.dart';
+import 'product_model.dart';
 
 class OurProduct extends StatelessWidget {
   OurProduct({super.key});

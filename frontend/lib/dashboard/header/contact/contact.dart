@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../widgets/header_bar.dart';
+import '../header_bar.dart';
 // import '../widgets/isi.dart' ;// Pastikan path ini sesuai dengan struktur proyek And
-import '../widgets/contact_page.dart';
+import 'contact_page.dart';
 // import 'package:get/get.dart';
 
 class ContactPage1 extends StatelessWidget {

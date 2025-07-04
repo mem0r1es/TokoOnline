@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../services/auth_service.dart';
+import '../../../controllers/auth_controller.dart';
 
 class AuthDialog extends StatefulWidget {
   const AuthDialog({super.key});

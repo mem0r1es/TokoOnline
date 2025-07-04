@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_web/pages/contact.dart';
+import 'package:flutter_web/dashboard/header/contact/contact.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
-import '../pages/dashboard.dart';
-import '../pages/shops.dart';
-import '../pages/shopping_cart.dart';
-import '../pages/about.dart';
-import 'search_page.dart';
-import 'favorite_page.dart';
-import 'auth_dialog.dart';
-import '../services/auth_service.dart';
-import '../services/cart_service.dart';
-import '../services/product_service.dart';
-import '../widgets/product_model.dart';
+import '../dashboard.dart';
+import 'shop/shops.dart';
+import 'shoppingcart/shopping_cart.dart';
+import 'about/about.dart';
+import 'search/search_page.dart';
+import 'favorite/favorite_page.dart';
+import 'login/auth_dialog.dart';
+import '../../controllers/auth_controller.dart';
+import '../../controllers/cart_controller.dart';
+import '../../controllers/product_controller.dart';
+import 'shop/product_model.dart';
 
 class HeaderPages extends StatelessWidget {
   const HeaderPages({super.key});
@@ -92,6 +92,8 @@ class HeaderPages extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
+
+              
 
               // Search icon
               _iconBtn(Icons.search, () => _openSearchDialog()),

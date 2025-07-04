@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import '../widgets/product_model.dart';
+import '../dashboard/header/shop/product_model.dart';
 // import '../widgets/product_model.dart';
 // import 'package:math_'
 

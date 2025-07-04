@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../controllers/page_controller.dart';
-import '../widgets/product_model.dart';
-import 'header_bar.dart';
+import '../../../controllers/page_controller.dart';
+import '../shop/product_model.dart';
+import '../header_bar.dart';
 // import 'package:google_fonts/google_fonts.dart';
 
 class FavoritePage extends StatelessWidget {

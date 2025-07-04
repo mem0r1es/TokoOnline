@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/material.dart';
-import '../widgets/product_model.dart';
+import '../dashboard/header/shop/product_model.dart';
 
 class ProductService extends GetxController {
   final supabase = Supabase.instance.client;
