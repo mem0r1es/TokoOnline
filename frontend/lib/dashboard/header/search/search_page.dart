@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web/controllers/page_controller.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import '../../../controllers/cart_controller.dart';
@@ -9,7 +10,8 @@ class SearchResultPage extends StatelessWidget {
   final String query;
   final List<Product> results;
 
-  const SearchResultPage({super.key, required this.query, required this.results});
+  SearchResultPage({super.key, required this.query, required this.results});
+  final favC = Get.put(FavoriteController());
 
   @override
   Widget build(BuildContext context) {
@@ -135,7 +137,7 @@ class SearchResultPage extends StatelessWidget {
   Widget _buildSearchResults(CartService cartService, AuthService authService) {
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
+        crossAxisCount: 4,
         mainAxisSpacing: 16,
         crossAxisSpacing: 16,
         childAspectRatio: 0.65,
@@ -153,133 +155,217 @@ class SearchResultPage extends StatelessWidget {
     CartService cartService,
     AuthService authService,
   ) {
-    String productId = product.id ?? product.title;
 
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Product Image
-          Expanded(
-            flex: 3,
-            child: Container(
+    String productId = product.id ?? product.title;
+  
+    return SizedBox(
+      width: 280,
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        color: Color(0xFFF8F4FF),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Product Image
+            Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(8),
+              height: 200,
+              padding: const EdgeInsets.all(12),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: _buildProductImage(product),
               ),
             ),
-          ),
 
-          // Product Info
-          Expanded(
-            flex: 2,
-            child: Padding(
-              padding: const EdgeInsets.all(12),
+            // Product Info
+            Padding(
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Product name
+                  // Product Name
                   Text(
                     product.title,
                     style: GoogleFonts.poppins(
-                      fontSize: 14,
+                      fontSize: 18,
                       fontWeight: FontWeight.w600,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
 
-                  const SizedBox(height: 4),
-
-                  // Category
-                  if (product.category != null)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.blue[100],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        product.category!,
-                        style: GoogleFonts.poppins(
-                          fontSize: 10,
-                          color: Colors.blue[700],
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-
                   const SizedBox(height: 8),
 
-                  // Price
+                  // Product Description
                   Text(
-                    'Rp ${_formatPrice(product.price)}',
+                    product.description,
                     style: GoogleFonts.poppins(
                       fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.green[600],
+                      fontWeight: FontWeight.w400,
+                      color: Colors.grey[600],
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
 
-                  const Spacer(),
+                  const SizedBox(height: 12),
 
-                  // Add to Cart Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: Obx(
-                      () => ElevatedButton.icon(
-                        onPressed: () => _handleAddToCart(
-                          product,
-                          productId,
-                          cartService,
-                          authService,
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: cartService.hasItem(productId)
-                              ? Colors.green
-                              : Colors.black,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                  // Price and Category
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Rp ${_formatPrice(product.price)}',
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.green[600],
+                            ),
                           ),
+                          if (product.category != null) ...[
+                            SizedBox(height: 4),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.blue[100],
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                product.category!,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  color: Colors.blue[700],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+
+                      // Stock info
+                      if (product.stock != null)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              'Stock',
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            Text(
+                              '${product.stock}',
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: product.stock! > 0
+                                    ? Colors.green[600]
+                                    : Colors.red[600],
+                              ),
+                            ),
+                          ],
                         ),
-                        icon: Icon(
-                          cartService.hasItem(productId)
-                              ? Icons.shopping_cart
-                              : Icons.shopping_cart_outlined,
-                          size: 16,
-                        ),
-                        label: Text(
-                          cartService.hasItem(productId)
-                              ? 'In Cart'
-                              : 'Add Cart',
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Action Buttons
+                  Row(
+                    children: [
+                      // Add to Cart Button
+                      Expanded(
+                        flex: 3,
+                        child: Obx(
+                          () => ElevatedButton.icon(
+                            onPressed: () => _handleAddToCart(
+                              product,
+                              productId,
+                              cartService,
+                              authService,
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: cartService.hasItem(productId)
+                                  ? Colors.green
+                                  : Colors.black,
+                              foregroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            icon: Icon(
+                              cartService.hasItem(productId)
+                                  ? Icons.shopping_cart
+                                  : Icons.shopping_cart_outlined,
+                              size: 18,
+                            ),
+                            label: Text(
+                              cartService.hasItem(productId)
+                                  ? 'In Cart'
+                                  : 'Add Cart',
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
+
+                      SizedBox(width: 8),
+
+                      // Favorite Button
+                      Obx(
+                        () => Container(
+                          decoration: BoxDecoration(
+                            color: favC.isFavorite(product)
+                                ? Colors.red[50]
+                                : Colors.grey[100],
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: favC.isFavorite(product)
+                                  ? Colors.red
+                                  : Colors.grey[300]!,
+                            ),
+                          ),
+                          child: IconButton(
+                            onPressed: () => _handleFavorite(product),
+                            icon: Icon(
+                              favC.isFavorite(product)
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: favC.isFavorite(product)
+                                  ? Colors.red
+                                  : Colors.grey[600],
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildProductImage(Product product) {
     if (product.imagePath.startsWith('http')) {
+      // Network image
       return Image.network(
         product.imagePath,
         fit: BoxFit.cover,
@@ -287,13 +373,21 @@ class SearchResultPage extends StatelessWidget {
         height: double.infinity,
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
-          return const Center(child: CircularProgressIndicator());
+          return Center(
+            child: CircularProgressIndicator(
+              value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded /
+                        loadingProgress.expectedTotalBytes!
+                  : null,
+            ),
+          );
         },
         errorBuilder: (context, error, stackTrace) {
           return _buildPlaceholderImage();
         },
       );
     } else {
+      // Asset image
       return Image.asset(
         product.imagePath,
         fit: BoxFit.cover,
@@ -316,13 +410,13 @@ class SearchResultPage extends StatelessWidget {
         children: [
           Icon(
             Icons.image_not_supported_outlined,
-            size: 32,
+            size: 40,
             color: Colors.grey[400],
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 8),
           Text(
-            'No Image',
-            style: GoogleFonts.poppins(fontSize: 10, color: Colors.grey[500]),
+            'Image not found',
+            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[500]),
           ),
         ],
       ),
@@ -337,12 +431,12 @@ class SearchResultPage extends StatelessWidget {
   ) {
     if (!authService.isLoggedIn.value) {
       Get.snackbar(
-        'Login Required',
-        'Please login first to add products to cart',
+        "Login Required",
+        "Please login first to add products to cart",
         backgroundColor: Colors.orange,
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
-        icon: const Icon(Icons.login, color: Colors.white),
+        icon: Icon(Icons.login, color: Colors.white),
       );
       return;
     }
@@ -350,12 +444,12 @@ class SearchResultPage extends StatelessWidget {
     // Check stock
     if (product.stock != null && product.stock! <= 0) {
       Get.snackbar(
-        'Out of Stock',
-        '${product.title} is currently out of stock',
+        "Out of Stock",
+        "${product.title} is currently out of stock",
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
-        icon: const Icon(Icons.inventory_2, color: Colors.white),
+        icon: Icon(Icons.inventory_2, color: Colors.white),
       );
       return;
     }
@@ -366,6 +460,25 @@ class SearchResultPage extends StatelessWidget {
       name: product.title,
       price: product.price.toDouble(),
       imageUrl: product.imagePath,
+    );
+  }
+
+  void _handleFavorite(Product product) {
+    favC.toggleFavorite(product);
+
+    Get.snackbar(
+      "Favorites",
+      favC.isFavorite(product)
+          ? "${product.title} added to favorites"
+          : "${product.title} removed from favorites",
+      backgroundColor: favC.isFavorite(product) ? Colors.red : Colors.grey,
+      colorText: Colors.white,
+      snackPosition: SnackPosition.BOTTOM,
+      duration: Duration(seconds: 2),
+      icon: Icon(
+        favC.isFavorite(product) ? Icons.favorite : Icons.favorite_border,
+        color: Colors.white,
+      ),
     );
   }
 

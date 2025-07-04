@@ -11,14 +11,14 @@ class OurProduct extends StatelessWidget {
   OurProduct({super.key});
 
   final favC = Get.put(FavoriteController());
+  final ProductService productService = Get.put(ProductService());
+
 
   @override
   Widget build(BuildContext context) {
-    // Initialize services
-    final ProductService productService = Get.put(ProductService());
-    final cartService = Get.find<CartService>();
-    final authService = Get.find<AuthService>();
-
+      final cartService = Get.find<CartService>();
+      final authService = Get.find<AuthService>();
+      
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 50),
       child: Column(
@@ -36,56 +36,56 @@ class OurProduct extends StatelessWidget {
           const SizedBox(height: 10),
 
           // Debug buttons (hapus ini nanti setelah testing)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton.icon(
-                onPressed: () async {
-                  await productService.refreshProducts();
-                },
-                icon: Icon(Icons.refresh, size: 16),
-                label: Text('Refresh'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                ),
-              ),
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.center,
+          //   children: [
+          //     ElevatedButton.icon(
+          //       onPressed: () async {
+          //         await productService.refreshProducts();
+          //       },
+          //       icon: Icon(Icons.refresh, size: 16),
+          //       label: Text('Refresh'),
+          //       style: ElevatedButton.styleFrom(
+          //         backgroundColor: Colors.blue,
+          //         foregroundColor: Colors.white,
+          //         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          //       ),
+          //     ),
 
-              SizedBox(width: 10),
+          //     SizedBox(width: 10),
 
-              ElevatedButton.icon(
-                onPressed: () {
-                  productService.printProductsInfo();
-                },
-                icon: Icon(Icons.info, size: 16),
-                label: Text('Debug'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                ),
-              ),
+          //     ElevatedButton.icon(
+          //       onPressed: () {
+          //         productService.printProductsInfo();
+          //       },
+          //       icon: Icon(Icons.info, size: 16),
+          //       label: Text('Debug'),
+          //       style: ElevatedButton.styleFrom(
+          //         backgroundColor: Colors.orange,
+          //         foregroundColor: Colors.white,
+          //         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          //       ),
+          //     ),
 
-              SizedBox(width: 10),
+          //     SizedBox(width: 10),
 
-              // Migrate button (untuk emergency)
-              ElevatedButton.icon(
-                onPressed: () async {
-                  await productService.migrateStaticProductsToDatabase();
-                },
-                icon: Icon(Icons.cloud_upload, size: 16),
-                label: Text('Migrate'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                ),
-              ),
-            ],
-          ),
+          //     // Migrate button (untuk emergency)
+          //     ElevatedButton.icon(
+          //       onPressed: () async {
+          //         await productService.migrateStaticProductsToDatabase();
+          //       },
+          //       icon: Icon(Icons.cloud_upload, size: 16),
+          //       label: Text('Migrate'),
+          //       style: ElevatedButton.styleFrom(
+          //         backgroundColor: Colors.green,
+          //         foregroundColor: Colors.white,
+          //         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          //       ),
+          //     ),
+          //   ],
+          // ),
 
-          const SizedBox(height: 20),
+          // const SizedBox(height: 20),
 
           // Products Grid
           Obx(() {
@@ -203,7 +203,7 @@ class OurProduct extends StatelessWidget {
     String productId = product.id ?? product.title;
 
     return SizedBox(
-      width: 280,
+      width: 200,
       child: Card(
         elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

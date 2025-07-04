@@ -22,9 +22,7 @@ class HeaderPages extends StatelessWidget {
     // Initialize ALL services (GUARANTEED TO WORK)
     final AuthService authService = Get.put(AuthService());
     final CartService cartService = Get.put(CartService());
-    final ProductService productService = Get.put(
-      ProductService(),
-    ); // TAMBAH INI
+    // final ProductService productService = Get.put(ProductService(),); // TAMBAH INI
 
     return Container(
       width: double.infinity,
@@ -69,31 +67,32 @@ class HeaderPages extends StatelessWidget {
           Row(
             children: [
               // User icon dengan auth logic
-              Obx(
-                () => GestureDetector(
-                  onTap: () {
-                    if (authService.isLoggedIn.value) {
-                      _showUserMenu(authService);
-                    } else {
-                      _showAuthDialog();
-                    }
-                  },
-                  child: SizedBox(
-                    width: 28,
-                    height: 28,
-                    child: authService.isLoggedIn.value
-                        ? Icon(
-                            Icons.account_circle,
-                            color: Colors.green,
-                            size: 24,
-                          )
-                        : Image.asset('headers/people.png'),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
+              // Obx(
+              //   () => GestureDetector(
+              //     onTap: () {
+              //       if (authService.isLoggedIn.value) {
+              //         _showUserMenu(authService);
+              //       } else {
+              //         _showAuthDialog();
+              //       }
+              //     },
+              //     child: SizedBox(
+              //       width: 28,
+              //       height: 28,
+              //       child: authService.isLoggedIn.value
+              //           ? Icon(
+              //               Icons.account_circle,
+              //               color: Colors.green,
+              //               size: 24,
+              //             )
+              //           : Image.asset('headers/people.png'),
+              //     ),
+              //   ),
+              // ),
+              // const SizedBox(width: 10),
 
-              
+              _iconBtn(Icons.person, () => _userlogin(authService)),
+              const SizedBox(width: 10),
 
               // Search icon
               _iconBtn(Icons.search, () => _openSearchDialog()),
@@ -256,8 +255,16 @@ class HeaderPages extends StatelessWidget {
     );
   }
 
+  void _userlogin (authService) {
+    if (authService.isLoggedIn.value){
+      _showUserMenu(authService);
+    } else {
+      _showAuthDialog();
+    }
+  }
+
   // Handle cart click
-  void _handleCartClick(AuthService authService, CartService cartService) {
+  void _handleCartClick(authService, CartService cartService) {
     if (authService.isLoggedIn.value) {
       // User is logged in, go to cart
       if (cartService.isNotEmpty) {
