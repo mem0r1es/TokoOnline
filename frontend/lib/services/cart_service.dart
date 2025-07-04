@@ -118,14 +118,14 @@ class CartService extends GetxController {
 
     Get.snackbar(
       'Removed from Cart',
-      '${item.name} removed from cart',
+      '${item?.name} removed from cart',
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.orange,
       colorText: Colors.white,
       duration: Duration(seconds: 2),
     );
 
-    print('Item removed from cart: ${item.name}');
+    print('Item removed from cart: ${item?.name}');
     _saveCartToMemory();
     }
 
