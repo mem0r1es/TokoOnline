@@ -49,8 +49,12 @@ class AuthService extends GetxController {
       final response = await supabase.auth.signUp(
         email: email,
         password: password,
-        data: {'full_name': fullName},
+        data: {
+          'full_name': fullName,
+          'role': 'buyer',
+        },
       );
+
 
       if (response.user != null) {
         print('Registration successful: ${response.user!.email}');
