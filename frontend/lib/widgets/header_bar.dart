@@ -78,7 +78,7 @@ class HeaderPages extends StatelessWidget {
                       _showAuthDialog();
                     }
                   },
-                  child: Container(
+                  child: SizedBox(
                     width: 28,
                     height: 28,
                     child: authService.isLoggedIn.value
@@ -181,7 +181,7 @@ class HeaderPages extends StatelessWidget {
             ),
             SizedBox(height: 4),
             Text(
-              '${authService.getUserEmail() ?? 'User'}',
+              authService.getUserEmail() ?? 'User',
               style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600]),
             ),
             SizedBox(height: 20),

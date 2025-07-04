@@ -78,7 +78,7 @@ class CartService extends GetxController {
 
       Get.snackbar(
         'Cart Updated',
-        '${name} quantity updated in cart',
+        '$name quantity updated in cart',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.green,
         colorText: Colors.white,
@@ -97,7 +97,7 @@ class CartService extends GetxController {
 
       Get.snackbar(
         'Added to Cart',
-        '${name} added to cart',
+        '$name added to cart',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.green,
         colorText: Colors.white,
@@ -106,7 +106,7 @@ class CartService extends GetxController {
     }
 
     print(
-      'Cart updated: ${cartItems.length} unique items, ${itemCount} total items',
+      'Cart updated: ${cartItems.length} unique items, $itemCount total items',
     );
     _saveCartToMemory();
   }
@@ -114,22 +114,20 @@ class CartService extends GetxController {
   void removeItem(String id) {
     CartItem? item = cartItems.firstWhereOrNull((item) => item.id == id);
 
-    if (item != null) {
-      cartItems.removeWhere((item) => item.id == id);
+    cartItems.removeWhere((item) => item.id == id);
 
-      Get.snackbar(
-        'Removed from Cart',
-        '${item.name} removed from cart',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.orange,
-        colorText: Colors.white,
-        duration: Duration(seconds: 2),
-      );
+    Get.snackbar(
+      'Removed from Cart',
+      '${item.name} removed from cart',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.orange,
+      colorText: Colors.white,
+      duration: Duration(seconds: 2),
+    );
 
-      print('Item removed from cart: ${item.name}');
-      _saveCartToMemory();
+    print('Item removed from cart: ${item.name}');
+    _saveCartToMemory();
     }
-  }
 
   void updateQuantity(String id, int newQuantity) {
     if (newQuantity <= 0) {

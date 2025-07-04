@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../services/auth_service.dart';
 
 class AuthDialog extends StatefulWidget {
+  const AuthDialog({super.key});
+
   @override
   _AuthDialogState createState() => _AuthDialogState();
 }

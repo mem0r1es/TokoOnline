@@ -1,364 +1,295 @@
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from supabase import create_client, Client
-import os
-from dotenv import load_dotenv
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+from .models import Product, Category, Cart, Favorite, SupabaseProduct, UserOrder, OrderItem
+import json
 
-# Load .env file
-load_dotenv()
-
-# Hardcode credentials untuk testing
-SUPABASE_URL = "https://mccdwczueketpqlbobyw.supabase.co"
-SUPABASE_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jY2R3Y3p1ZWtldHBxbGJvYnl3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MTI5MTAxNywiZXhwIjoyMDY2ODY3MDE3fQ.18sMUhVuJmFBGGstcM-vGg3PwBwwhFNszQf8RkPTR_I"
-
-print("✅ Initializing Supabase client...")
-
-# Initialize Supabase client
-try:
-    supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
-    print("✅ Supabase client initialized successfully")
-except Exception as e:
-    print(f"❌ Supabase init failed: {e}")
-    supabase = None
-
-# Products endpoints
-@api_view(['GET'])
+@csrf_exempt
+@require_http_methods(["GET"])
 def get_products(request):
-    if not supabase:
-        return Response({
-            'success': False,
-            'error': 'Supabase not initialized'
-        }, status=500)
-    
-    try:
-        response = supabase.table('products').select('*').execute()
-        return Response({
-            'success': True,
-            'data': response.data,
-            'count': len(response.data)
+    # Gunakan products Django (products_product table)
+    products = Product.objects.filter(is_active=True)
+    data = []
+    for product in products:
+        data.append({
+            "id": str(product.id),
+            "name": product.name,
+            "price": float(product.price),
+            "category": product.category.name,
+            "image": product.image,
+            "stock": product.stock,
+            "description": product.description,
+            "featured": product.featured
         })
-    except Exception as e:
-        return Response({
-            'success': False,
-            'error': str(e)
-        }, status=500)
-
-@api_view(['GET'])
-def get_product_detail(request, product_id):
-    if not supabase:
-        return Response({
-            'success': False,
-            'error': 'Supabase not initialized'
-        }, status=500)
-        
-    try:
-        response = supabase.table('products').select('*').eq('id', product_id).execute()
-        if response.data:
-            return Response({
-                'success': True,
-                'data': response.data[0]
+    
+    # Jika tidak ada products di Django table, ambil dari Supabase table
+    if not data:
+        supabase_products = SupabaseProduct.objects.filter(is_active=True)
+        for product in supabase_products:
+            data.append({
+                "id": str(product.id),
+                "name": product.name,
+                "price": float(product.price),
+                "category": product.category,
+                "image": product.image_url,
+                "stock": product.stock,
+                "description": product.description
             })
-        else:
-            return Response({
-                'success': False,
-                'error': 'Product not found'
-            }, status=404)
-    except Exception as e:
-        return Response({
-            'success': False,
-            'error': str(e)
-        }, status=500)
-
-@api_view(['GET'])
-def search_products(request):
-    if not supabase:
-        return Response({
-            'success': False,
-            'error': 'Supabase not initialized'
-        }, status=500)
     
-    query = request.GET.get('q', '')
-    if not query:
-        return Response({
-            'success': False,
-            'error': 'Search query is required'
-        }, status=400)
-    
-    try:
-        response = supabase.table('products').select('*').ilike('name', f'%{query}%').execute()
-        return Response({
-            'success': True,
-            'data': response.data,
-            'count': len(response.data),
-            'query': query
-        })
-    except Exception as e:
-        return Response({
-            'success': False,
-            'error': str(e)
-        }, status=500)
+    return JsonResponse({"products": data})
 
-@api_view(['GET'])
+@csrf_exempt
+@require_http_methods(["GET"])
 def get_categories(request):
-    if not supabase:
-        return Response({
-            'success': False,
-            'error': 'Supabase not initialized'
-        }, status=500)
-    
-    try:
-        response = supabase.table('products').select('category').execute()
-        categories = list(set([item['category'] for item in response.data if item['category']]))
-        return Response({
-            'success': True,
-            'data': categories,
-            'count': len(categories)
-        })
-    except Exception as e:
-        return Response({
-            'success': False,
-            'error': str(e)
-        }, status=500)
+    categories = Category.objects.all()
+    data = [{"id": cat.id, "name": cat.name, "description": cat.description} for cat in categories]
+    return JsonResponse({"categories": data})
 
-# Cart endpoints
-@api_view(['GET'])
-def get_cart(request):
-    if not supabase:
-        return Response({
-            'success': False,
-            'error': 'Supabase not initialized'
-        }, status=500)
-    
-    try:
-        response = supabase.table('cart').select('*, products(*)').execute()
-        return Response({
-            'success': True,
-            'data': response.data,
-            'count': len(response.data)
-        })
-    except Exception as e:
-        return Response({
-            'success': False,
-            'error': str(e)
-        }, status=500)
-
-@api_view(['POST'])
-def add_to_cart(request):
-    if not supabase:
-        return Response({
-            'success': False,
-            'error': 'Supabase not initialized'
-        }, status=500)
-    
-    try:
-        data = request.data
-        if not data.get('product_id'):
-            return Response({
-                'success': False,
-                'error': 'product_id is required'
-            }, status=400)
-        
-        response = supabase.table('cart').insert({
-            'product_id': data['product_id'],
-            'quantity': data.get('quantity', 1)
-        }).execute()
-        
-        return Response({
-            'success': True,
-            'data': response.data,
-            'message': 'Product added to cart'
-        })
-    except Exception as e:
-        return Response({
-            'success': False,
-            'error': str(e)
-        }, status=500)
-
-@api_view(['DELETE'])
-def remove_from_cart(request, cart_id):
-    if not supabase:
-        return Response({
-            'success': False,
-            'error': 'Supabase not initialized'
-        }, status=500)
-    
-    try:
-        response = supabase.table('cart').delete().eq('id', cart_id).execute()
-        return Response({
-            'success': True,
-            'message': 'Item removed from cart'
-        })
-    except Exception as e:
-        return Response({
-            'success': False,
-            'error': str(e)
-        }, status=500)
-
-# Favorites endpoints
-@api_view(['GET'])
-def get_favorites(request):
-    if not supabase:
-        return Response({
-            'success': False,
-            'error': 'Supabase not initialized'
-        }, status=500)
-    
-    try:
-        response = supabase.table('favorites').select('*, products(*)').execute()
-        return Response({
-            'success': True,
-            'data': response.data,
-            'count': len(response.data)
-        })
-    except Exception as e:
-        return Response({
-            'success': False,
-            'error': str(e)
-        }, status=500)
-
-@api_view(['POST'])
-def add_to_favorites(request):
-    if not supabase:
-        return Response({
-            'success': False,
-            'error': 'Supabase not initialized'
-        }, status=500)
-    
-    try:
-        data = request.data
-        if not data.get('product_id'):
-            return Response({
-                'success': False,
-                'error': 'product_id is required'
-            }, status=400)
-        
-        response = supabase.table('favorites').insert({
-            'product_id': data['product_id']
-        }).execute()
-        
-        return Response({
-            'success': True,
-            'data': response.data,
-            'message': 'Product added to favorites'
-        })
-    except Exception as e:
-        return Response({
-            'success': False,
-            'error': str(e)
-        }, status=500)
-
-@api_view(['DELETE'])
-def remove_from_favorites(request, favorite_id):
-    if not supabase:
-        return Response({
-            'success': False,
-            'error': 'Supabase not initialized'
-        }, status=500)
-    
-    try:
-        response = supabase.table('favorites').delete().eq('id', favorite_id).execute()
-        return Response({
-            'success': True,
-            'message': 'Item removed from favorites'
-        })
-    except Exception as e:
-        return Response({
-            'success': False,
-            'error': str(e)
-        }, status=500)
-
-# Products by category
-@api_view(['GET'])
+@csrf_exempt
+@require_http_methods(["GET"])
 def get_products_by_category(request, category):
-    if not supabase:
-        return Response({
-            'success': False,
-            'error': 'Supabase not initialized'
-        }, status=500)
-    
     try:
-        response = supabase.table('products').select('*').eq('category', category).execute()
-        return Response({
-            'success': True,
-            'data': response.data,
-            'count': len(response.data),
-            'category': category
-        })
-    except Exception as e:
-        return Response({
-            'success': False,
-            'error': str(e)
-        }, status=500)
+        # Coba dari Django categories
+        cat = Category.objects.get(name=category)
+        products = Product.objects.filter(category=cat, is_active=True)
+        data = []
+        for product in products:
+            data.append({
+                "id": str(product.id),
+                "name": product.name,
+                "price": float(product.price),
+                "category": product.category.name,
+                "image": product.image,
+                "stock": product.stock
+            })
+        
+        # Jika tidak ada, coba dari Supabase products
+        if not data:
+            supabase_products = SupabaseProduct.objects.filter(category=category, is_active=True)
+            for product in supabase_products:
+                data.append({
+                    "id": str(product.id),
+                    "name": product.name,
+                    "price": float(product.price),
+                    "category": product.category,
+                    "image": product.image_url,
+                    "stock": product.stock
+                })
+        
+        return JsonResponse({"products": data, "category": category})
+    except Category.DoesNotExist:
+        return JsonResponse({"error": "Category not found"}, status=404)
 
-# API Documentation
-@api_view(['GET'])
-def api_docs(request):
-    return Response({
-        'message': 'Toko Online API Documentation',
-        'version': '1.0',
-        'base_url': 'http://127.0.0.1:8000',
-        'endpoints': {
-            'products': {
-                'url': '/api/products/',
-                'method': 'GET',
-                'description': 'Get all products'
-            },
-            'product_detail': {
-                'url': '/api/products/{id}/',
-                'method': 'GET',
-                'description': 'Get product by ID (UUID)'
-            },
-            'search': {
-                'url': '/api/products/search/?q=query',
-                'method': 'GET',
-                'description': 'Search products by name'
-            },
-            'categories': {
-                'url': '/api/products/categories/',
-                'method': 'GET',
-                'description': 'Get all product categories'
-            },
-            'products_by_category': {
-                'url': '/api/products/category/{category}/',
-                'method': 'GET',
-                'description': 'Get products by category'
-            },
-            'cart': {
-                'url': '/api/products/cart/',
-                'method': 'GET',
-                'description': 'Get cart items'
-            },
-            'add_to_cart': {
-                'url': '/api/products/cart/add/',
-                'method': 'POST',
-                'description': 'Add product to cart',
-                'body': {
-                    'product_id': 'string (UUID)',
-                    'quantity': 'integer (optional, default: 1)'
-                }
-            },
-            'remove_from_cart': {
-                'url': '/api/products/cart/remove/{id}/',
-                'method': 'DELETE',
-                'description': 'Remove item from cart'
-            },
-            'favorites': {
-                'url': '/api/products/favorites/',
-                'method': 'GET',
-                'description': 'Get favorite items'
-            },
-            'add_to_favorites': {
-                'url': '/api/products/favorites/add/',
-                'method': 'POST',
-                'description': 'Add product to favorites',
-                'body': {
-                    'product_id': 'string (UUID)'
-                }
-            },
-            'remove_from_favorites': {
-                'url': '/api/products/favorites/remove/{id}/',
-                'method': 'DELETE',
-                'description': 'Remove item from favorites'
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_product_detail(request, product_id):
+    try:
+        # Coba dari Django products dulu
+        try:
+            product = Product.objects.get(id=product_id)
+            data = {
+                "id": str(product.id),
+                "name": product.name,
+                "price": float(product.price),
+                "description": product.description,
+                "category": product.category.name,
+                "image": product.image,
+                "stock": product.stock,
+                "featured": product.featured
             }
-        }
-    })
+        except Product.DoesNotExist:
+            # Jika tidak ada, coba dari Supabase products
+            product = SupabaseProduct.objects.get(id=product_id)
+            data = {
+                "id": str(product.id),
+                "name": product.name,
+                "price": float(product.price),
+                "description": product.description,
+                "category": product.category,
+                "image": product.image_url,
+                "stock": product.stock
+            }
+        
+        return JsonResponse({"product": data})
+    except (Product.DoesNotExist, SupabaseProduct.DoesNotExist):
+        return JsonResponse({"error": "Product not found"}, status=404)
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def search_products(request):
+    query = request.GET.get('q', '')
+    
+    # Search di Django products
+    products = Product.objects.filter(name__icontains=query, is_active=True)
+    data = []
+    for product in products:
+        data.append({
+            "id": str(product.id),
+            "name": product.name,
+            "price": float(product.price),
+            "category": product.category.name,
+            "image": product.image
+        })
+    
+    # Jika tidak ada, search di Supabase products
+    if not data:
+        supabase_products = SupabaseProduct.objects.filter(name__icontains=query, is_active=True)
+        for product in supabase_products:
+            data.append({
+                "id": str(product.id),
+                "name": product.name,
+                "price": float(product.price),
+                "category": product.category,
+                "image": product.image_url
+            })
+    
+    return JsonResponse({"products": data, "query": query})
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_cart(request):
+    cart_items = Cart.objects.all()
+    data = []
+    total_price = 0
+    for item in cart_items:
+        item_total = float(item.product.price) * item.quantity
+        total_price += item_total
+        data.append({
+            "id": str(item.id),
+            "product": {
+                "id": str(item.product.id),
+                "name": item.product.name,
+                "price": float(item.product.price),
+                "image": item.product.image
+            },
+            "quantity": item.quantity,
+            "total": item_total
+        })
+    return JsonResponse({"cart": data, "total_price": total_price})
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def add_to_cart(request):
+    try:
+        data = json.loads(request.body)
+        product_id = data.get('product_id')
+        quantity = data.get('quantity', 1)
+        
+        product = Product.objects.get(id=product_id)
+        cart_item, created = Cart.objects.get_or_create(
+            product=product,
+            defaults={'quantity': quantity}
+        )
+        
+        if not created:
+            cart_item.quantity += quantity
+            cart_item.save()
+            
+        return JsonResponse({"success": True, "message": "Added to cart"})
+    except Product.DoesNotExist:
+        return JsonResponse({"success": False, "message": "Product not found"}, status=404)
+    except Exception as e:
+        return JsonResponse({"success": False, "message": str(e)}, status=400)
+
+@csrf_exempt
+@require_http_methods(["DELETE"])
+def remove_from_cart(request, cart_id):
+    try:
+        cart_item = Cart.objects.get(id=cart_id)
+        cart_item.delete()
+        return JsonResponse({"success": True, "message": "Removed from cart"})
+    except Cart.DoesNotExist:
+        return JsonResponse({"success": False, "message": "Cart item not found"}, status=404)
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_favorites(request):
+    favorites = Favorite.objects.all()
+    data = []
+    for fav in favorites:
+        data.append({
+            "id": str(fav.id),
+            "product": {
+                "id": str(fav.product.id),
+                "name": fav.product.name,
+                "price": float(fav.product.price),
+                "image": fav.product.image
+            }
+        })
+    return JsonResponse({"favorites": data})
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def add_to_favorites(request):
+    try:
+        data = json.loads(request.body)
+        product_id = data.get('product_id')
+        
+        product = Product.objects.get(id=product_id)
+        favorite, created = Favorite.objects.get_or_create(product=product)
+        
+        if created:
+            return JsonResponse({"success": True, "message": "Added to favorites"})
+        else:
+            return JsonResponse({"success": False, "message": "Already in favorites"})
+    except Product.DoesNotExist:
+        return JsonResponse({"success": False, "message": "Product not found"}, status=404)
+
+@csrf_exempt
+@require_http_methods(["DELETE"])
+def remove_from_favorites(request, favorite_id):
+    try:
+        favorite = Favorite.objects.get(id=favorite_id)
+        favorite.delete()
+        return JsonResponse({"success": True, "message": "Removed from favorites"})
+    except Favorite.DoesNotExist:
+        return JsonResponse({"success": False, "message": "Favorite not found"}, status=404)
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_orders(request):
+    orders = UserOrder.objects.all().order_by('-created_at')
+    data = []
+    for order in orders:
+        order_items = OrderItem.objects.filter(order=order)
+        items = []
+        for item in order_items:
+            items.append({
+                "product_name": item.product_name,
+                "quantity": item.quantity,
+                "price": item.price,
+                "subtotal": item.subtotal
+            })
+        
+        data.append({
+            "id": str(order.id),
+            "customer": f"{order.first_name} {order.last_name}",
+            "email": order.email,
+            "total_amount": order.total_amount,
+            "status": order.status,
+            "created_at": order.created_at,
+            "items": items
+        })
+    
+    return JsonResponse({"orders": data})
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def api_docs(request):
+    docs = {
+        "endpoints": [
+            "GET /api/products/ - Get all products",
+            "GET /api/products/search/?q=query - Search products",
+            "GET /api/products/categories/ - Get categories",
+            "GET /api/products/cart/ - Get cart items",
+            "POST /api/products/cart/add/ - Add to cart",
+            "DELETE /api/products/cart/remove/{id}/ - Remove from cart",
+            "GET /api/products/favorites/ - Get favorites",
+            "POST /api/products/favorites/add/ - Add to favorites",
+            "DELETE /api/products/favorites/remove/{id}/ - Remove from favorites",
+            "GET /api/products/category/{category}/ - Get products by category",
+            "GET /api/products/{id}/ - Get product detail",
+            "GET /api/products/orders/ - Get all orders"
+        ]
+    }
+    return JsonResponse(docs)

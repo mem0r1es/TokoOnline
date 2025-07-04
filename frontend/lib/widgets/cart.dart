@@ -5,7 +5,7 @@ import '../services/cart_service.dart';
 import 'billing.dart';
 
 class CartPages extends StatelessWidget {
-  CartPages({super.key});
+  const CartPages({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class CartPages extends StatelessWidget {
   }
 
   Widget _buildEmptyCart() {
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(Get.context!).size.width - 100,
       height: 400,
       child: Center(
@@ -90,7 +90,7 @@ class CartPages extends StatelessWidget {
                             flex: 3,
                             child: Row(
                               children: [
-                                Container(
+                                SizedBox(
                                   width: 50,
                                   height: 50,
                                   child: item.imageUrl.startsWith('http')
@@ -347,7 +347,7 @@ class CartPages extends StatelessWidget {
 
                 // Clear Cart Button
                 Center(
-                  child: Container(
+                  child: SizedBox(
                     width: 222,
                     height: 45,
                     child: OutlinedButton(

@@ -90,7 +90,7 @@ class OurProduct extends StatelessWidget {
           // Products Grid
           Obx(() {
             if (productService.isLoading.value) {
-              return Container(
+              return SizedBox(
                 height: 300,
                 child: Center(
                   child: Column(
@@ -115,7 +115,7 @@ class OurProduct extends StatelessWidget {
             }
 
             if (productService.products.isEmpty) {
-              return Container(
+              return SizedBox(
                 height: 300,
                 child: Center(
                   child: Column(
