@@ -104,7 +104,7 @@ class UserOrder(models.Model):
         db_table = 'user_orders'
         managed = False
 
-class OrderItem(models.Model):
+class OrderItemSupabase(models.Model):
     id = models.UUIDField(primary_key=True)
     order = models.ForeignKey(UserOrder, on_delete=models.CASCADE, blank=True, null=True)
     product = models.ForeignKey(SupabaseProduct, on_delete=models.CASCADE, blank=True, null=True)
@@ -120,3 +120,61 @@ class OrderItem(models.Model):
     class Meta:
         db_table = 'order_items'
         managed = False
+
+# Django managed models for new order system
+class Order(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('processing', 'Processing'),
+        ('shipped', 'Shipped'),
+        ('delivered', 'Delivered'),
+        ('cancelled', 'Cancelled'),
+    ]
+    
+    user_id = models.CharField(max_length=100, blank=True, null=True)
+    session_id = models.CharField(max_length=100, blank=True, null=True)
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    
+    # Customer info
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    email = models.EmailField()
+    phone = models.CharField(max_length=20)
+    
+    # Address info
+    address = models.TextField()
+    city = models.CharField(max_length=100)
+    province = models.CharField(max_length=100)
+    zip_code = models.CharField(max_length=10)
+    country = models.CharField(max_length=100, default='Indonesia')
+    
+    # Order details
+    notes = models.TextField(blank=True, null=True)
+    payment_method = models.CharField(max_length=50, default='cash_on_delivery')
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"Order #{self.id} - {self.first_name} {self.last_name}"
+    
+    class Meta:
+        ordering = ['-created_at']
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product_name = models.CharField(max_length=200)
+    price = models.DecimalField(max_digits=12, decimal_places=2)
+    quantity = models.PositiveIntegerField()
+    subtotal = models.DecimalField(max_digits=12, decimal_places=2)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def save(self, *args, **kwargs):
+        self.subtotal = self.price * self.quantity
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"{self.product_name} x {self.quantity}"
