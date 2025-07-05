@@ -1,5 +1,18 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+final supabase = Supabase.instance.client;
+
+class OrderHistoryItem {
+  final List<CartItem> items;
+  final DateTime timestamp;
+
+  OrderHistoryItem({
+    required this.items,
+    required this.timestamp,
+  });
+}
 
 class CartItem {
   final String id;
@@ -42,6 +55,7 @@ class CartItem {
 class CartService extends GetxController {
   // Observable cart items
   var cartItems = <CartItem>[].obs;
+  var orderHistory = <OrderHistoryItem>[].obs;
 
   // Computed properties
   int get itemCount => cartItems.fold(0, (sum, item) => sum + item.quantity);
@@ -215,7 +229,14 @@ class CartService extends GetxController {
 
       await Future.delayed(Duration(seconds: 2));
 
+      final newOrder = OrderHistoryItem(
+          items: List.from(cartItems),
+          timestamp: DateTime.now(),
+        );
+      orderHistory.add(newOrder);
       clearCart();
+
+      await saveOrderToSupabase(newOrder);
 
       Get.snackbar(
         'Checkout Successful',
@@ -259,3 +280,22 @@ class CartService extends GetxController {
     print('====================');
   }
 }
+
+Future<void> saveOrderToSupabase(OrderHistoryItem order) async {
+  try {
+    final response = await supabase
+        .from('order_history')
+        .insert({
+          'timestamp': order.timestamp.toIso8601String(),
+          'items': order.items.map((item) => item.toJson()).toList(),
+          'name':order.items.map((item) => item.name).join(', '),
+          'total_price': order.items.fold(0.0, (sum, item) => sum + item.totalPrice),
+        });
+
+    print('Order saved successfully: $response');
+  } catch (e) {
+    print('Error saving to Supabase: $e');
+  }
+}
+
+

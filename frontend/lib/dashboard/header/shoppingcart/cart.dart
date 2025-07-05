@@ -4,9 +4,14 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../controllers/cart_controller.dart';
 import 'billing.dart';
 
-class CartPages extends StatelessWidget {
+class CartPages extends StatefulWidget {
   const CartPages({super.key});
 
+  @override
+  State<CartPages> createState() => _CartPagesState();
+}
+
+class _CartPagesState extends State<CartPages> {
   @override
   Widget build(BuildContext context) {
     // Gunakan CartService yang baru

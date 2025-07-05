@@ -110,8 +110,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
                               ),
                               const SizedBox(height: 20),
                               ElevatedButton(
-                                onPressed: () {
-                                  Get.to(() => const HistoryPage());
+                                onPressed: () async {
+                                  bool success = await cartService.checkout();
+                                  if (success) {
+                                  Get.to(() => ProductInfoPage());
+                                };
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.black,

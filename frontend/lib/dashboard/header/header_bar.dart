@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_web/dashboard/header/contact/contact.dart';
+import 'package:flutter_web/dashboard/header/shoppingcart/history.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import '../dashboard.dart';
@@ -200,7 +201,7 @@ class HeaderPages extends StatelessWidget {
               icon: Icons.shopping_bag,
               title: 'My Orders',
               onTap: () {
-                Get.back();
+                Get.to(ProductInfoPage());
                 Get.snackbar('Info', 'Orders page coming soon!');
               },
             ),
