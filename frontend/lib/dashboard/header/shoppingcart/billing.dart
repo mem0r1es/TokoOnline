@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web/controllers/cart_controller.dart';
 import 'package:flutter_web/dashboard/header/header_bar.dart';
+import 'package:flutter_web/dashboard/header/shoppingcart/history.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../controllers/page_controller.dart'; 
+import '../../../controllers/cart_controller.dart';
 
 class CheckoutPage extends StatefulWidget {
   const CheckoutPage({super.key});
@@ -12,7 +15,7 @@ class CheckoutPage extends StatefulWidget {
 }
 
 class _CheckoutPageState extends State<CheckoutPage> {
-  final cartC = Get.put(CartController1());
+  final CartService cartService = Get.find<CartService>();
 
   String? _selectedPayment = 'Direct bank transfer';
 
@@ -73,7 +76,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Obx(() {
-                          final total = cartC.cartItems.fold(0, (sum, item) => sum + item.subtotal);
+                          // final total = cartC.cartItems.fold(0, (sum, item) => sum + item.subtotal);
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -81,17 +84,17 @@ class _CheckoutPageState extends State<CheckoutPage> {
                               const SizedBox(height: 10),
 
                               // Produk dalam cart
-                              ...cartC.cartItems.map((item) => _orderRow(
-                                    '${item.title} × ${item.quantity}',
-                                    'Rp ${_rupiah(item.subtotal)}',
+                              ...cartService.cartItems.map((item) => _orderRow(
+                                    '${item.name} × ${item.quantity}',
+                                    'Rp ${_rupiah(item.totalPrice)}',
                                   )),
 
                               const Divider(),
-                              _orderRow("Subtotal", 'Rp ${_rupiah(total)}'),
+                              _orderRow("Subtotal", 'Rp ${_rupiah(cartService.totalPrice)}'),
                               const SizedBox(height: 8),
                               _orderRow(
                                 "Total",
-                                'Rp ${_rupiah(total)}',
+                                'Rp ${_rupiah(cartService.totalPrice)}',
                                 isBold: true,
                                 color: Colors.orange[800],
                               ),
@@ -107,7 +110,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
                               ),
                               const SizedBox(height: 20),
                               ElevatedButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  Get.to(() => const HistoryPage());
+                                },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.black,
                                   padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
@@ -192,6 +197,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
-  String _rupiah(int n) =>
-      n.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.');
+  String _rupiah(double price) {
+    return price
+        .toStringAsFixed(0)
+        .replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (m) => '${m[1]}.',
+        );
+  }
+
 }

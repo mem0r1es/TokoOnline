@@ -175,16 +175,19 @@ class OurProduct extends StatelessWidget {
                 ),
 
                 // Products grid
-                Wrap(
-                  spacing: 20,
-                  runSpacing: 20,
-                  alignment: WrapAlignment.center,
-                  children: productService.products
-                      .map(
-                        (product) =>
-                            _productCard(product, cartService, authService),
-                      )
-                      .toList(),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Wrap(
+                    spacing: 20,
+                    runSpacing: 20,
+                    alignment: WrapAlignment.center,
+                    children: productService.products
+                        .map(
+                          (product) =>
+                              _productCard(product, cartService, authService),
+                        )
+                        .toList(),
+                  ),
                 ),
               ],
             );
@@ -329,41 +332,56 @@ class OurProduct extends StatelessWidget {
                       // Add to Cart Button
                       Expanded(
                         flex: 3,
-                        child: Obx(
-                          () => ElevatedButton.icon(
-                            onPressed: () => _handleAddToCart(
-                              product,
-                              productId,
-                              cartService,
-                              authService,
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: cartService.hasItem(productId)
-                                  ? Colors.green
-                                  : Colors.black,
-                              foregroundColor: Colors.white,
-                              padding: EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                        child: Obx(() {
+                          final cartItem = cartService.getItem(productId);
+
+                          if (cartItem != null) {
+                            // ✅ Sudah ada di cart ➔ Tampilkan tombol + -
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  onPressed: () => cartService.decreaseQuantity(productId),
+                                  icon: Icon(Icons.remove_circle_outline),
+                                  constraints: BoxConstraints(minWidth: 24, minHeight: 24),
+                                ),
+                                Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.grey[300]!),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    '${cartItem.quantity}',
+                                    style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: () => cartService.increaseQuantity(productId),
+                                  icon: Icon(Icons.add_circle_outline),
+                                  constraints: BoxConstraints(minWidth: 24, minHeight: 24),
+                                ),
+                              ],
+                            );
+                          } else {
+                            // ❌ Belum ada di cart ➔ Tampilkan tombol Add Cart
+                            return ElevatedButton.icon(
+                              onPressed: () => _handleAddToCart(product, productId, cartService, authService),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.black,
+                                foregroundColor: Colors.white,
+                                padding: EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                               ),
-                            ),
-                            icon: Icon(
-                              cartService.hasItem(productId)
-                                  ? Icons.shopping_cart
-                                  : Icons.shopping_cart_outlined,
-                              size: 18,
-                            ),
-                            label: Text(
-                              cartService.hasItem(productId)
-                                  ? 'In Cart'
-                                  : 'Add Cart',
-                              style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
+                              icon: Icon(Icons.shopping_cart_outlined, size: 18),
+                              label: Text(
+                                'Add Cart',
+                                style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600),
                               ),
-                            ),
-                          ),
-                        ),
+                            );
+                          }
+                        }),
                       ),
 
                       SizedBox(width: 8),
