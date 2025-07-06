@@ -201,8 +201,8 @@ class HeaderPages extends StatelessWidget {
               icon: Icons.shopping_bag,
               title: 'My Orders',
               onTap: () {
-                Get.to(ProductInfoPage());
-                Get.snackbar('Info', 'Orders page coming soon!');
+                Get.to(()=> ProductInfoPage());
+                // Get.snackbar('Info', 'Orders page coming soon!');
               },
             ),
             _userMenuOption(

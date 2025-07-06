@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web/controllers/auth_controller.dart';
 import 'package:flutter_web/controllers/cart_controller.dart';
 import 'package:flutter_web/dashboard/header/header_bar.dart';
 import 'package:flutter_web/dashboard/header/shoppingcart/history.dart';
@@ -16,6 +17,15 @@ class CheckoutPage extends StatefulWidget {
 
 class _CheckoutPageState extends State<CheckoutPage> {
   final CartService cartService = Get.find<CartService>();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _addressController = TextEditingController();
+  final authService = Get.find<AuthService>();
+  // final userId = AuthService.getUserId();
+  // final userEmail = AuthService.getUserEmail();
+
 
   String? _selectedPayment = 'Direct bank transfer';
 
@@ -47,7 +57,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           const SizedBox(height: 16),
                           _formInput("Country / Region"),
                           const SizedBox(height: 16),
-                          _formInput("Street Address"),
+                          _formInput("Street Address", controller: _addressController),
                           const SizedBox(height: 16),
                           _formInput("Town / City"),
                           const SizedBox(height: 16),
@@ -55,9 +65,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           const SizedBox(height: 16),
                           _formInput("ZIP Code"),
                           const SizedBox(height: 16),
-                          _formInput("Phone"),
+                          _formInput("Phone", controller: _phoneController),
                           const SizedBox(height: 16),
-                          _formInput("Email Address"),
+                          _formInput("Email Address", controller: _emailController),
                           const SizedBox(height: 16),
                           _formInput("Additional Information"),
                         ],
@@ -111,7 +121,32 @@ class _CheckoutPageState extends State<CheckoutPage> {
                               const SizedBox(height: 20),
                               ElevatedButton(
                                 onPressed: () async {
-                                  bool success = await cartService.checkout();
+                                  final authService = Get.find<AuthService>();
+                                  final userId = authService.getUserId() ?? '';
+                                  final userEmail = authService.getUserEmail() ?? '';
+                                  if (_firstNameController.text.isEmpty ||
+                                      _lastNameController.text.isEmpty ||
+                                      // _emailController.text.isEmpty ||
+                                      _phoneController.text.isEmpty ||
+                                      _addressController.text.isEmpty ||
+                                      _selectedPayment == null) {
+                                    Get.snackbar(
+                                      "Error",
+                                      "Please fill in all fields",
+                                      snackPosition: SnackPosition.TOP,
+                                      backgroundColor: Colors.red,
+                                      colorText: Colors.white,
+                                    );
+                                    return;
+                                  }
+                                  final success = await cartService.checkout(
+                                    userId: userId,
+                                    fullName: '${_firstNameController.text} ${_lastNameController.text}',
+                                    email: userEmail,
+                                    phone: _phoneController.text,
+                                    address: _addressController.text,
+                                    paymentMethod: _selectedPayment!,
+                                  );
                                   if (success) {
                                   Get.to(() => ProductInfoPage());
                                 };
@@ -142,12 +177,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
         style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w600),
       );
 
-  Widget _formInput(String label) => Column(
+  Widget _formInput(String label, {TextEditingController? controller}) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label, style: GoogleFonts.poppins(fontSize: 14)),
           const SizedBox(height: 8),
           TextFormField(
+            controller: controller,
             decoration: InputDecoration(
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
               fillColor: Colors.white,
@@ -159,9 +195,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   Widget _formRow(String leftLabel, String rightLabel) => Row(
         children: [
-          Expanded(child: _formInput(leftLabel)),
+          Expanded(child: _formInput(leftLabel, controller: _firstNameController)),
           const SizedBox(width: 16),
-          Expanded(child: _formInput(rightLabel)),
+          Expanded(child: _formInput(rightLabel, controller: _lastNameController)),
         ],
       );
 

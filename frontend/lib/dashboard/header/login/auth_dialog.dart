@@ -12,7 +12,7 @@ class AuthDialog extends StatefulWidget {
 
 class _AuthDialogState extends State<AuthDialog> {
   final AuthService authService = Get.find<AuthService>();
-
+  
   bool isLogin = true; // true = login, false = register
   bool isLoading = false;
 
@@ -67,7 +67,6 @@ class _AuthDialogState extends State<AuthDialog> {
               obscureText: true,
             ),
             SizedBox(height: 16),
-
             if (!isLogin) ...[
               _buildTextField(
                 controller: confirmPasswordController,

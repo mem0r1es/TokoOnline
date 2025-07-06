@@ -1,3 +1,4 @@
+import 'package:flutter_web/controllers/auth_controller.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -7,10 +8,18 @@ final supabase = Supabase.instance.client;
 class OrderHistoryItem {
   final List<CartItem> items;
   final DateTime timestamp;
+  final String fullName;
+  final String email;
+  final String phone;
+  final String address;
 
   OrderHistoryItem({
     required this.items,
     required this.timestamp,
+    required this.fullName,
+    required this.email,
+    required this.phone,
+    required this.address,
   });
 }
 
@@ -71,7 +80,40 @@ class CartService extends GetxController {
   void onInit() {
     super.onInit();
     _loadCartFromMemory();
+    
+    // final authService = Get.find<AuthService>();
+    // final email = authService.getUserEmail();
+    // if (email != null) {
+    //   loadOrderHistory(email);
+    // }
   }
+
+//   Future<void> loadOrderHistory(String email) async {
+//   try {
+//     final response = await supabase
+//         .from('order_history')
+//         .select('*')
+//         .eq('email', email)
+//         .order('timestamp', ascending: false);
+
+//     // Map response ke model OrderHistoryItem
+//     orderHistory.value = (response as List).map((data) {
+//       return OrderHistoryItem(
+//         items: [], // bisa diisi kalau simpan item detail
+//         timestamp: DateTime.parse(data['timestamp']),
+//         fullName: data['full_name'],
+//         email: data['email'],
+//         phone: data['phone'],
+//         address: data['address'],
+//       );
+//     }).toList();
+
+//     print('Order history loaded: ${orderHistory.length}');
+//   } catch (e) {
+//     print('Failed to load order history: $e');
+//   }
+// }
+
 
   void _loadCartFromMemory() {
     print('Cart loaded: ${cartItems.length} items');
@@ -210,7 +252,14 @@ class CartService extends GetxController {
     return item?.quantity ?? 0;
   }
 
-  Future<bool> checkout() async {
+  Future<bool> checkout({
+    required String userId,
+    required String fullName,
+    required String email,
+    required String phone,
+    required String address,
+    required String paymentMethod,
+  }) async {
     if (isEmpty) {
       Get.snackbar(
         'Cart Empty',
@@ -232,11 +281,17 @@ class CartService extends GetxController {
       final newOrder = OrderHistoryItem(
           items: List.from(cartItems),
           timestamp: DateTime.now(),
+          fullName: fullName,
+          email: email,
+          phone: phone,
+          address: address,
         );
       orderHistory.add(newOrder);
       clearCart();
 
-      await saveOrderToSupabase(newOrder);
+      await saveOrderToSupabase(newOrder, fullName, phone, address, email, paymentMethod);
+      // await loadOrderHistory(email);
+
 
       Get.snackbar(
         'Checkout Successful',
@@ -281,20 +336,43 @@ class CartService extends GetxController {
   }
 }
 
-Future<void> saveOrderToSupabase(OrderHistoryItem order) async {
+Future<void> saveOrderToSupabase(
+  // String userId,
+  OrderHistoryItem order,
+  String fullName,
+  String phone,
+  String address,
+  String email,
+  String paymentMethod,
+) async {
   try {
-    final response = await supabase
-        .from('order_history')
-        .insert({
-          'timestamp': order.timestamp.toIso8601String(),
-          'items': order.items.map((item) => item.toJson()).toList(),
-          'name':order.items.map((item) => item.name).join(', '),
-          'total_price': order.items.fold(0.0, (sum, item) => sum + item.totalPrice),
-        });
+    print('Saving order to Supabase...');
 
-    print('Order saved successfully: $response');
+    final response = await supabase
+    .from('order_history')
+    .insert({
+      // 'user_id': userId,
+      'timestamp': order.timestamp.toIso8601String(),
+      'item': order.items.map((item) => item.name).join(', '),
+      'total_price': order.items.fold(0.0, (sum, item) => sum + item.totalPrice),
+      'full_name': fullName,
+      'phone': phone,
+      'address': address,
+      'email': email,
+      'payment_method': paymentMethod,
+    });
+
+print('Insert response: $response');
+
+if (response == null) {
+  print('Failed: No response from Supabase');
+} else if (response.error != null) {
+  print('Insert failed: ${response.error!.message}');
+} else {
+  print('Insert success: ${response.data}');
+}
   } catch (e) {
-    print('Error saving to Supabase: $e');
+    print('Error saving order to Supabase: $e');
   }
 }
 
