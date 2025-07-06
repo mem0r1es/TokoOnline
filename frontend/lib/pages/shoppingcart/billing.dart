@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+// import 'package:flutter_web/controller/auth_controller.dart';
 import 'package:flutter_web/controllers/auth_controller.dart';
-import 'package:flutter_web/controllers/cart_controller.dart';
-import 'package:flutter_web/dashboard/header/header_bar.dart';
-import 'package:flutter_web/dashboard/header/shoppingcart/history.dart';
+// import 'package:flutter_web/controller/cart_controller.dart';
+// import 'package:flutter_web/controllers/cart_controller.dart';
+import 'package:flutter_web/models/order_history_item.dart';
+import 'package:flutter_web/services/cart_service.dart';
+import 'package:flutter_web/widgets/header_bar.dart';
+import 'package:flutter_web/pages/shoppingcart/history.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../controllers/page_controller.dart'; 
-import '../../../controllers/cart_controller.dart';
+// import '../../controller/page_controller.dart'; 
+// import '../../controller/cart_controller.dart';
 
 class CheckoutPage extends StatefulWidget {
   const CheckoutPage({super.key});
@@ -16,13 +20,14 @@ class CheckoutPage extends StatefulWidget {
 }
 
 class _CheckoutPageState extends State<CheckoutPage> {
+  // final CartController cartController = Get.find<CartController>();
   final CartService cartService = Get.find<CartService>();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _addressController = TextEditingController();
-  final authService = Get.find<AuthService>();
+  final authController = Get.find<AuthController>();
   // final userId = AuthService.getUserId();
   // final userEmail = AuthService.getUserEmail();
 
@@ -121,9 +126,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
                               const SizedBox(height: 20),
                               ElevatedButton(
                                 onPressed: () async {
-                                  final authService = Get.find<AuthService>();
-                                  final userId = authService.getUserId() ?? '';
-                                  final userEmail = authService.getUserEmail() ?? '';
+                                  final authController = Get.find<AuthController>();
+                                  // final userId = authService.getUserId() ?? '';
+                                  final userEmail = authController.getUserEmail() ?? '';
                                   if (_firstNameController.text.isEmpty ||
                                       _lastNameController.text.isEmpty ||
                                       // _emailController.text.isEmpty ||
@@ -139,17 +144,22 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                     );
                                     return;
                                   }
-                                  final success = await cartService.checkout(
-                                    userId: userId,
-                                    fullName: '${_firstNameController.text} ${_lastNameController.text}',
-                                    email: userEmail,
-                                    phone: _phoneController.text,
-                                    address: _addressController.text,
-                                    paymentMethod: _selectedPayment!,
+                                  final order = OrderHistoryItem(
+                                      timestamp: DateTime.now(),
+                                      items: cartService.cartItems.toList(),
+                                      fullName: '${_firstNameController.text} ${_lastNameController.text}',
+                                      email: userEmail,
+                                      phone: _phoneController.text,
+                                      address: _addressController.text,
+                                    );
+                                    cartService.orderHistory.add(order);
+                                  // Simpan order ke Supabase
+                                  await cartService.saveOrderToSupabase(order,
+                                    _selectedPayment!,
                                   );
-                                  if (success) {
+                                  cartService.clearCart();
                                   Get.to(() => ProductInfoPage());
-                                };
+
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.black,

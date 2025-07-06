@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_web/dashboard/header/contact/contact.dart';
-import 'package:flutter_web/dashboard/header/shoppingcart/history.dart';
+import 'package:flutter_web/controllers/auth_controller.dart';
+import 'package:flutter_web/pages/contact/contact.dart';
+import 'package:flutter_web/pages/shoppingcart/history.dart';
+import 'package:flutter_web/services/cart_service.dart';
+import 'package:flutter_web/services/product_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
-import '../dashboard.dart';
-import 'shop/shops.dart';
-import 'shoppingcart/shopping_cart.dart';
-import 'about/about.dart';
-import 'search/search_page.dart';
-import 'favorite/favorite_page.dart';
-import 'login/auth_dialog.dart';
-import '../../controllers/auth_controller.dart';
-import '../../controllers/cart_controller.dart';
-import '../../controllers/product_controller.dart';
-import 'shop/product_model.dart';
+import '../pages/dashboard/dashboard.dart';
+import '../pages/shop/shops.dart';
+import '../pages/shoppingcart/shopping_cart.dart';
+import '../pages/about/about.dart';
+import '../pages/search/search_page.dart';
+import '../pages/favorite/favorite_page.dart';
+import '../pages/auth/auth_dialog.dart';
+// import '../controller/auth_controller.dart';
+// import '../controller/cart_controller.dart';
+// import '../controller/product_controller.dart';
+import '../models/product_model.dart';
 
 class HeaderPages extends StatelessWidget {
   const HeaderPages({super.key});
@@ -21,7 +24,7 @@ class HeaderPages extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Initialize ALL services (GUARANTEED TO WORK)
-    final AuthService authService = Get.put(AuthService());
+    final AuthController authController = Get.put(AuthController());
     final CartService cartService = Get.put(CartService());
     // final ProductService productService = Get.put(ProductService(),); // TAMBAH INI
 
@@ -92,7 +95,7 @@ class HeaderPages extends StatelessWidget {
               // ),
               // const SizedBox(width: 10),
 
-              _iconBtn(Icons.person, () => _userlogin(authService)),
+              _iconBtn(Icons.person, () => _userlogin(authController)),
               const SizedBox(width: 10),
 
               // Search icon
@@ -106,7 +109,7 @@ class HeaderPages extends StatelessWidget {
               // Cart icon dengan badge
               Obx(
                 () => GestureDetector(
-                  onTap: () => _handleCartClick(authService, cartService),
+                  onTap: () => _handleCartClick(authController, cartService),
                   child: SizedBox(
                     width: 28,
                     height: 28,
@@ -162,7 +165,7 @@ class HeaderPages extends StatelessWidget {
   }
 
   // Show user menu
-  void _showUserMenu(AuthService authService) {
+  void _showUserMenu(AuthController authController) {
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -183,7 +186,7 @@ class HeaderPages extends StatelessWidget {
             ),
             SizedBox(height: 4),
             Text(
-              authService.getUserEmail() ?? 'User',
+              authController.getUserEmail() ?? 'User',
               style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600]),
             ),
             SizedBox(height: 20),
@@ -222,7 +225,7 @@ class HeaderPages extends StatelessWidget {
               child: ElevatedButton.icon(
                 onPressed: () {
                   Get.back();
-                  authService.logout();
+                  authController.logout();
                 },
                 icon: Icon(Icons.logout, color: Colors.white),
                 label: Text(

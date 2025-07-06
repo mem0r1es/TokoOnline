@@ -1,73 +1,166 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web/controller/page_controller.dart';
 import 'package:flutter_web/controllers/auth_controller.dart';
-import 'package:flutter_web/controllers/cart_controller.dart';
-import 'package:flutter_web/controllers/product_controller.dart';
-import 'package:get/get.dart';
+import 'package:flutter_web/models/cart_item.dart';
+import 'package:flutter_web/services/cart_service.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../controllers/page_controller.dart';
-import '../shop/product_model.dart';
-import '../header_bar.dart';
-// import 'package:google_fonts/google_fonts.dart';
+import 'package:get/get.dart';
+// import '../../controller/cart_controller.dart';
+// import '../../controller/auth_controller.dart';
+import '../../models/product_model.dart';
 
-class FavoritePage extends StatelessWidget {
-  FavoritePage({super.key});
-  final CartController1 cartController1 = Get.put(CartController1());
+class SearchResultPage extends StatelessWidget {
+  final String query;
+  final List<Product> results;
+
+  SearchResultPage({super.key, required this.query, required this.results});
   final favC = Get.put(FavoriteController());
 
   @override
   Widget build(BuildContext context) {
-    // final favC = Get.find<FavoriteController>();
-    final cartC = Get.find<CartController1>();
-    final ProductService productService = Get.put(ProductService());
     final cartService = Get.find<CartService>();
-    final authService = Get.find<AuthService>();
-
+    final authController = Get.find<AuthController>();
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
+      appBar: AppBar(
+        title: Text(
+          'Search: "$query"',
+          style: GoogleFonts.montserrat(
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 1,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const HeaderPages(),
-            const SizedBox(height: 20),
-            Obx(() {
-              final favorites = favC.favorites;
-              if (favorites.isEmpty) {
-                return Center(
-                  child: Text(
-                    'No favorites yet.',
-                    style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold),
+            // Search result header
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.search, color: Colors.grey[600]),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Found ${results.length} products for "$query"',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                      ),
+                    ),
                   ),
-                );
-              }
-        
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 50),
-                child: Wrap(
-                  spacing: 20,
-                  runSpacing: 20,
-                  alignment: WrapAlignment.center,
-                  children: favorites
-                      .map((product) => _productCard(product, cartService, authService))
-                      .toList(),
-                ),
-              );
-            }),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Search results
+            Expanded(
+              child: results.isEmpty
+                  ? _buildEmptyState()
+                  : _buildSearchResults(cartService, authController),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _productCard(
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.search_off, size: 80, color: Colors.grey[400]),
+          const SizedBox(height: 24),
+          Text(
+            'No products found',
+            style: GoogleFonts.poppins(
+              fontSize: 24,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Try searching for:',
+            style: GoogleFonts.poppins(fontSize: 16, color: Colors.grey[500]),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            children: [
+              _buildSuggestionChip('gaming'),
+              _buildSuggestionChip('furniture'),
+              _buildSuggestionChip('electronics'),
+              _buildSuggestionChip('chair'),
+              _buildSuggestionChip('desk'),
+            ],
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: () => Get.back(),
+            icon: const Icon(Icons.arrow_back),
+            label: const Text('Back to Products'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSuggestionChip(String suggestion) {
+    return ActionChip(
+      label: Text(suggestion, style: GoogleFonts.poppins(fontSize: 12)),
+      onPressed: () {
+        // You can implement re-search with suggestion here
+        Get.back();
+      },
+      backgroundColor: Colors.blue[50],
+      side: BorderSide(color: Colors.blue[200]!),
+    );
+  }
+
+  Widget _buildSearchResults(CartService cartService, AuthController authController) {
+    return GridView.builder(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+        mainAxisSpacing: 16,
+        crossAxisSpacing: 16,
+        childAspectRatio: 0.65,
+      ),
+      itemCount: results.length,
+      itemBuilder: (context, index) {
+        final product = results[index];
+        return _buildProductCard(product, cartService, authController);
+      },
+    );
+  }
+
+  Widget _buildProductCard(
     Product product,
     CartService cartService,
-    AuthService authService,
+    AuthController authController,
   ) {
-    // Use database ID if available, fallback to title
-    String productId = product.id ?? product.title;
 
+    String productId = product.id ?? product.title;
+  
     return SizedBox(
       width: 280,
       child: Card(
@@ -129,7 +222,7 @@ class FavoritePage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Rp ${_rupiah(product.price)}',
+                            'Rp ${_formatPrice(product.price)}',
                             style: GoogleFonts.poppins(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
@@ -195,56 +288,41 @@ class FavoritePage extends StatelessWidget {
                       // Add to Cart Button
                       Expanded(
                         flex: 3,
-                        child: Obx(() {
-                          final cartItem = cartService.getItem(productId);
-
-                          if (cartItem != null) {
-                            // ✅ Sudah ada di cart ➔ Tampilkan tombol + -
-                            return Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  onPressed: () => cartService.decreaseQuantity(productId),
-                                  icon: Icon(Icons.remove_circle_outline),
-                                  constraints: BoxConstraints(minWidth: 24, minHeight: 24),
-                                ),
-                                Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.grey[300]!),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    '${cartItem.quantity}',
-                                    style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600),
-                                  ),
-                                ),
-                                IconButton(
-                                  onPressed: () => cartService.increaseQuantity(productId),
-                                  icon: Icon(Icons.add_circle_outline),
-                                  constraints: BoxConstraints(minWidth: 24, minHeight: 24),
-                                ),
-                              ],
-                            );
-                          } else {
-                            // ❌ Belum ada di cart ➔ Tampilkan tombol Add Cart
-                            return ElevatedButton.icon(
-                              onPressed: () => _handleAddToCart(product, productId, cartService, authService),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.black,
-                                foregroundColor: Colors.white,
-                                padding: EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        child: Obx(
+                          () => ElevatedButton.icon(
+                            onPressed: () => _handleAddToCart(
+                              product,
+                              productId,
+                              cartService,
+                              authController,
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: cartService.hasItem(productId)
+                                  ? Colors.green
+                                  : Colors.black,
+                              foregroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                              icon: Icon(Icons.shopping_cart_outlined, size: 18),
-                              label: Text(
-                                'Add Cart',
-                                style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600),
+                            ),
+                            icon: Icon(
+                              cartService.hasItem(productId)
+                                  ? Icons.shopping_cart
+                                  : Icons.shopping_cart_outlined,
+                              size: 18,
+                            ),
+                            label: Text(
+                              cartService.hasItem(productId)
+                                  ? 'In Cart'
+                                  : 'Add Cart',
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
                               ),
-                            );
-                          }
-                        }),
+                            ),
+                          ),
+                        ),
                       ),
 
                       SizedBox(width: 8),
@@ -352,9 +430,9 @@ class FavoritePage extends StatelessWidget {
     Product product,
     String productId,
     CartService cartService,
-    AuthService authService,
+    AuthController authController,
   ) {
-    if (!authService.isLoggedIn.value) {
+    if (!authController.isLoggedIn.value) {
       Get.snackbar(
         "Login Required",
         "Please login first to add products to cart",
@@ -380,11 +458,13 @@ class FavoritePage extends StatelessWidget {
     }
 
     // Add to cart
-    cartService.addItem(
+    cartService.addItem(CartItem(
       id: productId,
       name: product.title,
       price: product.price.toDouble(),
       imageUrl: product.imagePath,
+      quantity: 1, // Default quantity is 1
+      ),
     );
   }
 
@@ -407,6 +487,10 @@ class FavoritePage extends StatelessWidget {
     );
   }
 
-  String _rupiah(int n) => n.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.');
+  String _formatPrice(int price) {
+    return price.toString().replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (m) => '${m[1]}.',
+    );
+  }
 }

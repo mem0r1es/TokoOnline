@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'dashboard/dashboard.dart';
+import 'pages/dashboard/dashboard.dart';
 
 // void main() {
 //   runApp(const MyApp());
