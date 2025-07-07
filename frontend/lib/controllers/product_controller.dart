@@ -22,7 +22,7 @@ class ProductController extends GetxController {
   return products.firstWhereOrNull((p) => p.id == id);
 }
 
-  void decreaseStock(String productId) {
+  void decreaseStock(String productId, {required int quantity}) {
     final index = products.indexWhere((p) => p.id == productId);
     if (index != -1 && products[index].stock != null && products[index].stock! > 0) {
       products[index].stock = products[index].stock! - 1;

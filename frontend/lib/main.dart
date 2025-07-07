@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web/controllers/cart_controller.dart';
+import 'package:flutter_web/services/cart_service.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'pages/dashboard/dashboard.dart';
@@ -13,6 +15,12 @@ void main() async {
     anonKey:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jY2R3Y3p1ZWtldHBxbGJvYnl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyOTEwMTcsImV4cCI6MjA2Njg2NzAxN30.LAQPMZgZvIUtRVjzkLFh-wXO_RiP9IuwZ3kgSpYghqE',
   );
+
+  Get.put(CartService());
+  Get.put(CartController());
+
+  await Get.find<CartService>().loadCartIfLoggedIn();
+
   runApp(MyApp());
 }
 
