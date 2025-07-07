@@ -26,6 +26,7 @@ class HeaderPages extends StatelessWidget {
     // Initialize ALL services and controller required (GUARANTEED TO WORK)
     final AuthController authController = Get.put(AuthController());
     final CartService cartService = Get.put(CartService());
+    final ProductService productService = Get.put(ProductService());
 
     return Container(
       width: double.infinity,

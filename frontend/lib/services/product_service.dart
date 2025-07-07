@@ -81,5 +81,19 @@ class ProductService {
   Future<void> testConnection() async {
     await supabase.from('products').select('count').limit(1);
   }
+
+  Future<void> updateProductStock(String productId, int newStock) async {
+  try {
+    await supabase
+        .from('products')
+        .update({'stock': newStock})
+        .eq('id', productId);
+
+    print('Stock updated in Supabase for product $productId to $newStock');
+  } catch (e) {
+    print('Failed to update stock: $e');
+  }
+}
+
 }
 

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/cart_item.dart';
 import '../models/order_history_item.dart';
+import '../controllers/product_controller.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -15,10 +16,10 @@ class CartService extends GetxService {
   bool get isEmpty => cartItems.isEmpty;
   bool get isNotEmpty => cartItems.isNotEmpty;
 
-  void removeItem(String id) {
-    cartItems.removeWhere((item) => item.id == id);
-    cartItems.refresh();
-  }
+  // void removeItem(String id) {
+  //   cartItems.removeWhere((item) => item.id == id);
+  //   cartItems.refresh();
+  // }
 
   bool hasItem(String id) {
     return cartItems.any((item) => item.id == id);
@@ -36,33 +37,13 @@ class CartService extends GetxService {
     cartItems.clear();
   }
   
-  void increaseQuantity(String id) {
-    int index = cartItems.indexWhere((item) => item.id == id);
-    if (index >= 0) {
-      cartItems[index].quantity++;
-      cartItems.refresh();
-      _saveCartToMemory();
-    }
-  }
-
-  void decreaseQuantity(String id) {
-    int index = cartItems.indexWhere((item) => item.id == id);
-    if (index >= 0) {
-      if (cartItems[index].quantity > 1) {
-        cartItems[index].quantity--;
-        cartItems.refresh();
-        _saveCartToMemory();
-      } else {
-        removeItem(id);
-      }
-    }
-  }
-
   void addItem(CartItem item) {
   int existingIndex = cartItems.indexWhere((i) => i.id == item.id);
+  final productController = Get.find<ProductController>();
 
   if (existingIndex >= 0) {
     cartItems[existingIndex].quantity += item.quantity;
+    productController.decreaseStock(item.id); // ⬅ Kurangi stok
     cartItems.refresh();
     Get.snackbar('Cart Updated', '${item.name} quantity updated in cart',
       snackPosition: SnackPosition.BOTTOM,
@@ -72,6 +53,7 @@ class CartService extends GetxService {
     );
   } else {
     cartItems.add(item);
+    productController.decreaseStock(item.id); // ⬅ Kurangi stok
     Get.snackbar('Added to Cart', '${item.name} added to cart',
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.green,
@@ -84,6 +66,40 @@ class CartService extends GetxService {
   _saveCartToMemory();
 }
 
+void increaseQuantity(String id) {
+  int index = cartItems.indexWhere((item) => item.id == id);
+  final productController = Get.find<ProductController>();
+
+  if (index >= 0) {
+    cartItems[index].quantity++;
+    productController.decreaseStock(id); // ⬅ Kurangi stok
+    cartItems.refresh();
+    _saveCartToMemory();
+  }
+}
+
+void decreaseQuantity(String id) {
+  int index = cartItems.indexWhere((item) => item.id == id);
+  final productController = Get.find<ProductController>();
+
+  if (index >= 0) {
+    if (cartItems[index].quantity > 1) {
+      cartItems[index].quantity--;
+      productController.increaseStock(id); // ⬅ Balikin stok
+      cartItems.refresh();
+      _saveCartToMemory();
+    } else {
+      removeItem(id);
+    }
+  }
+}
+
+void removeItem(String id) {
+  cartItems.removeWhere((item) => item.id == id);
+  final productController = Get.find<ProductController>();
+  productController.increaseStock(id); // ⬅ Balikin stok
+  cartItems.refresh();
+}
 
   void _saveCartToMemory() {
     print('Cart saved to memory');

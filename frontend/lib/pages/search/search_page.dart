@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_web/controllers/favorite_controller.dart';
 // import 'package:flutter_web/controllers/page_controller.dart';
 import 'package:flutter_web/controllers/auth_controller.dart';
+import 'package:flutter_web/controllers/product_controller.dart';
 import 'package:flutter_web/models/cart_item.dart';
 import 'package:flutter_web/services/cart_service.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -16,6 +17,7 @@ class SearchResultPage extends StatelessWidget {
 
   SearchResultPage({super.key, required this.query, required this.results});
   final favC = Get.put(FavoriteController());
+  final productController = Get.put(ProductController());
 
   @override
   Widget build(BuildContext context) {
@@ -255,8 +257,13 @@ class SearchResultPage extends StatelessWidget {
                       ),
 
                       // Stock info
-                      if (product.stock != null)
-                        Column(
+                      Obx(() {
+                        final updatedProduct = productController.getProductById(product.id ?? product.title);
+
+                        final stock = updatedProduct?.stock ?? 0;
+                        final stockColor = stock > 0 ? Colors.green[600] : Colors.red[600];
+
+                        return Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
@@ -267,17 +274,16 @@ class SearchResultPage extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              '${product.stock}',
+                              '$stock',
                               style: GoogleFonts.poppins(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
-                                color: product.stock! > 0
-                                    ? Colors.green[600]
-                                    : Colors.red[600],
+                                color: stockColor,
                               ),
                             ),
                           ],
-                        ),
+                        );
+                      }),
                     ],
                   ),
 
@@ -293,7 +299,7 @@ class SearchResultPage extends StatelessWidget {
                           final cartItem = cartService.getItem(productId);
 
                           if (cartItem != null) {
-                            // ✅ Sudah ada di cart ➔ Tampilkan tombol + -
+                            // Sudah ada di cart ➔ Tampilkan tombol + -
                             return Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               mainAxisSize: MainAxisSize.min,

@@ -18,6 +18,28 @@ class ProductController extends GetxController {
     fetchProducts();
   }
 
+  Product? getProductById(String id) {
+  return products.firstWhereOrNull((p) => p.id == id);
+}
+
+  void decreaseStock(String productId) {
+    final index = products.indexWhere((p) => p.id == productId);
+    if (index != -1 && products[index].stock != null && products[index].stock! > 0) {
+      products[index].stock = products[index].stock! - 1;
+      products.refresh();
+      productService.updateProductStock(productId, products[index].stock!);
+    }
+  }
+
+  void increaseStock(String productId) {
+    final index = products.indexWhere((p) => p.id == productId);
+    if (index != -1 && products[index].stock != null) {
+      products[index].stock = products[index].stock! + 1;
+      products.refresh();
+      productService.updateProductStock(productId, products[index].stock!);
+    }
+  }
+
   Future<void> fetchProducts() async {
     isLoading.value = true;
     final result = await productService.fetchProducts();

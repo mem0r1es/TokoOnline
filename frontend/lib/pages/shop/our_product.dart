@@ -251,8 +251,13 @@ class OurProduct extends StatelessWidget {
                       ),
 
                       // Stock info
-                      if (product.stock != null)
-                        Column(
+                      Obx(() {
+                        final updatedProduct = productController.getProductById(product.id ?? product.title);
+
+                        final stock = updatedProduct?.stock ?? 0;
+                        final stockColor = stock > 0 ? Colors.green[600] : Colors.red[600];
+
+                        return Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
@@ -263,17 +268,17 @@ class OurProduct extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              '${product.stock}',
+                              '$stock',
                               style: GoogleFonts.poppins(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
-                                color: product.stock! > 0
-                                    ? Colors.green[600]
-                                    : Colors.red[600],
+                                color: stockColor,
                               ),
                             ),
                           ],
-                        ),
+                        );
+                      }),
+
                     ],
                   ),
 
@@ -289,7 +294,7 @@ class OurProduct extends StatelessWidget {
                           final cartItem = cartService.getItem(productId);
 
                           if (cartItem != null) {
-                            // ✅ Sudah ada di cart ➔ Tampilkan tombol + -
+                            // Sudah ada di cart ➔ Tampilkan tombol + -
                             return Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               mainAxisSize: MainAxisSize.min,
@@ -477,6 +482,10 @@ class OurProduct extends StatelessWidget {
       price: product.price.toDouble(),
       imageUrl: product.imagePath,)
     );
+
+    // final productController = Get.find<ProductController>();
+    // productController.decreaseStock(productId);
+
   }
 
   void _handleFavorite(Product product) {
