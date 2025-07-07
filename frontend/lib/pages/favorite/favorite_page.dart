@@ -25,12 +25,8 @@ class FavoritePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final favC = Get.find<FavoriteController>();
-    // final cartC = Get.find<CartController1>();
-    // final ProductController productController = Get.put(ProductController());
     final cartService = Get.find<CartService>();
     final authController = Get.find<AuthController>();
-
 
     return Scaffold(
       backgroundColor: Colors.white,
