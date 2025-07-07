@@ -11,7 +11,7 @@ import 'package:get/get.dart';
 import '../pages/dashboard/dashboard.dart';
 import '../pages/shop/shops.dart';
 import '../pages/shoppingcart/shopping_cart.dart';
-// import '../pages/about/about.dart';
+import '../pages/about/about.dart';
 import '../pages/search/search_page.dart';
 import '../pages/favorite/favorite_page.dart';
 import '../pages/auth/auth_dialog.dart';
@@ -65,7 +65,7 @@ class HeaderPages extends StatelessWidget {
               const SizedBox(width: 20),
               _navItem('Shop', () => Get.to(const ShopsPage())),
               const SizedBox(width: 20),
-              _navItem('About', () => Get.to(const AboutPage())),
+              _navItem('About', () => Get.to(const AboutPage1())),
               const SizedBox(width: 20),
               _navItem('Contact', () => Get.to(const ContactPage1())),
             ],
