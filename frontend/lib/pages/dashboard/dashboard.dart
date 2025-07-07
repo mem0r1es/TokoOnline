@@ -23,8 +23,6 @@ class DashboardPage extends StatelessWidget {
           const Isi(),
           OurProduct(),
 
-          // Konten lainnya...
-
           const SizedBox(height: 60), // Jarak sebelum footer
 
           // FOOTER: About dan Contact di bawah

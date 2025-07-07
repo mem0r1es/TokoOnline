@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_web/controllers/auth_controller.dart';
+// import 'package:flutter_web/controllers/favorite_controller.dart';
+import 'package:flutter_web/pages/about/about_page.dart';
 import 'package:flutter_web/pages/contact/contact.dart';
 import 'package:flutter_web/pages/shoppingcart/history.dart';
 import 'package:flutter_web/services/cart_service.dart';
@@ -9,7 +11,7 @@ import 'package:get/get.dart';
 import '../pages/dashboard/dashboard.dart';
 import '../pages/shop/shops.dart';
 import '../pages/shoppingcart/shopping_cart.dart';
-import '../pages/about/about.dart';
+// import '../pages/about/about.dart';
 import '../pages/search/search_page.dart';
 import '../pages/favorite/favorite_page.dart';
 import '../pages/auth/auth_dialog.dart';
@@ -27,6 +29,7 @@ class HeaderPages extends StatelessWidget {
     final AuthController authController = Get.put(AuthController());
     final CartService cartService = Get.put(CartService());
     final ProductService productService = Get.put(ProductService());
+    // final FavoriteController favoriteController = Get.put(FavoriteController());
 
     return Container(
       width: double.infinity,
@@ -62,7 +65,7 @@ class HeaderPages extends StatelessWidget {
               const SizedBox(width: 20),
               _navItem('Shop', () => Get.to(const ShopsPage())),
               const SizedBox(width: 20),
-              _navItem('About', () => Get.to(const AboutPage1())),
+              _navItem('About', () => Get.to(const AboutPage())),
               const SizedBox(width: 20),
               _navItem('Contact', () => Get.to(const ContactPage1())),
             ],
@@ -365,7 +368,7 @@ class HeaderPages extends StatelessWidget {
           content: TextField(
             onChanged: (val) => query = val,
             decoration: const InputDecoration(
-              hintText: 'Enter product name (e.g., gaming)',
+              hintText: 'Enter product name',
               border: OutlineInputBorder(),
             ),
           ),
@@ -403,7 +406,7 @@ class HeaderPages extends StatelessWidget {
         query,
       );
 
-      print('🔍 HEADER SEARCH: Found ${searchResults.length} results');
+      print('HEADER SEARCH: Found ${searchResults.length} results');
       for (var product in searchResults) {
         print('   - ${product.title} (${product.category})');
       }
@@ -430,32 +433,6 @@ class HeaderPages extends StatelessWidget {
                   style: GoogleFonts.poppins(fontSize: 16),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 12),
-                Text(
-                  'Try searching for:',
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                ),
-                SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  children: [
-                    Chip(
-                      label: Text('gaming'),
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    Chip(
-                      label: Text('furniture'),
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    Chip(
-                      label: Text('electronics'),
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                  ],
-                ),
               ],
             ),
             actions: [
@@ -472,7 +449,7 @@ class HeaderPages extends StatelessWidget {
         );
       }
     } catch (e) {
-      print('❌ SEARCH ERROR: $e');
+      print('SEARCH ERROR: $e');
       Get.snackbar(
         'Search Error',
         'Failed to search products: ${e.toString()}',

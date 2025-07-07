@@ -16,13 +16,15 @@ class SearchResultPage extends StatelessWidget {
   final List<Product> results;
 
   SearchResultPage({super.key, required this.query, required this.results});
+  // final favC = Get.find<FavoriteController>();
+  final ProductController productController = Get.put(ProductController());
   final favC = Get.put(FavoriteController());
-  final productController = Get.put(ProductController());
 
   @override
   Widget build(BuildContext context) {
     final cartService = Get.find<CartService>();
     final authController = Get.find<AuthController>();
+    // final favC = Get.put(FavoriteController());
 
     return Scaffold(
       appBar: AppBar(
@@ -96,22 +98,6 @@ class SearchResultPage extends StatelessWidget {
               color: Colors.grey[600],
             ),
           ),
-          const SizedBox(height: 12),
-          Text(
-            'Try searching for:',
-            style: GoogleFonts.poppins(fontSize: 16, color: Colors.grey[500]),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            children: [
-              _buildSuggestionChip('gaming'),
-              _buildSuggestionChip('furniture'),
-              _buildSuggestionChip('electronics'),
-              _buildSuggestionChip('chair'),
-              _buildSuggestionChip('desk'),
-            ],
-          ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: () => Get.back(),
@@ -128,17 +114,17 @@ class SearchResultPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSuggestionChip(String suggestion) {
-    return ActionChip(
-      label: Text(suggestion, style: GoogleFonts.poppins(fontSize: 12)),
-      onPressed: () {
-        // You can implement re-search with suggestion here
-        Get.back();
-      },
-      backgroundColor: Colors.blue[50],
-      side: BorderSide(color: Colors.blue[200]!),
-    );
-  }
+  // Widget _buildSuggestionChip(String suggestion) {
+  //   return ActionChip(
+  //     label: Text(suggestion, style: GoogleFonts.poppins(fontSize: 12)),
+  //     onPressed: () {
+  //       // You can implement re-search with suggestion here
+  //       Get.back();
+  //     },
+  //     backgroundColor: Colors.blue[50],
+  //     side: BorderSide(color: Colors.blue[200]!),
+  //   );
+  // }
 
   Widget _buildSearchResults(CartService cartService, AuthController authController) {
     return GridView.builder(

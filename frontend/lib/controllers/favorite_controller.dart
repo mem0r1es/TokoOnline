@@ -15,6 +15,7 @@ class FavoriteController extends GetxController {
   }
 
   bool isFavorite(Product product) {
-    return _favorites.contains(product);
+    return favorites.any((p) => p.id == product.id);
   }
+
 }
