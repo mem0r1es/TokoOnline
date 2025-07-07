@@ -7,3 +7,4 @@ urlpatterns = [
     path("login/", views.login_page, name="web_login"),
     path("register/", views.register_page, name="web_register"),  # ← WAJIB ADA
 ]
+        

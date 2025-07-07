@@ -1,0 +1,484 @@
+{% load i18n static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% trans 'Admin Portal' %} | Backend Management</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+        background: linear-gradient(
+          135deg,
+          #667eea 0%,
+          #764ba2 50%,
+          #f093fb 100%
+        );
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* Animated Background */
+      body::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(
+            circle at 20% 50%,
+            rgba(120, 119, 198, 0.3) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 80% 20%,
+            rgba(255, 119, 198, 0.3) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 40% 80%,
+            rgba(120, 219, 255, 0.3) 0%,
+            transparent 50%
+          );
+        animation: backgroundShift 8s ease-in-out infinite;
+      }
+
+      @keyframes backgroundShift {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.8;
+          transform: scale(1.1);
+        }
+      }
+
+      /* Floating Particles */
+      .particle {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        pointer-events: none;
+        animation: float 6s ease-in-out infinite;
+      }
+
+      .particle:nth-child(1) {
+        width: 80px;
+        height: 80px;
+        left: 10%;
+        top: 20%;
+        animation-delay: 0s;
+      }
+      .particle:nth-child(2) {
+        width: 120px;
+        height: 120px;
+        left: 80%;
+        top: 10%;
+        animation-delay: 2s;
+      }
+      .particle:nth-child(3) {
+        width: 60px;
+        height: 60px;
+        left: 60%;
+        top: 70%;
+        animation-delay: 4s;
+      }
+      .particle:nth-child(4) {
+        width: 100px;
+        height: 100px;
+        left: 30%;
+        top: 80%;
+        animation-delay: 1s;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px) rotate(0deg);
+          opacity: 0.3;
+        }
+        50% {
+          transform: translateY(-100px) rotate(180deg);
+          opacity: 0.8;
+        }
+      }
+
+      /* Main Container */
+      #container {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(25px);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        padding: 50px;
+        border-radius: 24px;
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.12),
+          inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        width: 100%;
+        max-width: 480px;
+        position: relative;
+        z-index: 10;
+        transform: translateY(0);
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+      }
+
+      #container:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 40px 80px rgba(0, 0, 0, 0.16),
+          inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      }
+
+      /* Header Section */
+      .admin-header {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      .admin-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3),
+          inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        animation: pulse 3s ease-in-out infinite;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .admin-icon::before {
+        content: "🔐";
+        font-size: 40px;
+        z-index: 2;
+        position: relative;
+      }
+
+      .admin-icon::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.4),
+          transparent
+        );
+        animation: shine 3s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+        }
+        50% {
+          box-shadow: 0 25px 50px rgba(102, 126, 234, 0.5);
+        }
+        100% {
+          box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+        }
+      }
+
+      @keyframes shine {
+        0% {
+          left: -100%;
+        }
+        50% {
+          left: 100%;
+        }
+        100% {
+          left: 100%;
+        }
+      }
+
+      h1 {
+        color: white;
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        text-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        letter-spacing: -0.5px;
+      }
+
+      .subtitle {
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 15px;
+        font-weight: 400;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+      }
+
+      /* Form Styling */
+      #login-form {
+        margin-top: 40px;
+      }
+
+      .form-row {
+        margin-bottom: 25px;
+        position: relative;
+      }
+
+      .form-row label {
+        display: block;
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 12px;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+      }
+
+      .input-wrapper {
+        position: relative;
+      }
+
+      .form-row input[type="text"],
+      .form-row input[type="password"] {
+        width: 100%;
+        padding: 20px 24px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 16px;
+        font-size: 16px;
+        color: white;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+        font-family: "Inter", sans-serif;
+        font-weight: 500;
+      }
+
+      .form-row input::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+      }
+
+      .form-row input:focus {
+        outline: none;
+        border-color: rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1),
+          0 8px 32px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+      }
+
+      /* Submit Button */
+      .submit-row {
+        margin-top: 32px;
+      }
+
+      .submit-row input[type="submit"] {
+        width: 100%;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border: none;
+        border-radius: 16px;
+        color: white;
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+        position: relative;
+        overflow: hidden;
+        font-family: "Inter", sans-serif;
+        text-transform: uppercase;
+        box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3),
+          inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      }
+
+      .submit-row input[type="submit"]:before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.3),
+          transparent
+        );
+        transition: left 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+      }
+
+      .submit-row input[type="submit"]:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 25px 50px rgba(102, 126, 234, 0.4),
+          inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      }
+
+      .submit-row input[type="submit"]:hover:before {
+        left: 100%;
+      }
+
+      .submit-row input[type="submit"]:active {
+        transform: translateY(-1px);
+      }
+
+      /* Error Messages */
+      .errornote {
+        background: rgba(231, 76, 60, 0.15);
+        border: 2px solid rgba(231, 76, 60, 0.3);
+        color: #ffebee;
+        padding: 18px 24px;
+        margin-bottom: 25px;
+        border-radius: 16px;
+        font-size: 14px;
+        text-align: center;
+        backdrop-filter: blur(10px);
+        font-weight: 500;
+      }
+
+      /* Footer */
+      .admin-footer {
+        text-align: center;
+        margin-top: 40px;
+        padding-top: 30px;
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
+      }
+
+      .security-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 13px;
+        font-weight: 500;
+      }
+
+      /* Loading Animation */
+      .loading {
+        display: none;
+        width: 24px;
+        height: 24px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s ease-in-out infinite;
+        margin: 0 auto;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Responsive */
+      @media (max-width: 480px) {
+        #container {
+          padding: 30px 25px;
+          margin: 10px;
+          border-radius: 20px;
+        }
+        h1 {
+          font-size: 28px;
+        }
+        .admin-icon {
+          width: 70px;
+          height: 70px;
+        }
+        .admin-icon::before {
+          font-size: 35px;
+        }
+      }
+    </style>
+  </head>
+
+  <body class="login">
+    <!-- Floating Particles -->
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+
+    <div id="container">
+      <!-- Header -->
+      <div class="admin-header">
+        <div class="admin-icon"></div>
+        <h1>{% trans 'Admin Portal' %}</h1>
+        <div class="subtitle">Secure Backend Management</div>
+      </div>
+
+      <!-- Error Messages -->
+      {% if form.errors and not form.non_field_errors %}
+      <p class="errornote">
+        {% if form.errors.items|length == 1 %} {% trans "Please correct the
+        error below." %} {% else %} {% trans "Please correct the errors below."
+        %} {% endif %}
+      </p>
+      {% endif %} {% if form.non_field_errors %} {% for error in
+      form.non_field_errors %}
+      <p class="errornote">{{ error }}</p>
+      {% endfor %} {% endif %}
+
+      <!-- Login Form -->
+      <form action="{{ app_path }}" method="post" id="login-form">
+        {% csrf_token %}
+
+        <div class="form-row">
+          {{ form.username.label_tag }}
+          <div class="input-wrapper">{{ form.username }}</div>
+          {% if form.username.errors %}{{ form.username.errors }}{% endif %}
+        </div>
+
+        <div class="form-row">
+          {{ form.password.label_tag }}
+          <div class="input-wrapper">{{ form.password }}</div>
+          {% if form.password.errors %}{{ form.password.errors }}{% endif %}
+        </div>
+
+        <div class="submit-row">
+          <input type="submit" value="{% trans 'Access Admin Panel' %}" />
+        </div>
+      </form>
+
+      <!-- Footer -->
+      <div class="admin-footer">
+        <div class="security-badge">
+          🔐 Secured with enterprise-grade encryption
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Add loading animation on form submit
+      document
+        .getElementById("login-form")
+        .addEventListener("submit", function () {
+          const submitBtn = document.querySelector('input[type="submit"]');
+          submitBtn.value = "Authenticating...";
+          submitBtn.style.opacity = "0.8";
+        });
+
+      // Animate particles on load
+      document.addEventListener("DOMContentLoaded", function () {
+        const particles = document.querySelectorAll(".particle");
+        particles.forEach((particle, index) => {
+          particle.style.top = Math.random() * 100 + "%";
+          particle.style.animationDelay = Math.random() * 6 + "s";
+        });
+      });
+    </script>
+  </body>
+</html>

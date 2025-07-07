@@ -1,43 +1,42 @@
-from django.shortcuts import render
+# myapi/views.py - COMPLETE VERSION
+from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.conf import settings
+from django.contrib.auth import authenticate, login  # ADD THIS
 import json
 
-
 # ======================================================
-# 1)  API LOGIN (JSON)  ->  POST /api/auth/login/
+# 1) API LOGIN (JSON + HTML) -> GET/POST /api/login/
 # ======================================================
 @csrf_exempt
-@require_POST
 def login(request):
     """
-    Body JSON:
-    {
-      "email": "...",
-      "password": "..."
-    }
-    Response: access_token, refresh_token, user{...}
+    - GET  : tampilkan halaman login testing
+    - POST : proses login JSON API
     """
-    try:
-        data = json.loads(request.body)
-        email = data.get("email")
-        password = data.get("password")
+    if request.method == "GET":
+        return render(request, "api_login.html")
+   
+    elif request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            email = data.get("email")
+            password = data.get("password")
 
-        if not email or not password:
-            return JsonResponse({"detail": "Email dan password wajib diisi"}, status=400)
+            if not email or not password:
+                return JsonResponse({"detail": "Email dan password wajib diisi"}, status=400)
 
-        auth_response = settings.SUPABASE.auth.sign_in_with_password(
-            {"email": email, "password": password}
-        )
+            auth_response = settings.SUPABASE.auth.sign_in_with_password({
+                "email": email,
+                "password": password
+            })
 
-        if auth_response.session is None:
-            # Login gagal
-            return JsonResponse({"detail": "Email atau password salah"}, status=401)
+            if auth_response.session is None:
+                return JsonResponse({"detail": "Email atau password salah"}, status=401)
 
-        return JsonResponse(
-            {
+            return JsonResponse({
                 "access_token": auth_response.session.access_token,
                 "refresh_token": auth_response.session.refresh_token,
                 "user": {
@@ -46,27 +45,19 @@ def login(request):
                     "name": auth_response.user.user_metadata.get("name", ""),
                     "role": auth_response.user.user_metadata.get("role", ""),
                 },
-            }
-        )
+            })
 
-    except Exception as e:
-        return JsonResponse({"detail": str(e)}, status=500)
-
+        except Exception as e:
+            return JsonResponse({"detail": str(e)}, status=500)
+   
+    return JsonResponse({"detail": "Method not allowed"}, status=405)
 
 # ======================================================
-# 2)  API REGISTER PENJUAL  ->  POST /api/auth/register-seller/
+# 2) API REGISTER SELLER -> POST /api/auth/register-seller/
 # ======================================================
 @csrf_exempt
 @require_POST
 def register_seller(request):
-    """
-    Body JSON:
-    {
-      "email": "...",
-      "password": "..."
-    }
-    Membuat akun Supabase dengan metadata role = "seller"
-    """
     try:
         data = json.loads(request.body)
         email = data.get("email")
@@ -75,64 +66,53 @@ def register_seller(request):
         if not email or not password:
             return JsonResponse({"detail": "Email dan password wajib diisi"}, status=400)
 
-        settings.SUPABASE.auth.sign_up(
-            {
-                "email": email,
-                "password": password,
-                "options": {"data": {"role": "seller"}},
-            }
-        )
+        settings.SUPABASE.auth.sign_up({
+            "email": email,
+            "password": password,
+            "options": {"data": {"role": "seller"}},
+        })
 
         return JsonResponse({"detail": "Akun penjual berhasil dibuat. Silakan login."})
 
     except Exception as e:
         return JsonResponse({"detail": str(e)}, status=500)
 
-
 # ======================================================
-# 3)  HALAMAN LOGIN PENJUAL  ->  GET/POST /login/
+# 3) SELLER LOGIN PAGE -> GET/POST /login/
 # ======================================================
 @csrf_exempt
 def login_page(request):
-    """
-    - GET  : tampilkan form login
-    - POST : proses form, hanya izinkan role == "seller"
-    """
     if request.method == "POST":
         email = request.POST.get("email")
         password = request.POST.get("password")
 
         try:
-            result = settings.SUPABASE.auth.sign_in_with_password(
-                {"email": email, "password": password}
-            )
+            result = settings.SUPABASE.auth.sign_in_with_password({
+                "email": email,
+                "password": password
+            })
 
             role = result.user.user_metadata.get("role")
             if result.session and role == "seller":
-                return render(
-                    request,
-                    "login.html",
-                    {"success": True, "name": result.user.user_metadata.get("name", "Penjual")},
-                )
+                return render(request, "login.html", {
+                    "success": True,
+                    "name": result.user.user_metadata.get("name", "Penjual")
+                })
 
-            return render(request, "login.html", {"error": "Akun ini bukan penjual atau kredensial salah"})
+            return render(request, "login.html", {
+                "error": "Akun ini bukan penjual atau kredensial salah"
+            })
 
         except Exception as e:
             return render(request, "login.html", {"error": str(e)})
 
-    # GET
     return render(request, "login.html")
 
-
 # ======================================================
-# 4)  HALAMAN REGISTER PENJUAL  ->  GET/POST /register/
+# 4) SELLER REGISTER PAGE -> GET/POST /register/
 # ======================================================
 @csrf_exempt
 def register_page(request):
-    """
-    - GET  : tampilkan form register
-    - POST : buat akun Supabase role = "seller"
-    """
     if request.method == "POST":
         email = request.POST.get("email")
         password = request.POST.get("password")
@@ -141,21 +121,16 @@ def register_page(request):
             return render(request, "register.html", {"error": "Email & password wajib"})
 
         try:
-            settings.SUPABASE.auth.sign_up(
-                {
-                    "email": email,
-                    "password": password,
-                    "options": {"data": {"role": "seller"}},
-                }
-            )
-            return render(
-                request,
-                "register.html",
-                {"success": "Akun berhasil dibuat. Silakan login."},
-            )
+            settings.SUPABASE.auth.sign_up({
+                "email": email,
+                "password": password,
+                "options": {"data": {"role": "seller"}},
+            })
+            return render(request, "register.html", {
+                "success": "Akun berhasil dibuat. Silakan login."
+            })
 
         except Exception as e:
             return render(request, "register.html", {"error": str(e)})
 
-    # GET
     return render(request, "register.html")
