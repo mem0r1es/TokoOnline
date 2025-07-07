@@ -41,6 +41,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
   _emailController.text = authController.getUserEmail() ?? '';
 }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0x0fffffff),
