@@ -29,12 +29,18 @@ class _CheckoutPageState extends State<CheckoutPage> {
   final _addressController = TextEditingController();
   final authController = Get.find<AuthController>();
   // final userId = AuthService.getUserId();
-  // final userEmail = AuthService.getUserEmail();
+
 
 
   String? _selectedPayment = 'Direct bank transfer';
 
   @override
+  void initState() {
+  super.initState();
+  // final userEmail = authController.getUserEmail()?? '';
+  _emailController.text = authController.getUserEmail() ?? '';
+}
+
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0x0fffffff),
@@ -72,7 +78,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           const SizedBox(height: 16),
                           _formInput("Phone", controller: _phoneController),
                           const SizedBox(height: 16),
-                          _formInput("Email Address", controller: _emailController),
+                          _formInput("Email Address", controller:_emailController, readOnly: true),
                           const SizedBox(height: 16),
                           _formInput("Additional Information"),
                         ],
@@ -187,16 +193,17 @@ class _CheckoutPageState extends State<CheckoutPage> {
         style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w600),
       );
 
-  Widget _formInput(String label, {TextEditingController? controller}) => Column(
+  Widget _formInput(String label, {TextEditingController? controller, bool readOnly = false}) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label, style: GoogleFonts.poppins(fontSize: 14)),
           const SizedBox(height: 8),
           TextFormField(
             controller: controller,
+            readOnly: readOnly,
             decoration: InputDecoration(
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-              fillColor: Colors.white,
+              fillColor: readOnly ? Colors.grey[200] : Colors.white,
               filled: true,
             ),
           ),

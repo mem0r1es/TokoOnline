@@ -120,6 +120,7 @@ void removeItem(String id) {
         'address': order.address,
         'email': order.email,
         'payment_method': paymentMethod,
+        'item_quantity': order.items.map((item) => item.quantity).join(', '),
       });
     } catch (e) {
       print('Error saving order: $e');
