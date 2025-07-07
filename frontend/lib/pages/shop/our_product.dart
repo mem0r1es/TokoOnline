@@ -40,58 +40,6 @@ class OurProduct extends StatelessWidget {
 
           const SizedBox(height: 10),
 
-          // Debug buttons (hapus ini nanti setelah testing)
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.center,
-          //   children: [
-          //     ElevatedButton.icon(
-          //       onPressed: () async {
-          //         await productService.refreshProducts();
-          //       },
-          //       icon: Icon(Icons.refresh, size: 16),
-          //       label: Text('Refresh'),
-          //       style: ElevatedButton.styleFrom(
-          //         backgroundColor: Colors.blue,
-          //         foregroundColor: Colors.white,
-          //         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          //       ),
-          //     ),
-
-          //     SizedBox(width: 10),
-
-          //     ElevatedButton.icon(
-          //       onPressed: () {
-          //         productService.printProductsInfo();
-          //       },
-          //       icon: Icon(Icons.info, size: 16),
-          //       label: Text('Debug'),
-          //       style: ElevatedButton.styleFrom(
-          //         backgroundColor: Colors.orange,
-          //         foregroundColor: Colors.white,
-          //         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          //       ),
-          //     ),
-
-          //     SizedBox(width: 10),
-
-          //     // Migrate button (untuk emergency)
-          //     ElevatedButton.icon(
-          //       onPressed: () async {
-          //         await productService.migrateStaticProductsToDatabase();
-          //       },
-          //       icon: Icon(Icons.cloud_upload, size: 16),
-          //       label: Text('Migrate'),
-          //       style: ElevatedButton.styleFrom(
-          //         backgroundColor: Colors.green,
-          //         foregroundColor: Colors.white,
-          //         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          //       ),
-          //     ),
-          //   ],
-          // ),
-
-          // const SizedBox(height: 20),
-
           // Products Grid
           Obx(() {
             if (productController.isLoading.value) {
@@ -370,7 +318,7 @@ class OurProduct extends StatelessWidget {
                               ],
                             );
                           } else {
-                            // ❌ Belum ada di cart ➔ Tampilkan tombol Add Cart
+                            // Belum ada di cart ➔ Tampilkan tombol Add Cart
                             return ElevatedButton.icon(
                               onPressed: () => _handleAddToCart(product, productId, cartService, authController),
                               style: ElevatedButton.styleFrom(

@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import '../models/product_model.dart';
+
 class FavoriteController extends GetxController {
   final RxList<Product> _favorites = <Product>[].obs;
 

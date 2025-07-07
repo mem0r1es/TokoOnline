@@ -15,16 +15,6 @@ class CartService extends GetxService {
   bool get isEmpty => cartItems.isEmpty;
   bool get isNotEmpty => cartItems.isNotEmpty;
 
-  // void addItem(CartItem item) {
-  //   int index = cartItems.indexWhere((e) => e.id == item.id);
-  //   if (index >= 0) {
-  //     cartItems[index].quantity += item.quantity;
-  //   } else {
-  //     cartItems.add(item);
-  //   }
-  //   cartItems.refresh();
-  // }
-
   void removeItem(String id) {
     cartItems.removeWhere((item) => item.id == id);
     cartItems.refresh();
@@ -45,6 +35,7 @@ class CartService extends GetxService {
   void clearCart() {
     cartItems.clear();
   }
+  
   void increaseQuantity(String id) {
     int index = cartItems.indexWhere((item) => item.id == id);
     if (index >= 0) {

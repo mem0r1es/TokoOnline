@@ -23,10 +23,9 @@ class HeaderPages extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Initialize ALL services (GUARANTEED TO WORK)
+    // Initialize ALL services and controller required (GUARANTEED TO WORK)
     final AuthController authController = Get.put(AuthController());
     final CartService cartService = Get.put(CartService());
-    // final ProductService productService = Get.put(ProductService(),); // TAMBAH INI
 
     return Container(
       width: double.infinity,
@@ -70,31 +69,6 @@ class HeaderPages extends StatelessWidget {
           // Icon Section
           Row(
             children: [
-              // User icon dengan auth logic
-              // Obx(
-              //   () => GestureDetector(
-              //     onTap: () {
-              //       if (authService.isLoggedIn.value) {
-              //         _showUserMenu(authService);
-              //       } else {
-              //         _showAuthDialog();
-              //       }
-              //     },
-              //     child: SizedBox(
-              //       width: 28,
-              //       height: 28,
-              //       child: authService.isLoggedIn.value
-              //           ? Icon(
-              //               Icons.account_circle,
-              //               color: Colors.green,
-              //               size: 24,
-              //             )
-              //           : Image.asset('headers/people.png'),
-              //     ),
-              //   ),
-              // ),
-              // const SizedBox(width: 10),
-
               _iconBtn(Icons.person, () => _userlogin(authController)),
               const SizedBox(width: 10),
 

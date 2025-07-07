@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_web/controllers/auth_controller.dart';
 import 'package:flutter_web/services/auth_service.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -14,7 +13,6 @@ class AuthDialog extends StatefulWidget {
 
 class _AuthDialogState extends State<AuthDialog> {
   final AuthService authService = Get.find<AuthService>();
-  final AuthController authController = Get.find<AuthController>();
   
   bool isLogin = true; // true = login, false = register
   bool isLoading = false;
@@ -30,178 +28,181 @@ class _AuthDialogState extends State<AuthDialog> {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
-        width: 400,
+        // width: 400,
         padding: EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Header
-            Text(
-              isLogin ? 'Login' : 'Daftar Akun',
-              style: GoogleFonts.montserrat(
-                fontSize: 24,
-                fontWeight: FontWeight.w600,
+        constraints: BoxConstraints(maxWidth: 400),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header
+              Text(
+                isLogin ? 'Login' : 'Daftar Akun',
+                style: GoogleFonts.montserrat(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-            SizedBox(height: 20),
-
-            // Form
-            if (!isLogin) ...[
+              SizedBox(height: 20),
+                
+              // Form
+              if (!isLogin) ...[
+                _buildTextField(
+                  controller: nameController,
+                  label: 'Nama Lengkap',
+                  icon: Icons.person,
+                ),
+                SizedBox(height: 16),
+              ],
+                
               _buildTextField(
-                controller: nameController,
-                label: 'Nama Lengkap',
-                icon: Icons.person,
+                controller: emailController,
+                label: 'Email',
+                icon: Icons.email,
+                keyboardType: TextInputType.emailAddress,
               ),
               SizedBox(height: 16),
-            ],
-
-            _buildTextField(
-              controller: emailController,
-              label: 'Email',
-              icon: Icons.email,
-              keyboardType: TextInputType.emailAddress,
-            ),
-            SizedBox(height: 16),
-
-            _buildTextField(
-              controller: passwordController,
-              label: 'Password',
-              icon: Icons.lock,
-              obscureText: true,
-            ),
-            SizedBox(height: 16),
-            if (!isLogin) ...[
+                
               _buildTextField(
-                controller: confirmPasswordController,
-                label: 'Konfirmasi Password',
-                icon: Icons.lock_outline,
+                controller: passwordController,
+                label: 'Password',
+                icon: Icons.lock,
                 obscureText: true,
               ),
               SizedBox(height: 16),
-            ],
-
-            // Submit Button
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: isLoading ? null : _handleSubmit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+              if (!isLogin) ...[
+                _buildTextField(
+                  controller: confirmPasswordController,
+                  label: 'Konfirmasi Password',
+                  icon: Icons.lock_outline,
+                  obscureText: true,
                 ),
-                child: isLoading
-                    ? CircularProgressIndicator(color: Colors.white)
-                    : Text(
-                        isLogin ? 'Login' : 'Daftar',
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-              ),
-            ),
-
-            SizedBox(height: 16),
-
-            // Divider
-            Row(
-              children: [
-                Expanded(child: Divider()),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Text('atau', style: GoogleFonts.poppins(fontSize: 14)),
-                ),
-                Expanded(child: Divider()),
+                SizedBox(height: 16),
               ],
-            ),
-
-            SizedBox(height: 16),
-
-            // Google Sign In Button
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: OutlinedButton.icon(
-                onPressed: isLoading
-                    ? null
-                    : () async {
-                        setState(() {
-                          isLoading = true;
-                        });
-
-                        bool success = await authService.signInWithGoogle();
-
-                        setState(() {
-                          isLoading = false;
-                        });
-
-                        if (success) {
-                          Get.back();
-                        }
-                      },
-                icon: Icon(Icons.login, color: Colors.red),
-                label: Text(
-                  'Login dengan Google',
-                  style: GoogleFonts.poppins(
-                    color: Colors.red,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
+                
+              // Submit Button
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: isLoading ? null : _handleSubmit,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
-                ),
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: Colors.red),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                  child: isLoading
+                      ? CircularProgressIndicator(color: Colors.white)
+                      : Text(
+                          isLogin ? 'Login' : 'Daftar',
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                 ),
               ),
-            ),
-
-            SizedBox(height: 16),
-
-            // Toggle Login/Register
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  isLogin ? 'Belum punya akun? ' : 'Sudah punya akun? ',
-                  style: GoogleFonts.poppins(fontSize: 14),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      isLogin = !isLogin;
-                      _clearForm();
-                    });
-                  },
-                  child: Text(
-                    isLogin ? 'Daftar' : 'Login',
+                
+              SizedBox(height: 16),
+                
+              // Divider
+              Row(
+                children: [
+                  Expanded(child: Divider()),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: Text('atau', style: GoogleFonts.poppins(fontSize: 14)),
+                  ),
+                  Expanded(child: Divider()),
+                ],
+              ),
+                
+              SizedBox(height: 16),
+                
+              // Google Sign In Button
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: OutlinedButton.icon(
+                  onPressed: isLoading
+                      ? null
+                      : () async {
+                          setState(() {
+                            isLoading = true;
+                          });
+                
+                          bool success = await authService.signInWithGoogle();
+                
+                          setState(() {
+                            isLoading = false;
+                          });
+                
+                          if (success) {
+                            Get.back();
+                          }
+                        },
+                  icon: Icon(Icons.login, color: Colors.red),
+                  label: Text(
+                    'Login dengan Google',
                     style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color: Colors.blue,
+                      color: Colors.red,
+                      fontSize: 16,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                ),
-              ],
-            ),
-
-            // Forgot Password (hanya saat login)
-            if (isLogin) ...[
-              SizedBox(height: 8),
-              GestureDetector(
-                onTap: _showForgotPassword,
-                child: Text(
-                  'Lupa Password?',
-                  style: GoogleFonts.poppins(fontSize: 14, color: Colors.blue),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: Colors.red),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
                 ),
               ),
+                
+              SizedBox(height: 16),
+                
+              // Toggle Login/Register
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    isLogin ? 'Belum punya akun? ' : 'Sudah punya akun? ',
+                    style: GoogleFonts.poppins(fontSize: 14),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        isLogin = !isLogin;
+                        _clearForm();
+                      });
+                    },
+                    child: Text(
+                      isLogin ? 'Daftar' : 'Login',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: Colors.blue,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+                
+              // Forgot Password (hanya saat login)
+              if (isLogin) ...[
+                SizedBox(height: 8),
+                GestureDetector(
+                  onTap: _showForgotPassword,
+                  child: Text(
+                    'Lupa Password?',
+                    style: GoogleFonts.poppins(fontSize: 14, color: Colors.blue),
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

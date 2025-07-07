@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 // import 'package:flutter_web/controller/auth_controller.dart';
 import 'package:flutter_web/controllers/auth_controller.dart';
+// import 'package:flutter_web/controllers/cart_controller.dart';
 // import 'package:flutter_web/controller/cart_controller.dart';
 // import 'package:flutter_web/controllers/cart_controller.dart';
 import 'package:flutter_web/controllers/favorite_controller.dart';
@@ -10,14 +11,14 @@ import 'package:flutter_web/models/cart_item.dart';
 import 'package:flutter_web/services/cart_service.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../controllers/page_controller.dart';
+// import '../../controllers/page_controller.dart';
 import '../../models/product_model.dart';
 import '../../widgets/header_bar.dart';
 // import 'package:google_fonts/google_fonts.dart';
 
 class FavoritePage extends StatelessWidget {
   FavoritePage({super.key});
-  final CartController1 cartController1 = Get.put(CartController1());
+  // final CartController1 cartController1 = Get.put(CartController1());
   final favC = Get.put(FavoriteController());
 
   @override
@@ -234,7 +235,7 @@ class FavoritePage extends StatelessWidget {
                               ],
                             );
                           } else {
-                            // ❌ Belum ada di cart ➔ Tampilkan tombol Add Cart
+                            // Belum ada di cart ➔ Tampilkan tombol Add Cart
                             return ElevatedButton.icon(
                               onPressed: () => _handleAddToCart(product, productId, cartService, authController),
                               style: ElevatedButton.styleFrom(

@@ -1,5 +1,3 @@
-// import 'package:flutter/material.dart';
-// import 'package:get/get.dart';
 import '../models/product_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
