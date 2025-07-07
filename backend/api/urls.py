@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # api/urls.py - INTERACTIVE E-COMMERCE ADMIN PORTAL
 from django.contrib import admin
 from django.contrib.auth import authenticate, login
@@ -6,18 +5,15 @@ from django.shortcuts import render, redirect
 from django.urls import path, include
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-=======
 # backend/api/urls.py  –  Admin + Auth + Product endpoints
 
 from django.contrib import admin
 from django.urls import path, include
 from django.http import JsonResponse
->>>>>>> 32b9f16cd3c4455026324c2acee8a64d343d5bc4
 
 # ── Status endpoint (tetap ada)
 def backend_status(request):
     return JsonResponse({
-<<<<<<< HEAD
         "status": "E-commerce Backend Running",
         "admin_portal": "/admin/",
         "seller_login": "/login/",
@@ -663,31 +659,5 @@ urlpatterns = [
     # BACKEND STATUS
     # ===============================================
     path('', backend_status, name='backend_status'),
-    
-    # ===============================================
-    # SELLER AUTH
-    # ===============================================
-    path('', include('myapi.urls')),
+
 ]
-=======
-        "status": "Backend Running",
-        "role": "Admin & Data Management",
-        "frontend_api": "Supabase direct",
-        "supabase_url": "https://mccdwczueketpqlbobyw.supabase.co",
-        "admin_panel": "/admin/",
-        "note": "Django backend untuk admin & penjual; "
-                "frontend pembeli pakai Supabase API langsung"
-    })
-
-
-urlpatterns = [
-    # ── Admin panel
-    path("admin/", admin.site.urls),
-
-    # ── Status JSON di root /
-    path("", backend_status, name="backend_status"),
-
-    # ── Endpoints produk
-    path("api/products/", include("products.urls")),
-]
->>>>>>> 32b9f16cd3c4455026324c2acee8a64d343d5bc4
