@@ -166,14 +166,14 @@ class HeaderPages extends StatelessWidget {
             SizedBox(height: 20),
 
             // Menu options
-            _userMenuOption(
-              icon: Icons.person,
-              title: 'Profile',
-              onTap: () {
-                Get.back();
-                Get.snackbar('Info', 'Profile page coming soon!');
-              },
-            ),
+            // _userMenuOption(
+            //   icon: Icons.person,
+            //   title: 'Profile',
+            //   onTap: () {
+            //     Get.back();
+            //     Get.snackbar('Info', 'Profile page coming soon!');
+            //   },
+            // ),
             _userMenuOption(
               icon: Icons.shopping_bag,
               title: 'My Orders',
@@ -182,14 +182,14 @@ class HeaderPages extends StatelessWidget {
                 // Get.snackbar('Info', 'Orders page coming soon!');
               },
             ),
-            _userMenuOption(
-              icon: Icons.settings,
-              title: 'Settings',
-              onTap: () {
-                Get.back();
-                Get.snackbar('Info', 'Settings page coming soon!');
-              },
-            ),
+            // _userMenuOption(
+            //   icon: Icons.settings,
+            //   title: 'Settings',
+            //   onTap: () {
+            //     Get.back();
+            //     Get.snackbar('Info', 'Settings page coming soon!');
+            //   },
+            // ),
 
             SizedBox(height: 20),
 
