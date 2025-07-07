@@ -5,7 +5,7 @@ class Product {
   final String description;
   final int price;
   final String? category;
-  final int? stock;
+  int? stock;
   final bool? isActive;
   final DateTime? createdAt;
 

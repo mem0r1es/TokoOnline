@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_web/dashboard/header/header_bar.dart';
+// import 'package:flutter_web/controller/auth_controller.dart';
+import 'package:flutter_web/controllers/auth_controller.dart';
+// import 'package:flutter_web/controller/cart_controller.dart';
+// import 'package:flutter_web/controllers/cart_controller.dart';
+import 'package:flutter_web/models/order_history_item.dart';
+import 'package:flutter_web/services/cart_service.dart';
+import 'package:flutter_web/widgets/header_bar.dart';
+import 'package:flutter_web/pages/shoppingcart/history.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../controllers/page_controller.dart'; 
+// import '../../controller/page_controller.dart'; 
+// import '../../controller/cart_controller.dart';
 
 class CheckoutPage extends StatefulWidget {
   const CheckoutPage({super.key});
@@ -12,11 +20,27 @@ class CheckoutPage extends StatefulWidget {
 }
 
 class _CheckoutPageState extends State<CheckoutPage> {
-  final cartC = Get.put(CartController1());
+  // final CartController cartController = Get.find<CartController>();
+  final CartService cartService = Get.find<CartService>();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _addressController = TextEditingController();
+  final authController = Get.find<AuthController>();
+  // final userId = AuthService.getUserId();
+
+
 
   String? _selectedPayment = 'Direct bank transfer';
 
   @override
+  void initState() {
+  super.initState();
+  // final userEmail = authController.getUserEmail()?? '';
+  _emailController.text = authController.getUserEmail() ?? '';
+}
+
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0x0fffffff),
@@ -44,7 +68,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           const SizedBox(height: 16),
                           _formInput("Country / Region"),
                           const SizedBox(height: 16),
-                          _formInput("Street Address"),
+                          _formInput("Street Address", controller: _addressController),
                           const SizedBox(height: 16),
                           _formInput("Town / City"),
                           const SizedBox(height: 16),
@@ -52,9 +76,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           const SizedBox(height: 16),
                           _formInput("ZIP Code"),
                           const SizedBox(height: 16),
-                          _formInput("Phone"),
+                          _formInput("Phone", controller: _phoneController),
                           const SizedBox(height: 16),
-                          _formInput("Email Address"),
+                          _formInput("Email Address", controller:_emailController, readOnly: true),
                           const SizedBox(height: 16),
                           _formInput("Additional Information"),
                         ],
@@ -73,7 +97,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Obx(() {
-                          final total = cartC.cartItems.fold(0, (sum, item) => sum + item.subtotal);
+                          // final total = cartC.cartItems.fold(0, (sum, item) => sum + item.subtotal);
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -81,17 +105,17 @@ class _CheckoutPageState extends State<CheckoutPage> {
                               const SizedBox(height: 10),
 
                               // Produk dalam cart
-                              ...cartC.cartItems.map((item) => _orderRow(
-                                    '${item.title} × ${item.quantity}',
-                                    'Rp ${_rupiah(item.subtotal)}',
+                              ...cartService.cartItems.map((item) => _orderRow(
+                                    '${item.name} × ${item.quantity}',
+                                    'Rp ${_rupiah(item.totalPrice)}',
                                   )),
 
                               const Divider(),
-                              _orderRow("Subtotal", 'Rp ${_rupiah(total)}'),
+                              _orderRow("Subtotal", 'Rp ${_rupiah(cartService.totalPrice)}'),
                               const SizedBox(height: 8),
                               _orderRow(
                                 "Total",
-                                'Rp ${_rupiah(total)}',
+                                'Rp ${_rupiah(cartService.totalPrice)}',
                                 isBold: true,
                                 color: Colors.orange[800],
                               ),
@@ -107,7 +131,42 @@ class _CheckoutPageState extends State<CheckoutPage> {
                               ),
                               const SizedBox(height: 20),
                               ElevatedButton(
-                                onPressed: () {},
+                                onPressed: () async {
+                                  final authController = Get.find<AuthController>();
+                                  // final userId = authService.getUserId() ?? '';
+                                  final userEmail = authController.getUserEmail() ?? '';
+                                  if (_firstNameController.text.isEmpty ||
+                                      _lastNameController.text.isEmpty ||
+                                      // _emailController.text.isEmpty ||
+                                      _phoneController.text.isEmpty ||
+                                      _addressController.text.isEmpty ||
+                                      _selectedPayment == null) {
+                                    Get.snackbar(
+                                      "Error",
+                                      "Please fill in all fields",
+                                      snackPosition: SnackPosition.TOP,
+                                      backgroundColor: Colors.red,
+                                      colorText: Colors.white,
+                                    );
+                                    return;
+                                  }
+                                  final order = OrderHistoryItem(
+                                      timestamp: DateTime.now(),
+                                      items: cartService.cartItems.toList(),
+                                      fullName: '${_firstNameController.text} ${_lastNameController.text}',
+                                      email: userEmail,
+                                      phone: _phoneController.text,
+                                      address: _addressController.text,
+                                    );
+                                    cartService.orderHistory.add(order);
+                                  // Simpan order ke Supabase
+                                  await cartService.saveOrderToSupabase(order,
+                                    _selectedPayment!,
+                                  );
+                                  cartService.clearCart();
+                                  Get.to(() => ProductInfoPage());
+
+                                },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.black,
                                   padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
@@ -134,15 +193,17 @@ class _CheckoutPageState extends State<CheckoutPage> {
         style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w600),
       );
 
-  Widget _formInput(String label) => Column(
+  Widget _formInput(String label, {TextEditingController? controller, bool readOnly = false}) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label, style: GoogleFonts.poppins(fontSize: 14)),
           const SizedBox(height: 8),
           TextFormField(
+            controller: controller,
+            readOnly: readOnly,
             decoration: InputDecoration(
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-              fillColor: Colors.white,
+              fillColor: readOnly ? Colors.grey[200] : Colors.white,
               filled: true,
             ),
           ),
@@ -151,9 +212,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   Widget _formRow(String leftLabel, String rightLabel) => Row(
         children: [
-          Expanded(child: _formInput(leftLabel)),
+          Expanded(child: _formInput(leftLabel, controller: _firstNameController)),
           const SizedBox(width: 16),
-          Expanded(child: _formInput(rightLabel)),
+          Expanded(child: _formInput(rightLabel, controller: _lastNameController)),
         ],
       );
 
@@ -192,6 +253,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
-  String _rupiah(int n) =>
-      n.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.');
+  String _rupiah(double price) {
+    return price
+        .toStringAsFixed(0)
+        .replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (m) => '${m[1]}.',
+        );
+  }
+
 }

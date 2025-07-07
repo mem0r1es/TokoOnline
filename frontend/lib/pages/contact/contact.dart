@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import '../header_bar.dart';
+import '../../widgets/header_bar.dart';
 // import '../widgets/isi.dart' ;// Pastikan path ini sesuai dengan struktur proyek And
-import 'about_page.dart';
+import 'contact_page.dart';
 // import 'package:get/get.dart';
 
-class AboutPage1 extends StatelessWidget {
-  const AboutPage1({super.key});
+class ContactPage1 extends StatelessWidget {
+  const ContactPage1({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +14,7 @@ class AboutPage1 extends StatelessWidget {
       body: ListView(
         children: [
           const HeaderPages(),
-          const AboutPage(),
+          const ContactPage(),
           
 
           // Tambahkan bagian lainnya seperti Our Products di sini

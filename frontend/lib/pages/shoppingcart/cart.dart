@@ -1,16 +1,25 @@
 import 'package:flutter/material.dart';
+// import 'package:flutter_web/controllers/cart_controller.dart';
+import 'package:flutter_web/models/cart_item.dart';
+import 'package:flutter_web/services/cart_service.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../controllers/cart_controller.dart';
+// import '../../controller/cart_controller.dart';
 import 'billing.dart';
 
-class CartPages extends StatelessWidget {
+class CartPages extends StatefulWidget {
   const CartPages({super.key});
 
   @override
+  State<CartPages> createState() => _CartPagesState();
+}
+
+class _CartPagesState extends State<CartPages> {
+  @override
   Widget build(BuildContext context) {
     // Gunakan CartService yang baru
-    final CartService cartService = Get.find<CartService>();
+    // final CartController = Get.find<CartController>();
+    final cartService = Get.find<CartService>();
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -87,7 +96,7 @@ class CartPages extends StatelessWidget {
                         children: [
                           // Product name + image
                           Expanded(
-                            flex: 3,
+                            flex: 2,
                             child: Row(
                               children: [
                                 SizedBox(
@@ -231,145 +240,147 @@ class CartPages extends StatelessWidget {
         // RIGHT: Ringkasan Belanja
         Container(
           width: 393,
-          height: 390,
+          height: 400,
           color: const Color(0xFFF9F1E7),
           padding: const EdgeInsets.all(24),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(
-                  'Cart Totals',
-                  style: GoogleFonts.poppins(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w600,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Text(
+                    'Cart Totals',
+                    style: GoogleFonts.poppins(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 20),
-
-                // Subtotal
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Subtotal',
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    Obx(
-                      () => Text(
-                        'Rp ${_formatPrice(cartService.totalPrice)}',
+                  const SizedBox(height: 20),
+            
+                  // Subtotal
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Subtotal',
                         style: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 10),
-
-                // Total Items
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Items',
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
+                      Obx(
+                        () => Text(
+                          'Rp ${_formatPrice(cartService.totalPrice)}',
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       ),
-                    ),
-                    Obx(
-                      () => Text(
-                        '${cartService.itemCount}',
+                    ],
+                  ),
+            
+                  const SizedBox(height: 10),
+            
+                  // Total Items
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Items',
                         style: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 20),
-                Divider(thickness: 1),
-                const SizedBox(height: 10),
-
-                // Total
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Total',
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
+                      Obx(
+                        () => Text(
+                          '${cartService.itemCount}',
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       ),
-                    ),
-                    Obx(
-                      () => Text(
-                        'Rp ${_formatPrice(cartService.totalPrice)}',
+                    ],
+                  ),
+            
+                  const SizedBox(height: 20),
+                  Divider(thickness: 1),
+                  const SizedBox(height: 10),
+            
+                  // Total
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Total',
                         style: GoogleFonts.poppins(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
-                          color: Colors.green[600],
                         ),
                       ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 30),
-
-                // Checkout Button
-                Center(
-                  child: Container(
-                    width: 222,
-                    height: 58.95,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(15)),
-                      color: Colors.white,
-                    ),
-                    child: _billing(
-                      'Check Out',
-                      () => _handleCheckout(cartService),
-                    ),
+                      Obx(
+                        () => Text(
+                          'Rp ${_formatPrice(cartService.totalPrice)}',
+                          style: GoogleFonts.poppins(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.green[600],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-
-                const SizedBox(height: 15),
-
-                // Clear Cart Button
-                Center(
-                  child: SizedBox(
-                    width: 222,
-                    height: 45,
-                    child: OutlinedButton(
-                      onPressed: () => _showClearCartConfirmation(cartService),
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: Colors.red),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
+            
+                  const SizedBox(height: 30),
+            
+                  // Checkout Button
+                  Center(
+                    child: Container(
+                      width: 222,
+                      height: 58.95,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(15)),
+                        color: Colors.white,
                       ),
-                      child: Text(
-                        'Clear Cart',
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.red,
-                        ),
+                      child: _billing(
+                        'Check Out',
+                        () => _handleCheckout(cartService),
                       ),
                     ),
                   ),
-                ),
-              ],
+            
+                  const SizedBox(height: 15),
+            
+                  // Clear Cart Button
+                  Center(
+                    child: SizedBox(
+                      width: 222,
+                      height: 45,
+                      child: OutlinedButton(
+                        onPressed: () => _showClearCartConfirmation(cartService),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: Colors.red),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                        ),
+                        child: Text(
+                          'Clear Cart',
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -386,7 +397,7 @@ class CartPages extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded(flex: 3, child: _text('Product')),
+            Expanded(flex: 2, child: _text('Product')),
             Expanded(flex: 1, child: _text('Price')),
             Expanded(flex: 1, child: _text('Qty')),
             Expanded(flex: 1, child: _text('Subtotal')),

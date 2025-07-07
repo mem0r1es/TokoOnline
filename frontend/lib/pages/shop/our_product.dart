@@ -1,61 +1,151 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_web/controllers/auth_controller.dart';
-import 'package:flutter_web/controllers/cart_controller.dart';
+import 'package:flutter_web/controllers/favorite_controller.dart';
 import 'package:flutter_web/controllers/product_controller.dart';
-import 'package:get/get.dart';
+import 'package:flutter_web/models/cart_item.dart';
+import 'package:flutter_web/services/cart_service.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../controllers/page_controller.dart';
-import '../shop/product_model.dart';
-import '../header_bar.dart';
-// import 'package:google_fonts/google_fonts.dart';
+import 'package:get/get.dart';
+// import '../../controller/cart_controller.dart';
+// import '../../controller/auth_controller.dart';
+// import '../../controller/product_controller.dart';
+// import '../../controllers/page_controller.dart';
+import '../../models/product_model.dart';
 
-class FavoritePage extends StatelessWidget {
-  FavoritePage({super.key});
-  final CartController1 cartController1 = Get.put(CartController1());
+class OurProduct extends StatelessWidget {
+  OurProduct({super.key});
+
   final favC = Get.put(FavoriteController());
+  final ProductController productController = Get.put(ProductController());
+
 
   @override
   Widget build(BuildContext context) {
-    // final favC = Get.find<FavoriteController>();
-    final cartC = Get.find<CartController1>();
-    final ProductService productService = Get.put(ProductService());
-    final cartService = Get.find<CartService>();
-    final authService = Get.find<AuthService>();
+      final cartService = Get.find<CartService>();
+      final authController= Get.find<AuthController>();
+      
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 50),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Header
+          Text(
+            'Our Products',
+            style: GoogleFonts.poppins(
+              fontSize: 40,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
 
+          const SizedBox(height: 10),
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const HeaderPages(),
-            const SizedBox(height: 20),
-            Obx(() {
-              final favorites = favC.favorites;
-              if (favorites.isEmpty) {
-                return Center(
-                  child: Text(
-                    'No favorites yet.',
-                    style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold),
+          // Products Grid
+          Obx(() {
+            if (productController.isLoading.value) {
+              return SizedBox(
+                height: 300,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(
+                        strokeWidth: 3,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                      ),
+                      SizedBox(height: 20),
+                      Text(
+                        'Loading products from database...',
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
                   ),
-                );
-              }
-        
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 50),
-                child: Wrap(
-                  spacing: 20,
-                  runSpacing: 20,
-                  alignment: WrapAlignment.center,
-                  children: favorites
-                      .map((product) => _productCard(product, cartService, authService))
-                      .toList(),
                 ),
               );
-            }),
-          ],
-        ),
+            }
+
+            if (productController.products.isEmpty) {
+              return SizedBox(
+                height: 300,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.inventory_2_outlined,
+                        size: 80,
+                        color: Colors.grey[400],
+                      ),
+                      SizedBox(height: 20),
+                      Text(
+                        'No products available',
+                        style: GoogleFonts.poppins(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        'Database might be empty or connection failed',
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: Colors.grey[500],
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      ElevatedButton.icon(
+                        onPressed: () => productController.refreshProducts(),
+                        icon: Icon(Icons.refresh),
+                        label: Text('Try Again'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          foregroundColor: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            // Products grid
+            return Column(
+              children: [
+                // Products count info
+                Padding(
+                  padding: EdgeInsets.only(bottom: 20),
+                  child: Text(
+                    'Showing ${productController.products.length} products',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ),
+
+                // Products grid
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Wrap(
+                    spacing: 20,
+                    runSpacing: 20,
+                    alignment: WrapAlignment.center,
+                    children: productController.products
+                        .map(
+                          (product) =>
+                              _productCard(product, cartService, authController),
+                        )
+                        .toList(),
+                  ),
+                ),
+              ],
+            );
+          }),
+        ],
       ),
     );
   }
@@ -63,13 +153,13 @@ class FavoritePage extends StatelessWidget {
   Widget _productCard(
     Product product,
     CartService cartService,
-    AuthService authService,
+    AuthController authController,
   ) {
     // Use database ID if available, fallback to title
     String productId = product.id ?? product.title;
 
     return SizedBox(
-      width: 280,
+      width: 200,
       child: Card(
         elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -161,8 +251,13 @@ class FavoritePage extends StatelessWidget {
                       ),
 
                       // Stock info
-                      if (product.stock != null)
-                        Column(
+                      Obx(() {
+                        final updatedProduct = productController.getProductById(product.id ?? product.title);
+
+                        final stock = updatedProduct?.stock ?? 0;
+                        final stockColor = stock > 0 ? Colors.green[600] : Colors.red[600];
+
+                        return Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
@@ -173,17 +268,17 @@ class FavoritePage extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              '${product.stock}',
+                              '$stock',
                               style: GoogleFonts.poppins(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
-                                color: product.stock! > 0
-                                    ? Colors.green[600]
-                                    : Colors.red[600],
+                                color: stockColor,
                               ),
                             ),
                           ],
-                        ),
+                        );
+                      }),
+
                     ],
                   ),
 
@@ -195,41 +290,56 @@ class FavoritePage extends StatelessWidget {
                       // Add to Cart Button
                       Expanded(
                         flex: 3,
-                        child: Obx(
-                          () => ElevatedButton.icon(
-                            onPressed: () => _handleAddToCart(
-                              product,
-                              productId,
-                              cartService,
-                              authService,
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: cartService.hasItem(productId)
-                                  ? Colors.green
-                                  : Colors.black,
-                              foregroundColor: Colors.white,
-                              padding: EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                        child: Obx(() {
+                          final cartItem = cartService.getItem(productId);
+
+                          if (cartItem != null) {
+                            // Sudah ada di cart ➔ Tampilkan tombol + -
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  onPressed: () => cartService.decreaseQuantity(productId),
+                                  icon: Icon(Icons.remove_circle_outline),
+                                  constraints: BoxConstraints(minWidth: 24, minHeight: 24),
+                                ),
+                                Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.grey[300]!),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    '${cartItem.quantity}',
+                                    style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: () => cartService.increaseQuantity(productId),
+                                  icon: Icon(Icons.add_circle_outline),
+                                  constraints: BoxConstraints(minWidth: 24, minHeight: 24),
+                                ),
+                              ],
+                            );
+                          } else {
+                            // Belum ada di cart ➔ Tampilkan tombol Add Cart
+                            return ElevatedButton.icon(
+                              onPressed: () => _handleAddToCart(product, productId, cartService, authController),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.black,
+                                foregroundColor: Colors.white,
+                                padding: EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                               ),
-                            ),
-                            icon: Icon(
-                              cartService.hasItem(productId)
-                                  ? Icons.shopping_cart
-                                  : Icons.shopping_cart_outlined,
-                              size: 18,
-                            ),
-                            label: Text(
-                              cartService.hasItem(productId)
-                                  ? 'In Cart'
-                                  : 'Add Cart',
-                              style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
+                              icon: Icon(Icons.shopping_cart_outlined, size: 18),
+                              label: Text(
+                                'Add Cart',
+                                style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600),
                               ),
-                            ),
-                          ),
-                        ),
+                            );
+                          }
+                        }),
                       ),
 
                       SizedBox(width: 8),
@@ -337,9 +447,9 @@ class FavoritePage extends StatelessWidget {
     Product product,
     String productId,
     CartService cartService,
-    AuthService authService,
+    AuthController authController,
   ) {
-    if (!authService.isLoggedIn.value) {
+    if (!authController.isLoggedIn.value) {
       Get.snackbar(
         "Login Required",
         "Please login first to add products to cart",
@@ -366,11 +476,16 @@ class FavoritePage extends StatelessWidget {
 
     // Add to cart
     cartService.addItem(
+      CartItem(
       id: productId,
       name: product.title,
       price: product.price.toDouble(),
-      imageUrl: product.imagePath,
+      imageUrl: product.imagePath,)
     );
+
+    // final productController = Get.find<ProductController>();
+    // productController.decreaseStock(productId);
+
   }
 
   void _handleFavorite(Product product) {
@@ -393,5 +508,7 @@ class FavoritePage extends StatelessWidget {
   }
 
   String _rupiah(int n) => n.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.');
+    RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+    (m) => '${m[1]}.',
+  );
 }
