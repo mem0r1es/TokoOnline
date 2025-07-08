@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard Penjual</title>
+</head>
+<body>
+    <h1>Halo, {{ request.user.username }}!</h1>
+    <p>Selamat datang di dashboard penjual.</p>
+    <a href="{% url 'penjual_product_list' %}">Kelola Produk Anda</a>
+</body>
+</html>

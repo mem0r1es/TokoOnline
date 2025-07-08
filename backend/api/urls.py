@@ -660,4 +660,8 @@ urlpatterns = [
     # ===============================================
     path('', backend_status, name='backend_status'),
 
+    # ===============================================
+    # PENJUAL / SELLER PANEL
+    # ===============================================
+    path('penjual/', include('penjual.urls')),
 ]
