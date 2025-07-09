@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'pages/dashboard/dashboard.dart';
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web/controllers/address_controller.dart';
 import 'package:flutter_web/controllers/auth_controller.dart';
 // import 'package:flutter_web/controllers/favorite_controller.dart';
 import 'package:flutter_web/pages/about/about_page.dart';
 import 'package:flutter_web/pages/contact/contact.dart';
-import 'package:flutter_web/pages/shoppingcart/history.dart';
+import 'package:flutter_web/pages/history/history.dart';
+import 'package:flutter_web/pages/profile/profile_page.dart';
 import 'package:flutter_web/services/cart_service.dart';
 import 'package:flutter_web/services/product_service.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -29,6 +31,7 @@ class HeaderPages extends StatelessWidget {
     final AuthController authController = Get.put(AuthController());
     final CartService cartService = Get.put(CartService());
     final ProductService productService = Get.put(ProductService());
+    final AddressController addressController = Get.put(AddressController());
     // final FavoriteController favoriteController = Get.put(FavoriteController());
 
     return Container(
@@ -72,6 +75,7 @@ class HeaderPages extends StatelessWidget {
           ),
           // Icon Section
           Row(
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               _iconBtn(Icons.person, () => _userlogin(authController)),
               const SizedBox(width: 10),
@@ -170,14 +174,15 @@ class HeaderPages extends StatelessWidget {
             SizedBox(height: 20),
 
             // Menu options
-            // _userMenuOption(
-            //   icon: Icons.person,
-            //   title: 'Profile',
-            //   onTap: () {
-            //     Get.back();
-            //     Get.snackbar('Info', 'Profile page coming soon!');
-            //   },
-            // ),
+            _userMenuOption(
+              icon: Icons.person,
+              title: 'Profile',
+              onTap: () {
+                Get.to(()=> ProfilePage());
+                // Get.snackbar('Info', 'Profile page coming soon!');
+              },
+            ),
+
             _userMenuOption(
               icon: Icons.shopping_bag,
               title: 'My Orders',
@@ -331,15 +336,18 @@ class HeaderPages extends StatelessWidget {
   }
 
   Widget _iconBtn(IconData icon, [VoidCallback? onPressed]) {
-    return SizedBox(
-      width: 28,
-      height: 28,
-      child: TextButton(
-        onPressed: onPressed,
-        child: Icon(icon, color: Colors.black, size: 24),
-      ),
-    );
-  }
+  return SizedBox(
+    width: 28,
+    height: 28,
+    child: IconButton(
+      icon: Icon(icon, color: Colors.black, size: 24),
+      onPressed: onPressed,
+      padding: EdgeInsets.zero, // ➔ HAPUS padding default
+      constraints: BoxConstraints(), // ➔ HAPUS size default
+      splashRadius: 20, // ➔ Biar ripple klik ga terlalu besar
+    ),
+  );
+}
 
   Widget _navItem(String text, [VoidCallback? onTap]) {
     return GestureDetector(

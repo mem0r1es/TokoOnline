@@ -5,7 +5,7 @@ import 'package:flutter_web/services/cart_service.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 // import '../../controller/cart_controller.dart';
-import 'billing.dart';
+import 'checkout_page.dart';
 
 class CartPages extends StatefulWidget {
   const CartPages({super.key});

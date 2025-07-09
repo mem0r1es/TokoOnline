@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web/controllers/address_controller.dart';
 import 'package:flutter_web/services/auth_service.dart';
+import 'package:flutter_web/services/cart_service.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 // import '../../controller/auth_controller.dart';
@@ -256,7 +258,14 @@ class _AuthDialogState extends State<AuthDialog> {
       });
 
       if (success) {
-        Get.back(); // Close dialog
+        authService.refreshUser(); 
+        // final cartService = Get.find<CartService>();
+        //   cartService.infoUser.add(info);
+        //   await cartService.saveAddressToSupabase(info);
+
+          final addressController = Get.find<AddressController>();
+          await addressController.fetchAddresses(); // Buat method ini untuk update state user misalnya
+        Get.back();
       }
     }
   }

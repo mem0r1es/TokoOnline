@@ -9,6 +9,7 @@ import 'package:flutter_web/controllers/product_controller.dart';
 // import 'package:flutter_web/controller/product_controller.dart';
 // import 'package:flutter_web/controllers/product_controller.dart';
 import 'package:flutter_web/models/cart_item.dart';
+import 'package:flutter_web/pages/auth/auth_dialog.dart';
 import 'package:flutter_web/services/cart_service.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -357,6 +358,10 @@ class FavoritePage extends StatelessWidget {
     );
   }
 
+  void _showAuthDialog() {
+    Get.dialog(AuthDialog());
+  }
+
   void _handleAddToCart(
     Product product,
     String productId,
@@ -364,6 +369,7 @@ class FavoritePage extends StatelessWidget {
     AuthController authController,
   ) {
     if (!authController.isLoggedIn.value) {
+      _showAuthDialog();
       Get.snackbar(
         "Login Required",
         "Please login first to add products to cart",

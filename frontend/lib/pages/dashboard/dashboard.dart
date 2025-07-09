@@ -9,10 +9,15 @@ import '../contact/contact_page.dart';
 // import '../widgets/billing.dart';// Pastikan path ini sesuai dengan struktur proyek And
 // import 'package:get/get.dart';
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends StatefulWidget {
   
   const DashboardPage({super.key});
 
+  @override
+  State<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

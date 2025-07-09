@@ -3,6 +3,9 @@ import 'package:flutter_web/controllers/auth_controller.dart';
 import 'package:flutter_web/controllers/favorite_controller.dart';
 import 'package:flutter_web/controllers/product_controller.dart';
 import 'package:flutter_web/models/cart_item.dart';
+import 'package:flutter_web/pages/auth/auth_dialog.dart';
+import 'package:flutter_web/pages/history/history.dart';
+import 'package:flutter_web/pages/profile/profile_page.dart';
 import 'package:flutter_web/services/cart_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
@@ -180,19 +183,22 @@ class OurProduct extends StatelessWidget {
 
             // Product Info
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.only(right: 16, left: 16, top: 8, bottom: 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Product Name
-                  Text(
-                    product.title,
-                    style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
+                  SizedBox(
+                    height: 48,
+                    child: Text(
+                      product.title,
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                   ),
 
                   const SizedBox(height: 8),
@@ -443,6 +449,10 @@ class OurProduct extends StatelessWidget {
     );
   }
 
+  void _showAuthDialog() {
+    Get.dialog(AuthDialog());
+  }
+
   void _handleAddToCart(
     Product product,
     String productId,
@@ -450,6 +460,7 @@ class OurProduct extends StatelessWidget {
     AuthController authController,
   ) {
     if (!authController.isLoggedIn.value) {
+      _showAuthDialog();
       Get.snackbar(
         "Login Required",
         "Please login first to add products to cart",
@@ -506,6 +517,8 @@ class OurProduct extends StatelessWidget {
       ),
     );
   }
+
+  
 
   String _rupiah(int n) => n.toString().replaceAllMapped(
     RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),

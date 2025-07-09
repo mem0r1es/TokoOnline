@@ -1,4 +1,7 @@
+
 import 'package:flutter/material.dart';
+import 'package:flutter_web/controllers/address_controller.dart';
+import 'package:flutter_web/models/info_user.dart';
 // import 'package:flutter_web/controller/cart_controller.dart';
 // import 'package:flutter_web/controllers/cart_controller.dart';
 import 'package:flutter_web/models/order_history_item.dart';
@@ -44,7 +47,10 @@ class ProductInfoPage extends StatelessWidget {
                 margin: const EdgeInsets.symmetric(vertical: 8),
                 child: ListTile(
                   tileColor: Colors.white,
-                  title: Text('Order at ${order.timestamp}'),
+                  title: Text(
+                    'Order at ${order.timestamp}',
+                    style: GoogleFonts.poppins(fontSize: 14),
+                  ),
                   trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
                   onTap: () {
                     // ➔ Pindah ke detail page
@@ -62,11 +68,16 @@ class ProductInfoPage extends StatelessWidget {
 
 class OrderDetailPage extends StatelessWidget {
   final OrderHistoryItem order;
+  final AddressController addressController = Get.find<AddressController>();
+  
 
-  const OrderDetailPage({super.key, required this.order});
+  OrderDetailPage({super.key, required this.order});
 
   @override
   Widget build(BuildContext context) {
+    final info = order.infoUser.isNotEmpty ? order.infoUser.first : InfoUser();
+    final selectedAddress = addressController.addresses.isNotEmpty ? addressController.addresses.first : InfoUser();
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -79,7 +90,10 @@ class OrderDetailPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Ordered at: ${order.timestamp}", style: GoogleFonts.poppins(fontSize: 14)),
+              Text(
+                'Ordered at ${order.infoUser.isNotEmpty ? (order.infoUser.first.timestamp ?? '') : ''}',
+                style: GoogleFonts.poppins(fontSize: 14),
+              ),
               const SizedBox(height: 10),
 
               Container(
@@ -94,10 +108,10 @@ class OrderDetailPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
-              Text("Full Name: ${order.fullName}", style: GoogleFonts.poppins(fontSize: 14)),
-              Text("Email: ${order.email}", style: GoogleFonts.poppins(fontSize: 14)),
-              Text("Phone: ${order.phone}", style: GoogleFonts.poppins(fontSize: 14)),
-              Text("Address: ${order.address}", style: GoogleFonts.poppins(fontSize: 14)),
+              Text("Full Name: ${order.infoUser.isNotEmpty ? (order.infoUser.first.fullName ?? '') : ''}", style: GoogleFonts.poppins(fontSize: 14)),
+              Text("Email: ${order.infoUser.isNotEmpty ? (order.infoUser.first.email ?? '') : ''}", style: GoogleFonts.poppins(fontSize: 14)),
+              Text("Phone: ${order.infoUser.isNotEmpty ? (order.infoUser.first.phone ?? '') : ''}", style: GoogleFonts.poppins(fontSize: 14)),
+              Text("Address: ${order.infoUser.isNotEmpty ? (order.infoUser.first.address ?? '') : ''}", style: GoogleFonts.poppins(fontSize: 14)),
               const SizedBox(height: 20),
 
               Container(

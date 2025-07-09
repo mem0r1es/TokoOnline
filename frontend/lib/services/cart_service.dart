@@ -1,3 +1,4 @@
+import 'package:flutter_web/models/info_user.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -10,6 +11,7 @@ final supabase = Supabase.instance.client;
 class CartService extends GetxService {
   var cartItems = <CartItem>[].obs;
   var orderHistory = <OrderHistoryItem>[].obs;
+  var infoUser = <InfoUser>[].obs;
 
   int get itemCount => cartItems.fold(0, (sum, item) => sum + item.quantity);
   double get totalPrice => cartItems.fold(0.0, (sum, item) => sum + item.totalPrice);
@@ -71,10 +73,25 @@ void increaseQuantity(String id) {
   final productController = Get.find<ProductController>();
 
   if (index >= 0) {
-    cartItems[index].quantity++;
-    productController.decreaseStock(id); // ⬅ Kurangi stok
-    cartItems.refresh();
-    _saveCartToMemory();
+    final product = productController.getProductById(id);
+    final availableStock = product?.stock ?? 0;
+
+    if (availableStock > 0) {
+      cartItems[index].quantity++;
+      productController.decreaseStock(id); // Kurangi stok produk
+      cartItems.refresh();
+      _saveCartToMemory();
+    } else {
+      // Stok habis ➔ Tampilkan notifikasi
+      Get.snackbar(
+        "Out of Stock",
+        "${product?.title ?? 'This product'} is out of stock.",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        icon: Icon(Icons.error_outline, color: Colors.white),
+      );
+    }
   }
 }
 
@@ -110,20 +127,53 @@ void removeItem(String id) {
   }
 
   Future<void> saveOrderToSupabase(OrderHistoryItem order, String paymentMethod) async {
-    try {
-      await supabase.from('order_history').insert({
-        'timestamp': order.timestamp.toIso8601String(),
-        'item': order.items.map((item) => item.name).join(', '),
-        'total_price': order.items.fold(0.0, (sum, item) => sum + item.totalPrice),
-        'full_name': order.fullName,
-        'phone': order.phone,
-        'address': order.address,
-        'email': order.email,
-        'payment_method': paymentMethod,
-        'item_quantity': order.items.map((item) => item.quantity).join(', '),
-      });
-    } catch (e) {
-      print('Error saving order: $e');
-    }
+  try {
+    final fullName = order.infoUser.isNotEmpty ? order.infoUser.first.fullName ?? '' : '';
+    final phone = order.infoUser.isNotEmpty ? order.infoUser.first.phone ?? '' : '';
+    final address = order.infoUser.isNotEmpty ? order.infoUser.first.address ?? '' : '';
+    final email = order.infoUser.isNotEmpty ? order.infoUser.first.email ?? '' : '';
+
+    // final itemsText = order.items
+    //     .map((item) => '${item.name} x${item.quantity} (Rp ${item.totalPrice.toStringAsFixed(0)})')
+    //     .join(', ');
+
+    // final totalPrice = order.items.fold(0.0, (sum, item) => sum + item.totalPrice);
+
+    await supabase.from('order_history').insert({
+      'timestamp': DateTime.now().toIso8601String(),
+      'items': order.items.map((item) => item.name).join(', '),
+      'total_price': order.items.fold(0.0, (sum, item) => sum + item.totalPrice),
+      'full_name': fullName,
+      'phone': phone,
+      'address': address,
+      'email': email,
+      'payment_method': paymentMethod,
+      'item_quantity': order.items.map((item) => item.quantity).join(', '),
+    });
+
+    print('Order saved successfully');
+  } catch (e) {
+    print('Error saving order: $e');
   }
+}
+
+  Future<void> saveAddressToSupabase(InfoUser info) async {
+  final user = supabase.auth.currentUser;
+  final email = user?.email ?? info.email;
+
+  try {
+    await supabase.from('addresses').insert({
+      'timestamp': info.timestamp?.toIso8601String() ?? DateTime.now().toIso8601String(),
+      'full_name': info.fullName,
+      'phone': info.phone,
+      'address': info.address,
+      'email': email,
+    });
+    print('Address saved');
+  } catch (e) {
+    print('Error saving address: $e');
+  }
+}
+
+
 }

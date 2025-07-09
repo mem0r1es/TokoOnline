@@ -5,6 +5,19 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class AuthService extends GetxService {
   final supabase = Supabase.instance.client;
 
+  final Rxn<User> currentUser = Rxn<User>();
+
+   @override
+  void onInit() {
+    super.onInit();
+    refreshUser();  // Panggil sekali saat service dimuat
+  }
+
+  void refreshUser() {
+    final user = supabase.auth.currentUser;
+    currentUser.value = user;
+  }
+
   Future<AuthResponse?> signUp(String email, String password, String fullName) async {
     try {
       final response = await supabase.auth.signUp(
@@ -72,7 +85,6 @@ class AuthService extends GetxService {
   }
 }
 
-
   Future<void> signOut() async {
     await supabase.auth.signOut();
   }
@@ -137,6 +149,8 @@ class AuthService extends GetxService {
         email: email,
         password: password,
       );
+      await Future.delayed(Duration(milliseconds: 500));
+      refreshUser();  // Update current user state after login
 
       if (response.user != null) {
         print('Login successful: ${response.user!.email}');
@@ -146,7 +160,7 @@ class AuthService extends GetxService {
           snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.green,
           colorText: Colors.white,
-        );
+        );  // Update current user state
         return true;
       } else {
         print('Login failed: No user returned');
@@ -183,6 +197,6 @@ class AuthService extends GetxService {
   }
 
   Session? get currentSession => supabase.auth.currentSession;
-  User? get currentUser => supabase.auth.currentUser;
+  // User? get currentUser => supabase.auth.currentUser;
   
 }

@@ -1,19 +1,17 @@
 import 'cart_item.dart';
+import 'info_user.dart';
 
 class OrderHistoryItem {
-  final List<CartItem> items;
   final DateTime timestamp;
-  final String fullName;
-  final String email;
-  final String phone;
-  final String address;
+  final List<CartItem> items;
+  final List<InfoUser> infoUser;  // Kamu sudah pakai list
+  final String paymentMethod;
 
   OrderHistoryItem({
-    required this.items,
     required this.timestamp,
-    required this.fullName,
-    required this.email,
-    required this.phone,
-    required this.address,
+    required this.items,
+    required this.infoUser,
+    required this.paymentMethod,
   });
 }
+
