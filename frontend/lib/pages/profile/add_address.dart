@@ -155,7 +155,7 @@ class _AddAddressState extends State<AddAddress> {
       address: _addressController.text,
     );
 
-    await cartService.saveAddressToSupabase(info);
+    // await cartService.saveAddressToSupabase(info);
     final addressService = AddressService();
     await addressService.saveAddress(info);
     await addressController.fetchAddresses();

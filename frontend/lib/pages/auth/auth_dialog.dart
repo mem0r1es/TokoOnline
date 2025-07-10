@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_web/controllers/address_controller.dart';
 import 'package:flutter_web/services/auth_service.dart';
 import 'package:flutter_web/services/cart_service.dart';
+import 'package:flutter_web/services/checkout_service.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 // import '../../controller/auth_controller.dart';
 
 class AuthDialog extends StatefulWidget {
@@ -258,13 +260,14 @@ class _AuthDialogState extends State<AuthDialog> {
       });
 
       if (success) {
-        authService.refreshUser(); 
-        // final cartService = Get.find<CartService>();
-        //   cartService.infoUser.add(info);
-        //   await cartService.saveAddressToSupabase(info);
+        final user = Supabase.instance.client.auth.currentUser;
+        final email = user?.email;
 
-          final addressController = Get.find<AddressController>();
-          await addressController.fetchAddresses(); // Buat method ini untuk update state user misalnya
+        if (email != null) {
+          await Get.find<AddressController>().fetchAddresses();
+          await Get.find<CartService>().loadCartFromSupabase(email);
+          await Get.find<CheckoutService>().loadOrderHistoryFromSupabase(email);
+        }
         Get.back();
       }
     }

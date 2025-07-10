@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_web/controllers/address_controller.dart';
 import 'package:flutter_web/controllers/auth_controller.dart';
+import 'package:flutter_web/controllers/cart_controller.dart';
+import 'package:flutter_web/controllers/favorite_controller.dart';
+import 'package:flutter_web/controllers/product_controller.dart';
 // import 'package:flutter_web/controllers/favorite_controller.dart';
 import 'package:flutter_web/pages/about/about_page.dart';
 import 'package:flutter_web/pages/contact/contact.dart';
 import 'package:flutter_web/pages/history/history.dart';
 import 'package:flutter_web/pages/profile/profile_page.dart';
 import 'package:flutter_web/services/cart_service.dart';
+import 'package:flutter_web/services/checkout_service.dart';
 import 'package:flutter_web/services/product_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
@@ -32,7 +36,11 @@ class HeaderPages extends StatelessWidget {
     final CartService cartService = Get.put(CartService());
     final ProductService productService = Get.put(ProductService());
     final AddressController addressController = Get.put(AddressController());
-    // final FavoriteController favoriteController = Get.put(FavoriteController());
+    final CheckoutService checkoutService = Get.put(CheckoutService());
+    final CartController cartController = Get.put(CartController());
+    // final CheckoutService checkoutService = Get.put(CheckoutService());
+    // final FavoriteController favC = Get.put(FavoriteController());
+    // final ProductController productController = Get.put(ProductController());
 
     return Container(
       width: double.infinity,

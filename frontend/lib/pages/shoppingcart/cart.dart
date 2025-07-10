@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web/controllers/cart_controller.dart';
 // import 'package:flutter_web/controllers/cart_controller.dart';
 import 'package:flutter_web/models/cart_item.dart';
 import 'package:flutter_web/services/cart_service.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 // import '../../controller/cart_controller.dart';
 import 'checkout_page.dart';
 
@@ -19,6 +21,7 @@ class _CartPagesState extends State<CartPages> {
   Widget build(BuildContext context) {
     // Gunakan CartService yang baru
     // final CartController = Get.find<CartController>();
+    final cartController = Get.find<CartController>();
     final cartService = Get.find<CartService>();
 
     return SingleChildScrollView(
@@ -499,3 +502,113 @@ class _CartPagesState extends State<CartPages> {
         );
   }
 }
+
+class CartPageFromSupabase extends StatefulWidget {
+  const CartPageFromSupabase({Key? key}) : super(key: key);
+
+  @override
+  State<CartPageFromSupabase> createState() => _CartPageFromSupabaseState();
+}
+
+class _CartPageFromSupabaseState extends State<CartPageFromSupabase> {
+  final cartService = Get.find<CartService>();
+  late final user;
+  String? email;
+
+  
+
+  // Future<void> _loadCart() async {
+  //   if (user != null && user.email!= null) {
+  //     final result = await cartService.loadCartFromSupabase(user.email!);
+  //     cartService.cartItems.assignAll(
+  //       result.map((historyItem) => CartItem(
+  //         id: historyItem.productId, 
+  //         name: historyItem.name, 
+  //         price: historyItem.price, 
+  //         imageUrl: historyItem.imageUrl, 
+  //         quantity: historyItem.quantity,
+  //       )).toList()
+  //     );
+  //   }
+  // }
+
+  @override
+  void initState() {
+    super.initState();
+    user = Supabase.instance.client.auth.currentUser;
+    email = user?.email;
+    if (email != null) {
+      cartService.loadCartFromSupabase(email!);
+    }
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Your Cart')),
+      body: Obx(() {
+        if (cartService.isEmpty) {
+          return Center(child: Text('Cart is Empty'));
+        } else {
+          return ListView.builder(
+            itemCount: cartService.cartItems.length,
+            itemBuilder: (_, i) {
+              final item = cartService.cartItems[i];
+              return ListTile(
+                leading: Image.network(item.imageUrl, width: 50, height: 50, fit: BoxFit.cover),
+                title: Text(item.name),
+                subtitle: Text('Rp ${_formatPrice(item.price)}'),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.remove),
+                      onPressed: () {
+                        cartService.decreaseQuantity(item.id);
+                        if (user?.email != null) {
+                          cartService.saveCartToSupabase(user!.email!);
+                        }
+                      },
+                    ),
+                    Text('${item.quantity}'),
+                    IconButton(
+                      icon: Icon(Icons.add),
+                      onPressed: () {
+                        cartService.increaseQuantity(item.id);
+                        cartService.saveCartToSupabase(user!.email!);
+                      },
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        }
+      }),
+      bottomNavigationBar: Obx(() => Container(
+        padding: EdgeInsets.all(16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Total: Rp ${_formatPrice(cartService.totalPrice)}',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            ElevatedButton(
+              onPressed: cartService.isEmpty ? null : () {
+                Get.to(CheckoutPage());
+              },
+              child: Text('Checkout'),
+            )
+          ],
+        ),
+      )),
+    );
+  }
+
+  String _formatPrice(double price) {
+    return price
+      .toStringAsFixed(0)
+      .replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.');
+  }
+}
+
