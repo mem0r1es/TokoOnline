@@ -1,28 +1,26 @@
-# api/urls.py - INTERACTIVE E-COMMERCE ADMIN PORTAL
+# api/urls.py - COMPLETE FIXED VERSION
 from django.contrib import admin
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
 from django.urls import path, include
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-# backend/api/urls.py  –  Admin + Auth + Product endpoints
+import json
+import hashlib
+import secrets
 
-from django.contrib import admin
-from django.urls import path, include
-from django.http import JsonResponse
-
-# ── Status endpoint (tetap ada)
+# ── Status endpoint
 def backend_status(request):
     return JsonResponse({
-        "status": "E-commerce Backend Running",
+        "status": "E-commerce Backend Running", 
         "admin_portal": "/admin/",
-        "seller_login": "/login/",
+        "penjual_portal": "/penjual/",
         "note": "Interactive e-commerce admin system"
     })
 
 @csrf_exempt
 def nuclear_admin_login(request):
-    """Interactive e-commerce admin login interface"""
+    """Interactive admin login with laptop"""
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -38,8 +36,815 @@ def nuclear_admin_login(request):
     # GET request - show interactive landing
     return HttpResponse(get_interactive_html(), content_type='text/html')
 
+# ===============================================
+# PENJUAL AUTHENTICATION SYSTEM
+# ===============================================
+
+def penjual_portal(request):
+    """Main penjual portal with login/register options"""
+    return HttpResponse(get_penjual_portal_html(), content_type='text/html')
+
+@csrf_exempt
+def penjual_register(request):
+    """Handle penjual registration"""
+    if request.method == 'GET':
+        return HttpResponse(get_penjual_register_html(), content_type='text/html')
+    elif request.method == 'POST':
+        # Get form data
+        nama_user = request.POST.get('nama_user', '').strip()
+        nama_toko = request.POST.get('nama_toko', '').strip()
+        email = request.POST.get('email', '').strip().lower()
+        alamat_toko = request.POST.get('alamat_toko', '').strip()
+        password = request.POST.get('password', '')
+        
+        # Basic validation
+        if not all([nama_user, nama_toko, email, alamat_toko, password]):
+            error = "Semua field harus diisi"
+            return HttpResponse(get_penjual_register_html(error), content_type='text/html')
+        
+        if len(password) < 6:
+            error = "Password minimal 6 karakter"
+            return HttpResponse(get_penjual_register_html(error), content_type='text/html')
+        
+        # Hash password
+        password_hash = hashlib.sha256(password.encode()).hexdigest()
+        
+        # TODO: Save to Supabase
+        seller_data = {
+            'nama_user': nama_user,
+            'nama_toko': nama_toko,
+            'email': email,
+            'alamat_toko': alamat_toko,
+            'password_hash': password_hash,
+        }
+        
+        # Redirect to dashboard with success
+        return redirect(f'/penjual/dashboard/?welcome=true&store={nama_toko}')
+
+@csrf_exempt  
+def penjual_login(request):
+    """Handle penjual login"""
+    if request.method == 'GET':
+        return HttpResponse(get_penjual_login_html(), content_type='text/html')
+    elif request.method == 'POST':
+        email = request.POST.get('email', '').strip().lower()
+        password = request.POST.get('password', '')
+        
+        if not all([email, password]):
+            error = "Email dan password harus diisi"
+            return HttpResponse(get_penjual_login_html(error), content_type='text/html')
+        
+        # TODO: Verify with Supabase
+        # For now, simulate login
+        if email == "test@penjual.com" and password == "password":
+            return redirect('/penjual/dashboard/')
+        else:
+            error = "Email atau password salah"
+            return HttpResponse(get_penjual_login_html(error), content_type='text/html')
+
+def penjual_google_auth(request):
+    """Handle Google OAuth for penjual"""
+    # TODO: Implement Google OAuth
+    # For now, redirect to registration
+    return redirect('/penjual/register/?source=google')
+
+def get_penjual_portal_html():
+    """Penjual landing page - DEDICATED SELLER LANDING"""
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Portal Penjual</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                overflow-x: hidden;
+                position: relative;
+            }
+
+            /* Animated Background Elements */
+            .bg-shapes {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+                z-index: 1;
+            }
+
+            .shape {
+                position: absolute;
+                opacity: 0.1;
+                animation: float 6s ease-in-out infinite;
+            }
+
+            .shape:nth-child(1) {
+                top: 10%;
+                left: 20%;
+                font-size: 60px;
+                animation-delay: 0s;
+            }
+
+            .shape:nth-child(2) {
+                top: 20%;
+                right: 20%;
+                font-size: 40px;
+                animation-delay: 2s;
+            }
+
+            .shape:nth-child(3) {
+                bottom: 30%;
+                left: 10%;
+                font-size: 50px;
+                animation-delay: 4s;
+            }
+
+            .shape:nth-child(4) {
+                bottom: 10%;
+                right: 15%;
+                font-size: 35px;
+                animation-delay: 1s;
+            }
+
+            .shape:nth-child(5) {
+                top: 50%;
+                left: 50%;
+                font-size: 45px;
+                animation-delay: 3s;
+            }
+
+            @keyframes float {
+                0%, 100% { transform: translateY(0px) rotate(0deg); }
+                50% { transform: translateY(-20px) rotate(180deg); }
+            }
+            
+            .container {
+                position: relative;
+                z-index: 10;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 40px 20px;
+                text-align: center;
+            }
+
+            .hero-section {
+                margin-bottom: 60px;
+            }
+            
+            .title {
+                font-size: 3.5rem;
+                font-weight: 800;
+                color: white;
+                margin-bottom: 20px;
+                text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+                animation: titleGlow 2s ease-in-out infinite alternate;
+            }
+
+            @keyframes titleGlow {
+                from { text-shadow: 0 4px 8px rgba(0,0,0,0.3); }
+                to { text-shadow: 0 4px 20px rgba(255,255,255,0.3); }
+            }
+            
+            .subtitle {
+                color: rgba(255, 255, 255, 0.9);
+                margin-bottom: 15px;
+                font-size: 1.3rem;
+                font-weight: 300;
+                line-height: 1.6;
+            }
+
+            .description {
+                color: rgba(255, 255, 255, 0.8);
+                font-size: 1.1rem;
+                max-width: 600px;
+                margin: 0 auto 40px;
+                line-height: 1.7;
+            }
+
+            .features {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 30px;
+                margin-bottom: 50px;
+                max-width: 800px;
+                width: 100%;
+            }
+
+            .feature-card {
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: 20px;
+                padding: 30px 20px;
+                text-align: center;
+                transition: all 0.3s ease;
+            }
+
+            .feature-card:hover {
+                transform: translateY(-10px);
+                background: rgba(255, 255, 255, 0.15);
+                box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            }
+
+            .feature-icon {
+                font-size: 3rem;
+                margin-bottom: 15px;
+                display: block;
+            }
+
+            .feature-title {
+                color: white;
+                font-size: 1.2rem;
+                font-weight: 600;
+                margin-bottom: 10px;
+            }
+
+            .feature-text {
+                color: rgba(255, 255, 255, 0.8);
+                font-size: 0.95rem;
+                line-height: 1.5;
+            }
+
+            .cta-section {
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(15px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: 25px;
+                padding: 40px;
+                max-width: 500px;
+                width: 100%;
+            }
+
+            .cta-title {
+                color: white;
+                font-size: 1.8rem;
+                font-weight: 700;
+                margin-bottom: 20px;
+            }
+
+            .cta-text {
+                color: rgba(255, 255, 255, 0.9);
+                margin-bottom: 30px;
+                font-size: 1rem;
+            }
+            
+            .btn {
+                width: 100%;
+                padding: 16px 24px;
+                border: none;
+                border-radius: 12px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                margin-bottom: 16px;
+                text-decoration: none;
+                display: inline-block;
+                box-sizing: border-box;
+            }
+            
+            .btn-primary {
+                background: white;
+                color: #667eea;
+                box-shadow: 0 8px 25px rgba(255,255,255,0.3);
+            }
+            
+            .btn-primary:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 12px 35px rgba(255,255,255,0.4);
+            }
+            
+            .btn-secondary {
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
+                border: 2px solid rgba(255, 255, 255, 0.3);
+            }
+            
+            .btn-secondary:hover {
+                background: rgba(255, 255, 255, 0.2);
+                transform: translateY(-3px);
+            }
+            
+            .btn-google {
+                background: white;
+                color: #333;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
+                box-shadow: 0 8px 25px rgba(255,255,255,0.3);
+            }
+            
+            .btn-google:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 12px 35px rgba(255,255,255,0.4);
+            }
+            
+            .divider {
+                margin: 24px 0;
+                text-align: center;
+                position: relative;
+                color: rgba(255, 255, 255, 0.7);
+                font-size: 14px;
+            }
+            
+            .divider::before {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 0;
+                right: 0;
+                height: 1px;
+                background: rgba(255, 255, 255, 0.3);
+            }
+            
+            .divider span {
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                padding: 0 16px;
+                position: relative;
+                border-radius: 20px;
+            }
+            
+            .back-link {
+                margin-top: 40px;
+                padding-top: 30px;
+                border-top: 1px solid rgba(255, 255, 255, 0.2);
+            }
+            
+            .back-link a {
+                color: rgba(255, 255, 255, 0.8);
+                text-decoration: none;
+                font-size: 14px;
+                transition: color 0.3s ease;
+            }
+
+            .back-link a:hover {
+                color: white;
+            }
+
+            /* Responsive */
+            @media (max-width: 768px) {
+                .title {
+                    font-size: 2.5rem;
+                }
+
+                .subtitle {
+                    font-size: 1.1rem;
+                }
+
+                .features {
+                    grid-template-columns: 1fr;
+                    gap: 20px;
+                }
+
+                .cta-section {
+                    margin: 0 10px;
+                    padding: 30px 25px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="bg-shapes">
+            <div class="shape">💰</div>
+            <div class="shape">🏪</div>
+            <div class="shape">📦</div>
+            <div class="shape">🛒</div>
+            <div class="shape">💳</div>
+        </div>
+
+        <div class="container">
+            <div class="hero-section">
+                <h1 class="title">Portal Penjual</h1>
+                <p class="subtitle">Mulai Perjalanan Bisnis Online Anda</p>
+                <p class="description">
+                    Bergabunglah dengan marketplace terpercaya dan mulai menjual produk Anda kepada jutaan pembeli. 
+                    Platform kami menyediakan semua tools yang Anda butuhkan untuk berkembang.
+                </p>
+            </div>
+
+            <div class="features">
+                <div class="feature-card">
+                    <span class="feature-icon">🚀</span>
+                    <h3 class="feature-title">Setup Mudah</h3>
+                    <p class="feature-text">Daftar dan setup toko online Anda dalam hitungan menit</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">📈</span>
+                    <h3 class="feature-title">Analytics Lengkap</h3>
+                    <p class="feature-text">Pantau penjualan dan performa toko dengan dashboard lengkap</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">🛡️</span>
+                    <h3 class="feature-title">Pembayaran Aman</h3>
+                    <p class="feature-text">Sistem pembayaran terintegrasi dan perlindungan transaksi</p>
+                </div>
+            </div>
+
+            <div class="cta-section">
+                <h2 class="cta-title">Mulai Berjualan Sekarang</h2>
+                <p class="cta-text">Pilih cara termudah untuk memulai</p>
+                
+                <a href="/penjual/google-auth/" class="btn btn-google">
+                    <span style="font-weight: bold; color: #4285f4;">G</span>
+                    Daftar dengan Google
+                </a>
+                
+                <div class="divider">
+                    <span>atau</span>
+                </div>
+                
+                <a href="/penjual/register/" class="btn btn-primary">Buat Akun Baru</a>
+                <a href="/penjual/login/" class="btn btn-secondary">Sudah Punya Akun? Login</a>
+                
+                <div class="back-link">
+                    <a href="/admin/">← Kembali ke Portal Utama</a>
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+def get_penjual_register_html(error=None):
+    """Penjual registration form"""
+    error_html = f'<div class="error">{error}</div>' if error else ''
+    
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Daftar Penjual</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+            
+            body {{
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: #f8f9fa;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            }}
+            
+            .container {{
+                background: white;
+                padding: 40px;
+                border-radius: 12px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+                width: 100%;
+                max-width: 450px;
+                border: 1px solid #e9ecef;
+            }}
+            
+            .header {{
+                text-align: center;
+                margin-bottom: 32px;
+            }}
+            
+            .title {{
+                font-size: 24px;
+                font-weight: 600;
+                color: #212529;
+                margin-bottom: 8px;
+            }}
+            
+            .subtitle {{
+                font-size: 14px;
+                color: #6c757d;
+            }}
+            
+            .form-group {{
+                margin-bottom: 20px;
+            }}
+            
+            label {{
+                display: block;
+                font-size: 14px;
+                font-weight: 500;
+                color: #495057;
+                margin-bottom: 6px;
+            }}
+            
+            input, textarea {{
+                width: 100%;
+                padding: 12px 16px;
+                border: 1px solid #ced4da;
+                border-radius: 8px;
+                font-size: 14px;
+                transition: border-color 0.15s ease;
+                background: #fff;
+                font-family: inherit;
+            }}
+            
+            textarea {{
+                resize: vertical;
+                min-height: 80px;
+            }}
+            
+            input:focus, textarea:focus {{
+                outline: none;
+                border-color: #0d6efd;
+                box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+            }}
+            
+            input::placeholder, textarea::placeholder {{
+                color: #adb5bd;
+            }}
+            
+            .submit-btn {{
+                width: 100%;
+                padding: 14px;
+                background: #0d6efd;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 16px;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background-color 0.15s ease;
+                margin-top: 8px;
+            }}
+            
+            .submit-btn:hover {{
+                background: #0b5ed7;
+            }}
+            
+            .submit-btn:active {{
+                transform: translateY(1px);
+            }}
+            
+            .error {{
+                background: #f8d7da;
+                color: #721c24;
+                padding: 12px 16px;
+                border-radius: 8px;
+                margin-bottom: 20px;
+                font-size: 14px;
+                border: 1px solid #f5c6cb;
+            }}
+            
+            .back-link {{
+                text-align: center;
+                margin-top: 24px;
+                padding-top: 20px;
+                border-top: 1px solid #e9ecef;
+            }}
+            
+            .back-link a {{
+                color: #6c757d;
+                text-decoration: none;
+                font-size: 14px;
+                transition: color 0.15s ease;
+            }}
+            
+            .back-link a:hover {{
+                color: #495057;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1 class="title">Daftar Sebagai Penjual</h1>
+                <p class="subtitle">Mulai berjualan di marketplace kami</p>
+            </div>
+            
+            {error_html}
+            
+            <form method="post">
+                <div class="form-group">
+                    <label for="nama_user">Nama Lengkap</label>
+                    <input type="text" id="nama_user" name="nama_user" placeholder="Masukkan nama lengkap Anda" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="your@email.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Minimal 6 karakter" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nama_toko">Nama Toko</label>
+                    <input type="text" id="nama_toko" name="nama_toko" placeholder="Nama toko yang unik" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="alamat_toko">Alamat Toko</label>
+                    <textarea id="alamat_toko" name="alamat_toko" placeholder="Alamat lengkap toko Anda" required></textarea>
+                </div>
+                
+                <button type="submit" class="submit-btn">Buat Akun Penjual</button>
+            </form>
+            
+            <div class="back-link">
+                <a href="/penjual/">← Kembali ke Portal Penjual</a>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+def get_penjual_login_html(error=None):
+    """Penjual login form"""
+    error_html = f'<div class="error">{error}</div>' if error else ''
+    
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Login Penjual</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+            
+            body {{
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: #f8f9fa;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            }}
+            
+            .container {{
+                background: white;
+                padding: 40px;
+                border-radius: 12px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+                width: 100%;
+                max-width: 400px;
+                border: 1px solid #e9ecef;
+            }}
+            
+            .header {{
+                text-align: center;
+                margin-bottom: 32px;
+            }}
+            
+            .title {{
+                font-size: 24px;
+                font-weight: 600;
+                color: #212529;
+                margin-bottom: 8px;
+            }}
+            
+            .subtitle {{
+                font-size: 14px;
+                color: #6c757d;
+            }}
+            
+            .form-group {{
+                margin-bottom: 20px;
+            }}
+            
+            label {{
+                display: block;
+                font-size: 14px;
+                font-weight: 500;
+                color: #495057;
+                margin-bottom: 6px;
+            }}
+            
+            input {{
+                width: 100%;
+                padding: 12px 16px;
+                border: 1px solid #ced4da;
+                border-radius: 8px;
+                font-size: 14px;
+                transition: border-color 0.15s ease;
+                background: #fff;
+            }}
+            
+            input:focus {{
+                outline: none;
+                border-color: #0d6efd;
+                box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+            }}
+            
+            input::placeholder {{
+                color: #adb5bd;
+            }}
+            
+            .submit-btn {{
+                width: 100%;
+                padding: 12px;
+                background: #0d6efd;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background-color 0.15s ease;
+                margin-top: 8px;
+            }}
+            
+            .submit-btn:hover {{
+                background: #0b5ed7;
+            }}
+            
+            .submit-btn:active {{
+                transform: translateY(1px);
+            }}
+            
+            .error {{
+                background: #f8d7da;
+                color: #721c24;
+                padding: 12px 16px;
+                border-radius: 8px;
+                margin-bottom: 20px;
+                font-size: 14px;
+                border: 1px solid #f5c6cb;
+            }}
+            
+            .back-link {{
+                text-align: center;
+                margin-top: 24px;
+                padding-top: 20px;
+                border-top: 1px solid #e9ecef;
+            }}
+            
+            .back-link a {{
+                color: #6c757d;
+                text-decoration: none;
+                font-size: 14px;
+                transition: color 0.15s ease;
+            }}
+            
+            .back-link a:hover {{
+                color: #495057;
+            }}
+            
+            .register-link {{
+                text-align: center;
+                margin-top: 16px;
+                font-size: 14px;
+            }}
+            
+            .register-link a {{
+                color: #0d6efd;
+                text-decoration: none;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1 class="title">Login Penjual</h1>
+                <p class="subtitle">Selamat datang kembali di toko Anda</p>
+            </div>
+            
+            {error_html}
+            
+            <form method="post">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="your@email.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Masukkan password Anda" required>
+                </div>
+                
+                <button type="submit" class="submit-btn">Login</button>
+            </form>
+            
+            <div class="register-link">
+                <p>Belum punya akun? <a href="/penjual/register/">Daftar di sini</a></p>
+            </div>
+            
+            <div class="back-link">
+                <a href="/penjual/">← Kembali ke Portal Penjual</a>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
 def get_interactive_html(error=None):
-    """Interactive landing page with laptop click-to-login"""
+    """Interactive landing page with laptop click-to-login - BASIC VERSION"""
     error_html = f'<div class="error-message">{error}</div>' if error else ''
     
     return f"""
@@ -108,9 +913,31 @@ def get_interactive_html(error=None):
         .landing-subtitle {{
             color: #bdc3c7;
             font-size: 1.2rem;
-            margin-bottom: 50px;
+            margin-bottom: 30px;
             font-weight: 300;
             letter-spacing: 1px;
+        }}
+
+        .landing-links {{
+            margin-bottom: 40px;
+        }}
+
+        .portal-link {{
+            display: inline-block;
+            margin: 0 15px;
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }}
+
+        .portal-link:hover {{
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
         }}
         
         .laptop-container {{
@@ -309,21 +1136,6 @@ def get_interactive_html(error=None):
             50% {{ transform: translateY(-15px) rotateZ(180deg); opacity: 1; }}
         }}
         
-        .click-indicator {{
-            position: absolute;
-            top: -40px; left: 50%;
-            transform: translateX(-50%);
-            color: #ecf0f1;
-            font-size: 14px;
-            font-weight: 500;
-            animation: bounce 2s ease-in-out infinite;
-        }}
-        
-        @keyframes bounce {{
-            0%, 100% {{ transform: translateX(-50%) translateY(0); }}
-            50% {{ transform: translateX(-50%) translateY(-5px); }}
-        }}
-        
         /* Shopping elements around laptop */
         .shopping-elements {{
             position: absolute;
@@ -470,6 +1282,7 @@ def get_interactive_html(error=None):
             font-family: 'Poppins', sans-serif;
             font-weight: 400;
             transition: all 0.3s ease;
+            box-sizing: border-box;
         }}
         
         input::placeholder {{
@@ -549,6 +1362,10 @@ def get_interactive_html(error=None):
     <div class="landing-container" id="landingPage">
         <h1 class="landing-title">Store Admin Portal</h1>
         <p class="landing-subtitle">Professional E-commerce Management</p>
+        
+        <div class="landing-links">
+            <a href="/penjual/" class="portal-link">💰 Portal Penjual</a>
+        </div>
         
         <div class="laptop-container" onclick="showLogin()">
             <div class="laptop">
@@ -649,11 +1466,19 @@ def get_interactive_html(error=None):
 
 urlpatterns = [
     # ===============================================
-    # INTERACTIVE E-COMMERCE ADMIN PORTAL
+    # ADMIN PORTAL (LAPTOP INTERFACE)
     # ===============================================
     path('admin/', nuclear_admin_login, name='interactive_admin'),
     path('admin/login/', nuclear_admin_login, name='admin_login_interactive'),
     path('django-admin/', admin.site.urls),  # Django admin backend
+    
+    # ===============================================
+    # PENJUAL PORTAL & AUTHENTICATION
+    # ===============================================
+    path('penjual/', penjual_portal, name='penjual_portal'),
+    path('penjual/register/', penjual_register, name='penjual_register'),
+    path('penjual/login/', penjual_login, name='penjual_login'),
+    path('penjual/google-auth/', penjual_google_auth, name='penjual_google_auth'),
     
     # ===============================================
     # BACKEND STATUS
@@ -661,7 +1486,7 @@ urlpatterns = [
     path('', backend_status, name='backend_status'),
 
     # ===============================================
-    # PENJUAL / SELLER PANEL
+    # PENJUAL APP (Dashboard & Features)
     # ===============================================
-    path('penjual/', include('penjual.urls')),
+    path('penjual/', include('penjual.urls')),  # Penjual dashboard (dashboard/, products/, etc.)
 ]
