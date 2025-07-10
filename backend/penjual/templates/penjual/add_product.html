@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tambah Produk</title>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: Arial;
+      background: #f9f9f9;
+      padding: 20px;
+    }
+
+    form {
+      background: white;
+      padding: 30px 40px; /* Tambah padding kiri-kanan */
+      max-width: 500px;
+      margin: auto;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      box-sizing: border-box;
+    }
+
+    button {
+      margin-top: 20px;
+      background-color: #3498db;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+  </style>
+</head>
+<body>
+  <h2 style="text-align:center">Tambah Produk Baru</h2>
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label for="name">Nama Produk</label>
+    <input type="text" name="name" required>
+
+    <label for="price">Harga</label>
+    <input type="number" name="price" step="0.01" required>
+
+    <label for="stock">Stok</label>
+    <input type="number" name="stock" required>
+
+    <label for="description">Deskripsi</label>
+    <textarea name="description"></textarea>
+
+    <label for="category">Kategori</label>
+    <input type="text" name="category">
+
+    <label for="image_file">Gambar Produk</label>
+    <input type="file" name="image_file" accept="image/*" required>
+
+    <button type="submit">Simpan Produk</button>
+  </form>
+</body>
+</html>

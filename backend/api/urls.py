@@ -9,6 +9,17 @@ import json
 import hashlib
 import secrets
 
+from supabase import create_client
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
+
+supabase = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
+
 # ── Status endpoint
 def backend_status(request):
     return JsonResponse({
@@ -50,57 +61,69 @@ def penjual_register(request):
     if request.method == 'GET':
         return HttpResponse(get_penjual_register_html(), content_type='text/html')
     elif request.method == 'POST':
-        # Get form data
         nama_user = request.POST.get('nama_user', '').strip()
         nama_toko = request.POST.get('nama_toko', '').strip()
         email = request.POST.get('email', '').strip().lower()
-        alamat_toko = request.POST.get('alamat_toko', '').strip()
+        alamat_toko = request.POST.get('alamat_toko', '').strip()  # tetap pakai ini dari form
         password = request.POST.get('password', '')
-        
-        # Basic validation
+
         if not all([nama_user, nama_toko, email, alamat_toko, password]):
             error = "Semua field harus diisi"
             return HttpResponse(get_penjual_register_html(error), content_type='text/html')
-        
+
         if len(password) < 6:
             error = "Password minimal 6 karakter"
             return HttpResponse(get_penjual_register_html(error), content_type='text/html')
-        
-        # Hash password
+
         password_hash = hashlib.sha256(password.encode()).hexdigest()
-        
-        # TODO: Save to Supabase
+
         seller_data = {
-            'nama_user': nama_user,
-            'nama_toko': nama_toko,
+            'owner_name': nama_user,
+            'store_name': nama_toko,
             'email': email,
-            'alamat_toko': alamat_toko,
+            'address': alamat_toko,  # ganti dari alamat_toko → address
             'password_hash': password_hash,
         }
-        
-        # Redirect to dashboard with success
+
+        supabase.table('sellers').insert(seller_data).execute()
+
         return redirect(f'/penjual/dashboard/?welcome=true&store={nama_toko}')
+
 
 @csrf_exempt  
 def penjual_login(request):
     """Handle penjual login"""
     if request.method == 'GET':
         return HttpResponse(get_penjual_login_html(), content_type='text/html')
+
     elif request.method == 'POST':
         email = request.POST.get('email', '').strip().lower()
         password = request.POST.get('password', '')
-        
+
         if not all([email, password]):
             error = "Email dan password harus diisi"
             return HttpResponse(get_penjual_login_html(error), content_type='text/html')
-        
-        # TODO: Verify with Supabase
-        # For now, simulate login
-        if email == "test@penjual.com" and password == "password":
-            return redirect('/penjual/dashboard/')
-        else:
-            error = "Email atau password salah"
+
+        # Ambil seller dari Supabase
+        response = supabase.table("sellers").select("*").eq("email", email).execute()
+        sellers = response.data
+
+        if not sellers:
+            error = "Akun tidak ditemukan"
             return HttpResponse(get_penjual_login_html(error), content_type='text/html')
+
+        seller = sellers[0]
+
+        # Bandingkan password yang di-hash
+        input_hash = hashlib.sha256(password.encode()).hexdigest()
+        if input_hash != seller.get("password_hash"):
+            error = "Password salah"
+            return HttpResponse(get_penjual_login_html(error), content_type='text/html')
+
+        # Login berhasil → redirect ke dashboard
+        return redirect(f'/penjual/dashboard/?store={seller.get("nama_toko")}')
+
+
 
 def penjual_google_auth(request):
     """Handle Google OAuth for penjual"""
