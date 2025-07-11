@@ -1,7 +1,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_web/controllers/address_controller.dart';
-import 'package:flutter_web/models/info_user.dart';
 // import 'package:flutter_web/controller/cart_controller.dart';
 // import 'package:flutter_web/controllers/cart_controller.dart';
 import 'package:flutter_web/models/order_history_item.dart';
@@ -75,8 +74,6 @@ class OrderDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final info = order.infoUser.isNotEmpty ? order.infoUser.first : InfoUser();
-    final selectedAddress = addressController.addresses.isNotEmpty ? addressController.addresses.first : InfoUser();
 
     return Scaffold(
       appBar: AppBar(

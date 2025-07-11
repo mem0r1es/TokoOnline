@@ -19,8 +19,8 @@ class ProductController extends GetxController {
   }
 
   Product? getProductById(String id) {
-  return products.firstWhereOrNull((p) => p.id == id);
-}
+    return products.firstWhereOrNull((p) => p.id == id);
+  }
 
   void decreaseStock(String productId) {
     final index = products.indexWhere((p) => p.id == productId);

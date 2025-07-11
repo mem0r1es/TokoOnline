@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart'; 
-import 'package:get/get.dart';
-import '../shop/shops.dart';
+//import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 
 class Isi extends StatelessWidget {
   const Isi({super.key});
@@ -56,7 +56,7 @@ class Isi extends StatelessWidget {
                   margin: const EdgeInsets.only(top: 20),
                   child: ElevatedButton(
                     onPressed: () {
-                      Get.to(() => ShopsPage());
+                      context.go('/shop');
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF000000),

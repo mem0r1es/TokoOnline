@@ -155,10 +155,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () async {
-                      final authController = Get.find<AuthController>();
+                      Get.find<AuthController>();
                       final cartService = Get.find<CartService>();
                       // final userId = authService.getUserId() ?? '';
-                      final userEmail = authController.getUserEmail() ?? '';
                       if (_selectedAddressUser == null) {
                         Get.snackbar("Error", "Please select an address first.");
                         return;

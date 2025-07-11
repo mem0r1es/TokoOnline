@@ -1,12 +1,13 @@
+// our_product.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_web/controllers/auth_controller.dart';
 import 'package:flutter_web/controllers/favorite_controller.dart';
 import 'package:flutter_web/controllers/product_controller.dart';
 import 'package:flutter_web/models/cart_item.dart';
 import 'package:flutter_web/pages/auth/auth_dialog.dart';
-import 'package:flutter_web/pages/history/history.dart';
-import 'package:flutter_web/pages/profile/profile_page.dart';
 import 'package:flutter_web/services/cart_service.dart';
+import 'package:flutter_web/controllers/scroll_controller_manager.dart'; 
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 // import '../../controller/cart_controller.dart';
@@ -15,143 +16,172 @@ import 'package:get/get.dart';
 // import '../../controllers/page_controller.dart';
 import '../../models/product_model.dart';
 
-class OurProduct extends StatelessWidget {
-  OurProduct({super.key});
+class OurProduct extends StatefulWidget {
+  const OurProduct({super.key});
 
+  @override
+  State<OurProduct> createState() => _OurProductState();
+}
+
+class _OurProductState extends State<OurProduct> {
   final favC = Get.put(FavoriteController());
-  final ProductController productController = Get.put(ProductController());
+  final productController = Get.put(ProductController());
+  final scrollKey = 'our_product_scroll'; // ✅ scroll key unik
+  late ScrollController _scrollController;
+  late ScrollControllerManager scrollManager;
 
+  @override
+  void initState() {
+    super.initState();
+    scrollManager = Get.find<ScrollControllerManager>();
+    _scrollController = ScrollController(
+      initialScrollOffset: scrollManager.getOffset(scrollKey),
+    );
+    _scrollController.addListener(() {
+      scrollManager.saveOffset(scrollKey, _scrollController.offset);
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-      final cartService = Get.find<CartService>();
-      final authController= Get.find<AuthController>();
-      
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 50),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Header
-          Text(
-            'Our Products',
-            style: GoogleFonts.poppins(
-              fontSize: 40,
-              fontWeight: FontWeight.w700,
+    final cartService = Get.find<CartService>();
+    final authController = Get.find<AuthController>();
+
+    return SingleChildScrollView(
+      controller: _scrollController,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 50),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Header
+            Text(
+              'Our Products',
+              style: GoogleFonts.poppins(
+                fontSize: 40,
+                fontWeight: FontWeight.w700,
+              ),
             ),
-          ),
 
-          const SizedBox(height: 10),
+            const SizedBox(height: 10),
 
-          // Products Grid
-          Obx(() {
-            if (productController.isLoading.value) {
-              return SizedBox(
-                height: 300,
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircularProgressIndicator(
-                        strokeWidth: 3,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
-                      ),
-                      SizedBox(height: 20),
-                      Text(
-                        'Loading products from database...',
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          color: Colors.grey[600],
+            // Products Grid
+            Obx(() {
+              if (productController.isLoading.value) {
+                return SizedBox(
+                  height: 300,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(
+                          strokeWidth: 3,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }
-
-            if (productController.products.isEmpty) {
-              return SizedBox(
-                height: 300,
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.inventory_2_outlined,
-                        size: 80,
-                        color: Colors.grey[400],
-                      ),
-                      SizedBox(height: 20),
-                      Text(
-                        'No products available',
-                        style: GoogleFonts.poppins(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[600],
+                        SizedBox(height: 20),
+                        Text(
+                          'Loading products from database...',
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            color: Colors.grey[600],
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        'Database might be empty or connection failed',
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: Colors.grey[500],
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      ElevatedButton.icon(
-                        onPressed: () => productController.refreshProducts(),
-                        icon: Icon(Icons.refresh),
-                        label: Text('Try Again'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }
-
-            // Products grid
-            return Column(
-              children: [
-                // Products count info
-                Padding(
-                  padding: EdgeInsets.only(bottom: 20),
-                  child: Text(
-                    'Showing ${productController.products.length} products',
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color: Colors.grey[600],
+                      ],
                     ),
                   ),
-                ),
+                );
+              }
 
-                // Products grid
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Wrap(
-                    spacing: 20,
-                    runSpacing: 20,
-                    alignment: WrapAlignment.center,
-                    children: productController.products
-                        .map(
-                          (product) =>
-                              _productCard(product, cartService, authController),
-                        )
-                        .toList(),
+              if (productController.products.isEmpty) {
+                return SizedBox(
+                  height: 300,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.inventory_2_outlined,
+                          size: 80,
+                          color: Colors.grey[400],
+                        ),
+                        SizedBox(height: 20),
+                        Text(
+                          'No products available',
+                          style: GoogleFonts.poppins(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          'Database might be empty or connection failed',
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color: Colors.grey[500],
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        ElevatedButton.icon(
+                          onPressed: () => productController.refreshProducts(),
+                          icon: Icon(Icons.refresh),
+                          label: Text('Try Again'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black,
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            );
-          }),
-        ],
+                );
+              }
+
+              return Column(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 20),
+                    child: Text(
+                      'Showing ${productController.products.length} products',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Wrap(
+                      spacing: 20,
+                      runSpacing: 20,
+                      alignment: WrapAlignment.center,
+                      children: productController.products
+                          .map(
+                            (product) => _productCard(
+                              product,
+                              cartService,
+                              authController,
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ),
+                ],
+              );
+            }),
+          ],
+        ),
       ),
     );
   }
+
+
 
   Widget _productCard(
     Product product,
