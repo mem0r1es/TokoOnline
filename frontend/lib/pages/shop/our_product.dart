@@ -15,6 +15,7 @@ import 'package:get/get.dart';
 // import '../../controller/product_controller.dart';
 // import '../../controllers/page_controller.dart';
 import '../../models/product_model.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class OurProduct extends StatefulWidget {
   const OurProduct({super.key});
@@ -24,7 +25,9 @@ class OurProduct extends StatefulWidget {
 }
 
 class _OurProductState extends State<OurProduct> {
-  final favC = Get.put(FavoriteController());
+  final FavoriteController favC = Get.put(FavoriteController());
+  // final favC = Get.find<FavoriteController>();
+  // final productController = Get.find<ProductController>();
   final productController = Get.put(ProductController());
   final scrollKey = 'our_product_scroll'; // ✅ scroll key unik
   late ScrollController _scrollController;
@@ -46,7 +49,9 @@ class _OurProductState extends State<OurProduct> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
-  }
+  }  // final favC = Get.find<FavoriteController>();
+  // final productController = Get.find<ProductController>();
+
 
   @override
   Widget build(BuildContext context) {
@@ -234,15 +239,18 @@ class _OurProductState extends State<OurProduct> {
                   const SizedBox(height: 8),
 
                   // Product Description
-                  Text(
-                    product.description,
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.grey[600],
+                  SizedBox(
+                    height: 48,
+                    child: Text(
+                      product.description,
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.grey[600],
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                   ),
 
                   const SizedBox(height: 12),
@@ -352,7 +360,16 @@ class _OurProductState extends State<OurProduct> {
                                   ),
                                 ),
                                 IconButton(
-                                  onPressed: () => cartService.increaseQuantity(productId),
+                                  onPressed: () {
+                                    cartService.increaseQuantity(productId);
+
+                                    final user = Supabase.instance.client.auth.currentUser;
+                                    final email = user?.email;
+
+                                    if (email != null) {
+                                      cartService.saveCartToSupabase(email);
+                                    }
+                                  },
                                   icon: Icon(Icons.add_circle_outline),
                                   constraints: BoxConstraints(minWidth: 24, minHeight: 24),
                                 ),
@@ -484,50 +501,48 @@ class _OurProductState extends State<OurProduct> {
   }
 
   void _handleAddToCart(
-    Product product,
-    String productId,
-    CartService cartService,
-    AuthController authController,
-  ) {
-    if (!authController.isLoggedIn.value) {
-      _showAuthDialog();
-      Get.snackbar(
-        "Login Required",
-        "Please login first to add products to cart",
-        backgroundColor: Colors.orange,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-        icon: Icon(Icons.login, color: Colors.white),
-      );
-      return;
-    }
+  Product product,
+  String productId,
+  CartService cartService,
+  AuthController authController,
+) async {
+  final currentUser = authController.currentUser.value;
 
-    // Check stock
-    if (product.stock != null && product.stock! <= 0) {
-      Get.snackbar(
-        "Out of Stock",
-        "${product.title} is currently out of stock",
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-        icon: Icon(Icons.inventory_2, color: Colors.white),
-      );
-      return;
-    }
-
-    // Add to cart
-    cartService.addItem(
-      CartItem(
-      id: productId,
-      name: product.title,
-      price: product.price.toDouble(),
-      imageUrl: product.imagePath,)
+  if (currentUser == null || currentUser.email == null) {
+    _showAuthDialog();
+    Get.snackbar(
+      "Login Required",
+      "Please login first to add products to cart",
+      backgroundColor: Colors.orange,
+      colorText: Colors.white,
+      snackPosition: SnackPosition.BOTTOM,
+      icon: Icon(Icons.login, color: Colors.white),
     );
-
-    // final productController = Get.find<ProductController>();
-    // productController.decreaseStock(productId);
-
+    return;
   }
+
+  if (product.stock != null && product.stock! <= 0) {
+    Get.snackbar(
+      "Out of Stock",
+      "${product.title} is currently out of stock",
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+      snackPosition: SnackPosition.BOTTOM,
+      icon: Icon(Icons.inventory_2, color: Colors.white),
+    );
+    return;
+  }
+
+  cartService.addItem(CartItem(
+    id: productId,
+    name: product.title,
+    price: product.price.toDouble(),
+    imageUrl: product.imagePath,
+  ));
+
+  await cartService.saveCartToSupabase(currentUser.email!);
+}
+
 
   void _handleFavorite(Product product) {
     favC.toggleFavorite(product);

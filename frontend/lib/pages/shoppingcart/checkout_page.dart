@@ -9,6 +9,7 @@ import 'package:flutter_web/models/info_user.dart';
 import 'package:flutter_web/models/order_history_item.dart';
 import 'package:flutter_web/pages/profile/address_page.dart';
 import 'package:flutter_web/services/cart_service.dart';
+import 'package:flutter_web/services/checkout_service.dart';
 import 'package:flutter_web/widgets/address_list_widget.dart';
 // import 'package:flutter_web/widgets/header_bar.dart';
 import 'package:flutter_web/pages/history/history.dart';
@@ -157,6 +158,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     onPressed: () async {
                       Get.find<AuthController>();
                       final cartService = Get.find<CartService>();
+                      final checkoutService = Get.find<CheckoutService>();
                       // final userId = authService.getUserId() ?? '';
                       if (_selectedAddressUser == null) {
                         Get.snackbar("Error", "Please select an address first.");
@@ -169,7 +171,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         paymentMethod: _selectedPayment ?? 'Cash on Delivery',
                       );
                       cartService.orderHistory.add(order);
-                      await cartService.saveOrderToSupabase(order, _selectedPayment!);
+                      await checkoutService.saveOrderToSupabase(order, _selectedPayment!);
+                      await Get.find<CartService>().clearCartFromSupabase(userEmail);
                       cartService.clearCart();
                       Get.to(() => ProductInfoPage());
                     },

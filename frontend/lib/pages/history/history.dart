@@ -5,15 +5,30 @@ import 'package:flutter_web/controllers/address_controller.dart';
 // import 'package:flutter_web/controllers/cart_controller.dart';
 import 'package:flutter_web/models/order_history_item.dart';
 import 'package:flutter_web/services/cart_service.dart';
+import 'package:flutter_web/services/checkout_service.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 
-class ProductInfoPage extends StatelessWidget {
-  // final CartController cartController = Get.find<CartController>();
-  final CartService cartService = Get.find<CartService>();
-
+class ProductInfoPage extends StatefulWidget {
   ProductInfoPage({super.key});
+
+  @override
+  State<ProductInfoPage> createState() => _ProductInfoPageState();
+}
+
+class _ProductInfoPageState extends State<ProductInfoPage> {
+  final CheckoutService checkoutService = Get.find<CheckoutService>();
+
+  @override
+  void initState() {
+    super.initState();
+    final email = Supabase.instance.client.auth.currentUser?.email;
+    if (email != null) {
+      checkoutService.loadOrderHistoryFromSupabase(email);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +44,7 @@ class ProductInfoPage extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Obx(() {
-          if (cartService.orderHistory.isEmpty) {
+          if (checkoutService.orderHistory.isEmpty) {
             return Center(
               child: Text(
                 "No order history yet.",
@@ -39,9 +54,9 @@ class ProductInfoPage extends StatelessWidget {
           }
 
           return ListView.builder(
-            itemCount: cartService.orderHistory.length,
+            itemCount: checkoutService.orderHistory.length,
             itemBuilder: (context, index) {
-              final order = cartService.orderHistory[index];
+              final order = checkoutService.orderHistory[index];
               return Card(
                 margin: const EdgeInsets.symmetric(vertical: 8),
                 child: ListTile(
@@ -52,8 +67,7 @@ class ProductInfoPage extends StatelessWidget {
                   ),
                   trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
                   onTap: () {
-                    // ➔ Pindah ke detail page
-                    Get.to(() => OrderDetailPage(order:order));
+                    Get.to(() => OrderDetailPage(order: order));
                   },
                 ),
               );
@@ -64,6 +78,7 @@ class ProductInfoPage extends StatelessWidget {
     );
   }
 }
+
 
 class OrderDetailPage extends StatelessWidget {
   final OrderHistoryItem order;

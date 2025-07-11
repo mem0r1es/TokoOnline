@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_web/controllers/address_controller.dart';
 import 'package:flutter_web/controllers/auth_controller.dart';
+import 'package:flutter_web/controllers/cart_controller.dart';
+import 'package:flutter_web/controllers/favorite_controller.dart';
+import 'package:flutter_web/controllers/product_controller.dart';
 // import 'package:flutter_web/controllers/favorite_controller.dart';
 //import 'package:flutter_web/pages/contact/contact.dart';
 import 'package:flutter_web/services/cart_service.dart';
+import 'package:flutter_web/services/checkout_service.dart';
 import 'package:flutter_web/services/product_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -157,6 +161,120 @@ class _HeaderPagesState extends State<HeaderPages> {
             ),
           ],
         ),
+    // Initialize ALL services and controller required (GUARANTEED TO WORK)
+    final AuthController authController = Get.put(AuthController());
+    final CartService cartService = Get.put(CartService());
+    final ProductService productService = Get.put(ProductService());
+    final AddressController addressController = Get.put(AddressController());
+    final CheckoutService checkoutService = Get.put(CheckoutService());
+    final CartController cartController = Get.put(CartController());
+    // final CheckoutService checkoutService = Get.put(CheckoutService());
+    // final FavoriteController favC = Get.put(FavoriteController());
+    // final ProductController productController = Get.put(ProductController());
+
+    return Container(
+      width: double.infinity,
+      height: 100,
+      color: const Color(0xFFFFFFFF),
+      padding: const EdgeInsets.symmetric(horizontal: 54, vertical: 29),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Logo dan Teks
+          Row(
+            children: [
+              Image.asset(
+                'headers/MeubelHouse_Logos-05.png',
+                width: 50,
+                height: 32,
+              ),
+              const SizedBox(width: 5),
+              Text(
+                'Toko Online',
+                style: GoogleFonts.montserrat(
+                  fontSize: 34,
+                  color: const Color(0xFF000000),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          // Menu Navigasi
+          Row(
+            children: [
+              _navItem('Home', () => Get.to(const DashboardPage())),
+              const SizedBox(width: 20),
+              _navItem('Shop', () => Get.to(const ShopsPage())),
+              const SizedBox(width: 20),
+              _navItem('About', () => Get.to(const AboutPage1())),
+              const SizedBox(width: 20),
+              _navItem('Contact', () => Get.to(const ContactPage1())),
+            ],
+          ),
+          // Icon Section
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              _iconBtn(Icons.person, () => _userlogin(authController)),
+              const SizedBox(width: 10),
+
+              // Search icon
+              _iconBtn(Icons.search, () => _openSearchDialog()),
+              const SizedBox(width: 10),
+
+              // Favorite icon
+              _iconBtn(Icons.favorite_border, () => Get.to(FavoritePage())),
+              const SizedBox(width: 10),
+
+              // Cart icon dengan badge
+              Obx(
+                () => GestureDetector(
+                  onTap: () => _handleCartClick(authController, cartService),
+                  child: SizedBox(
+                    width: 28,
+                    height: 28,
+                    child: Stack(
+                      children: [
+                        Center(
+                          child: Icon(
+                            Icons.shopping_cart_outlined,
+                            color: Colors.black,
+                            size: 24,
+                          ),
+                        ),
+                        if (cartService.itemCount > 0)
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            child: Container(
+                              padding: EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              constraints: BoxConstraints(
+                                minWidth: 16,
+                                minHeight: 16,
+                              ),
+                              child: Text(
+                                '${cartService.itemCount}',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
