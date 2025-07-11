@@ -3,15 +3,10 @@ import 'package:flutter_web/controllers/auth_controller.dart';
 import 'package:flutter_web/controllers/favorite_controller.dart';
 import 'package:flutter_web/controllers/product_controller.dart';
 import 'package:flutter_web/services/cart_service.dart';
-import 'package:flutter_web/controllers/favorite_controller.dart';
-import 'package:flutter_web/controllers/product_controller.dart';
-import 'package:flutter_web/services/cart_service.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_web/go_routers.dart';
-
-import 'controllers/auth_controller.dart';
 import 'controllers/scroll_controller_manager.dart';
 
 void main() async {
