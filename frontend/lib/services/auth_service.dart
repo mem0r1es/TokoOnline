@@ -149,7 +149,7 @@ class AuthService extends GetxService {
         email: email,
         password: password,
       );
-      await Future.delayed(Duration(milliseconds: 500));
+      await Future.delayed(Duration(milliseconds: 1000));
       refreshUser();  // Update current user state after login
 
       if (response.user != null) {

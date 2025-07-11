@@ -10,7 +10,7 @@ import '../../services/cart_service.dart';
 class AddAddress extends StatefulWidget {
   final InfoUser? existingAddress;  // Untuk edit
 
-  const AddAddress({Key? key, this.existingAddress}) : super(key: key);
+  const AddAddress({super.key, this.existingAddress});
 
   @override
   State<AddAddress> createState() => _AddAddressState();
@@ -155,7 +155,7 @@ class _AddAddressState extends State<AddAddress> {
       address: _addressController.text,
     );
 
-    await cartService.saveAddressToSupabase(info);
+    // await cartService.saveAddressToSupabase(info);
     final addressService = AddressService();
     await addressService.saveAddress(info);
     await addressController.fetchAddresses();

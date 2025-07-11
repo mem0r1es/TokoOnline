@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import '../../models/info_user.dart';
-import '../../pages/profile/add_address.dart';
+import 'package:go_router/go_router.dart';
 import '../../controllers/address_controller.dart';
+import 'package:get/get.dart';
 
 class AddressPage extends StatefulWidget {
 
-  AddressPage({super.key});
+  const AddressPage({super.key});
 
   @override
   State<AddressPage> createState() => _AddressPageState();
@@ -16,7 +15,6 @@ class _AddressPageState extends State<AddressPage> {
   // final AddressController addressController = Get.put(AddressController());
   final AddressController addressController = Get.find<AddressController>();
 
-  String? _selectedAddressId;
 
 //   @override
 //   void initState() {
@@ -60,7 +58,6 @@ class _AddressPageState extends State<AddressPage> {
             itemCount: addressController.addresses.length,
             itemBuilder: (context, index) {
               final address = addressController.addresses[index];
-              final addressId = address.id ?? index.toString();
               
               return Card(
                 margin: const EdgeInsets.symmetric(vertical: 8),
@@ -103,7 +100,8 @@ class _AddressPageState extends State<AddressPage> {
                   ),
                   subtitle: Text('${address.address}\n${address.phone ?? ''}'),
                   onTap: () {
-                    Get.to(() => AddAddress(existingAddress: address));
+                    context.goNamed('addAddress', extra: address);
+
                       // Optional: Hapus atau nonaktifkan
                       // Get.snackbar('comingsoon',
                       //   'This feature is coming soon!',
@@ -119,7 +117,7 @@ class _AddressPageState extends State<AddressPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Get.to(() => const AddAddress());
+          context.go('add-addres');
         },
         backgroundColor: Colors.amber,
         child: const Icon(Icons.add),

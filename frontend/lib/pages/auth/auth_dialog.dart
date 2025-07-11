@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_web/controllers/address_controller.dart';
 import 'package:flutter_web/services/auth_service.dart';
 import 'package:flutter_web/services/cart_service.dart';
+import 'package:flutter_web/services/checkout_service.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 // import '../../controller/auth_controller.dart';
 
 class AuthDialog extends StatefulWidget {
@@ -15,7 +17,7 @@ class AuthDialog extends StatefulWidget {
 
 class _AuthDialogState extends State<AuthDialog> {
   final AuthService authService = Get.find<AuthService>();
-  
+
   bool isLogin = true; // true = login, false = register
   bool isLoading = false;
 
@@ -46,7 +48,7 @@ class _AuthDialogState extends State<AuthDialog> {
                 ),
               ),
               SizedBox(height: 20),
-                
+
               // Form
               if (!isLogin) ...[
                 _buildTextField(
@@ -56,7 +58,7 @@ class _AuthDialogState extends State<AuthDialog> {
                 ),
                 SizedBox(height: 16),
               ],
-                
+
               _buildTextField(
                 controller: emailController,
                 label: 'Email',
@@ -64,7 +66,7 @@ class _AuthDialogState extends State<AuthDialog> {
                 keyboardType: TextInputType.emailAddress,
               ),
               SizedBox(height: 16),
-                
+
               _buildTextField(
                 controller: passwordController,
                 label: 'Password',
@@ -81,7 +83,7 @@ class _AuthDialogState extends State<AuthDialog> {
                 ),
                 SizedBox(height: 16),
               ],
-                
+
               // Submit Button
               SizedBox(
                 width: double.infinity,
@@ -106,9 +108,9 @@ class _AuthDialogState extends State<AuthDialog> {
                         ),
                 ),
               ),
-                
+
               SizedBox(height: 16),
-                
+
               // Divider
               Row(
                 children: [
@@ -120,9 +122,9 @@ class _AuthDialogState extends State<AuthDialog> {
                   Expanded(child: Divider()),
                 ],
               ),
-                
+
               SizedBox(height: 16),
-                
+
               // Google Sign In Button
               SizedBox(
                 width: double.infinity,
@@ -134,15 +136,15 @@ class _AuthDialogState extends State<AuthDialog> {
                           setState(() {
                             isLoading = true;
                           });
-                
+
                           bool success = await authService.signInWithGoogle();
-                
+
                           setState(() {
                             isLoading = false;
                           });
-                
+
                           if (success) {
-                            Get.back();
+                            Navigator.of(context).pop();
                           }
                         },
                   icon: Icon(Icons.login, color: Colors.red),
@@ -162,9 +164,9 @@ class _AuthDialogState extends State<AuthDialog> {
                   ),
                 ),
               ),
-                
+
               SizedBox(height: 16),
-                
+
               // Toggle Login/Register
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -191,7 +193,7 @@ class _AuthDialogState extends State<AuthDialog> {
                   ),
                 ],
               ),
-                
+
               // Forgot Password (hanya saat login)
               if (isLogin) ...[
                 SizedBox(height: 8),
@@ -258,14 +260,23 @@ class _AuthDialogState extends State<AuthDialog> {
       });
 
       if (success) {
-        authService.refreshUser(); 
+        final user = Supabase.instance.client.auth.currentUser;
+        final email = user?.email;
+
+        if (email != null) {
+          await Get.find<AddressController>().fetchAddresses();
+          await Get.find<CartService>().loadCartFromSupabase(email);
+          await Get.find<CheckoutService>().loadOrderHistoryFromSupabase(email);
+        }
+        Get.back();
+        authService.refreshUser();
         // final cartService = Get.find<CartService>();
         //   cartService.infoUser.add(info);
         //   await cartService.saveAddressToSupabase(info);
 
-          final addressController = Get.find<AddressController>();
-          await addressController.fetchAddresses(); // Buat method ini untuk update state user misalnya
-        Get.back();
+        final addressController = Get.find<AddressController>();
+        await addressController.fetchAddresses(); // Buat method ini untuk update state user misalnya
+        Navigator.of(context).pop();
       }
     }
   }
@@ -311,8 +322,9 @@ class _AuthDialogState extends State<AuthDialog> {
   void _showForgotPassword() {
     final resetEmailController = TextEditingController();
 
-    Get.dialog(
-      AlertDialog(
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
         title: Text('Reset Password'),
         content: TextField(
           controller: resetEmailController,
@@ -322,14 +334,14 @@ class _AuthDialogState extends State<AuthDialog> {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Get.back(), child: Text('Batal')),
+          TextButton(onPressed: () => Navigator.of(context).pop(), child: Text('Batal')),
           ElevatedButton(
             onPressed: () async {
               if (resetEmailController.text.trim().isNotEmpty) {
                 await authService.resetPassword(
                   resetEmailController.text.trim(),
                 );
-                Get.back();
+                Navigator.of(context).pop();
               }
             },
             child: Text('Kirim'),
