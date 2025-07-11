@@ -117,79 +117,87 @@ REST_FRAMEWORK = {
 }
 
 # DJANGO JAZZMIN CONFIGURATION
+# settings.py - Simple Jazzmin Configuration
+
+# settings.py - Simple Jazzmin Configuration
+
 JAZZMIN_SETTINGS = {
+    # Basic site info
     "site_title": "Store Admin",
-    "site_header": "E-commerce Backend Administration",
-    "site_brand": "Your Store",
-    "welcome_sign": "Welcome to E-commerce Backend",
-    "copyright": "Your Company Ltd",
-    "search_model": [
-        "auth.User", 
-        "products.Contact",
-        "products.OrderItem",
-        "products.SupabaseProduct",
-        "products.UserOrder",
-    ],
+    "site_header": "Store Management",
+    "site_brand": "Store Admin",
+    "welcome_sign": "Welcome to Store Management",
+    "copyright": "Store Management 2024",
+    
+    # Simple navigation
     "topmenu_links": [
-        {"name": "Dashboard", "url": "admin:index", "permissions": ["auth.view_user"]},
-        {"name": "Orders", "url": "admin:products_userorder_changelist"},
+        {"name": "Home", "url": "admin:index"},
+        {"name": "Sellers", "url": "admin:products_seller_changelist"},
         {"name": "Products", "url": "admin:products_supabaseproduct_changelist"},
-        {"name": "View Store", "url": "/", "new_window": True},
-        {"model": "auth.User"},
+        {"name": "Orders", "url": "admin:products_orderhistory_changelist"},
+        {"name": "Contacts", "url": "admin:products_contact_changelist"},
     ],
+    
+    # Search
+    "search_model": ["products.SupabaseProduct", "products.Seller"],
+    
+    # Clean sidebar
     "show_sidebar": True,
     "navigation_expanded": True,
+    
+    # Simple icons
     "icons": {
-        "products": "fas fa-store",
-        "auth": "fas fa-users-cog",
-        "products.Contact": "fas fa-address-book",
-        "products.OrderItem": "fas fa-list-ul", 
-        "products.SupabaseProduct": "fas fa-box",
-        "products.UserOrder": "fas fa-receipt",
-        "auth.User": "fas fa-user",
+        "auth": "fas fa-users",
+        "auth.user": "fas fa-user",
         "auth.Group": "fas fa-users",
+        "products": "fas fa-store",
+        "products.SupabaseProduct": "fas fa-box",
+        "products.Seller": "fas fa-store",
+        "products.OrderHistory": "fas fa-shopping-cart",
+        "products.Contact": "fas fa-envelope",
     },
-    "order_with_respect_to": [
-        "products",
-        "auth",
-    ],
-    "custom_css": None,
-    "custom_js": None,
-    "use_google_fonts_cdn": True,
-    "show_ui_builder": False,
+    
+    # Clean form layout
     "changeform_format": "horizontal_tabs",
-    "language_chooser": False,
+    "related_modal_active": False,
 }
 
 JAZZMIN_UI_TWEAKS = {
+    # Clean color scheme - soft colors
     "navbar_small_text": False,
     "footer_small_text": False,
     "body_small_text": False,
     "brand_small_text": False,
-    "brand_colour": "navbar-primary",
+    "brand_colour": "navbar-white",
     "accent": "accent-primary",
-    "navbar": "navbar-dark",
+    "navbar": "navbar-white navbar-light",  # Clean white navbar
     "no_navbar_border": False,
     "navbar_fixed": False,
     "layout_boxed": False,
     "footer_fixed": False,
-    "sidebar_fixed": False,
-    "sidebar": "sidebar-dark-primary",
+    "sidebar_fixed": True,
+    "sidebar": "sidebar-light-primary",  # Light sidebar, easy on eyes
     "sidebar_nav_small_text": False,
-    "sidebar_disable_expand": False,
+    "sidebar_disable_expand": False,  # Allow expand/collapse
     "sidebar_nav_child_indent": False,
-    "sidebar_nav_compact_style": False,
+    "sidebar_nav_compact_style": True,  # Compact style - lebih kecil
     "sidebar_nav_legacy_style": False,
-    "sidebar_nav_flat_style": False,
-    "theme": "flatly",
-    "dark_mode_theme": "darkly",
+    "sidebar_nav_flat_style": True,  # Flat, clean style
+    
+    # Use default theme (clean & readable)
+    "theme": "default",
+    "dark_mode_theme": None,
+    
+    # Simple button styling
     "button_classes": {
-        "primary": "btn-primary",
-        "secondary": "btn-secondary", 
-        "info": "btn-info",
-        "warning": "btn-warning",
-        "danger": "btn-danger",
-        "success": "btn-success"
+        "primary": "btn-outline-primary",
+        "secondary": "btn-outline-secondary", 
+        "info": "btn-outline-info",
+        "warning": "btn-outline-warning",
+        "danger": "btn-outline-danger",
+        "success": "btn-outline-success"
     },
-    "actions_sticky_top": False,
 }
+
+# Optional: Very minimal custom CSS
+JAZZMIN_SETTINGS["custom_css"] = "admin/css/simple_admin.css"

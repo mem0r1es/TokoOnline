@@ -1,4 +1,4 @@
-# products/models.py - Updated for order_history table structure
+# products/models.py - Updated with Seller model
 import uuid
 import json
 from django.db import models
@@ -6,7 +6,70 @@ from django.utils import timezone
 from django.core.validators import MinValueValidator
 from decimal import Decimal
 
-# === EXISTING SUPABASE PRODUCT MODEL (unchanged) ===
+# === NEW SELLER MODEL ===
+
+class Seller(models.Model):
+    """Seller/Store model"""
+    id = models.UUIDField(
+        primary_key=True, 
+        default=uuid.uuid4, 
+        editable=False
+    )
+    store_name = models.CharField(
+        max_length=255,
+        help_text="Nama toko"
+    )
+    owner_name = models.CharField(
+        max_length=255,
+        help_text="Nama pemilik toko"
+    )
+    email = models.EmailField(
+        help_text="Email kontak toko"
+    )
+    phone = models.CharField(
+        max_length=20, 
+        blank=True, 
+        null=True,
+        help_text="Nomor telepon"
+    )
+    address = models.TextField(
+        blank=True, 
+        null=True,
+        help_text="Alamat toko"
+    )
+    description = models.TextField(
+        blank=True, 
+        null=True,
+        help_text="Deskripsi toko"
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Apakah toko masih aktif"
+    )
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return self.store_name
+    
+    @property
+    def total_products(self):
+        """Jumlah produk yang dijual"""
+        return self.products.filter(is_active=True).count()
+    
+    @property
+    def active_products_count(self):
+        """Jumlah produk aktif"""
+        return self.products.filter(is_active=True).count()
+    
+    class Meta:
+        db_table = 'sellers'
+        managed = True
+        verbose_name = "Seller"
+        verbose_name_plural = "Sellers"
+        ordering = ['store_name']
+
+# === UPDATED SUPABASE PRODUCT MODEL ===
 
 class SupabaseProduct(models.Model):
     """Main products table yang dipakai Flutter app"""
@@ -25,8 +88,24 @@ class SupabaseProduct(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
     
+    # TAMBAHAN: Foreign key ke Seller
+    seller = models.ForeignKey(
+        Seller, 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True,
+        related_name='products',
+        help_text="Toko yang menjual produk ini",
+        db_column='seller_id'  # Map to seller_id column in Supabase
+    )
+    
     def __str__(self):
         return self.name
+    
+    @property
+    def seller_name(self):
+        """Safe seller name display"""
+        return self.seller.store_name if self.seller else "No Seller"
     
     class Meta:
         db_table = 'products'
@@ -35,7 +114,7 @@ class SupabaseProduct(models.Model):
         verbose_name_plural = "Products"
         ordering = ['-created_at']
 
-# === NEW ORDER HISTORY MODEL (matches Supabase structure) ===
+# === ORDER HISTORY MODEL (unchanged) ===
 
 class OrderHistory(models.Model):
     """Order history table - matches Supabase order_history structure exactly"""
@@ -198,7 +277,7 @@ class OrderHistory(models.Model):
             qty = quantities[i] if i < len(quantities) else "1"
             summary.append(f"{item} ({qty})")
         
-        if len(items) > 3:
+        if len(items) > 3: 
             summary.append(f"... +{len(items) - 3} more items")
         
         return ", ".join(summary)

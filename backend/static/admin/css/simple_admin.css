@@ -1,0 +1,223 @@
+/* static/admin/css/simple_admin.css - Auto-Expand Sidebar on Hover */
+
+/* Clean, soft color scheme */
+:root {
+  --soft-blue: #6b73ff;
+  --soft-green: #00d4aa;
+  --soft-gray: #f8f9fa;
+  --text-dark: #2d3748;
+  --border-light: #e2e8f0;
+}
+
+/* Auto-collapsible sidebar - DEFAULT COLLAPSED */
+.main-sidebar {
+  width: 60px !important; /* Default collapsed */
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+/* HOVER TO EXPAND */
+.main-sidebar:hover {
+  width: 250px !important; /* Expand on hover */
+  overflow: visible;
+}
+
+/* Hide text by default, show on hover */
+.main-sidebar .nav-link p {
+  opacity: 0;
+  transition: opacity 0.3s ease 0.1s; /* Delay sedikit */
+}
+
+.main-sidebar:hover .nav-link p {
+  opacity: 1;
+}
+
+/* Icon centering when collapsed */
+.nav-link {
+  text-align: center;
+  padding: 0.75rem 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.main-sidebar:hover .nav-link {
+  text-align: left;
+  padding: 0.75rem 1rem;
+}
+
+/* Content area always full width */
+.content-wrapper {
+  margin-left: 60px !important; /* Always account for collapsed sidebar */
+}
+
+/* Hide hamburger menu completely */
+.navbar-nav .nav-link[data-widget="pushmenu"] {
+  display: none !important;
+}
+
+/* Brand area adjustments */
+.brand-link {
+  padding: 0.8125rem 0.5rem;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.main-sidebar:hover .brand-link {
+  padding: 0.8125rem 1rem;
+}
+
+.brand-text {
+  opacity: 0;
+  transition: opacity 0.3s ease 0.1s;
+}
+
+.main-sidebar:hover .brand-text {
+  opacity: 1;
+}
+
+/* Mobile behavior - keep simple */
+@media (max-width: 991px) {
+  .main-sidebar {
+    width: 250px !important;
+    transform: translateX(-250px);
+  }
+
+  .main-sidebar:hover {
+    transform: translateX(0);
+    z-index: 1050;
+  }
+
+  .content-wrapper {
+    margin-left: 0 !important;
+  }
+
+  /* Show hamburger on mobile only */
+  .navbar-nav .nav-link[data-widget="pushmenu"] {
+    display: block !important;
+  }
+}
+
+/* Subtle improvements to cards */
+.card {
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.card-header {
+  background: var(--soft-gray);
+  border-bottom: 1px solid var(--border-light);
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+/* Clean button styling */
+.btn {
+  border-radius: 6px;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+}
+
+.btn-primary,
+.btn-outline-primary:hover {
+  background: var(--soft-blue);
+  border-color: var(--soft-blue);
+}
+
+.btn-success,
+.btn-outline-success:hover {
+  background: var(--soft-green);
+  border-color: var(--soft-green);
+}
+
+/* Clean table styling */
+.table thead th {
+  background: var(--soft-gray);
+  border-bottom: 2px solid var(--border-light);
+  font-weight: 600;
+  color: var(--text-dark);
+  font-size: 0.9rem;
+}
+
+.table tbody tr:hover {
+  background: rgba(107, 115, 255, 0.04);
+}
+
+/* Clean form inputs */
+.form-control {
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+}
+
+.form-control:focus {
+  border-color: var(--soft-blue);
+  box-shadow: 0 0 0 2px rgba(107, 115, 255, 0.1);
+}
+
+/* Subtle sidebar improvements */
+.sidebar-light-primary .nav-link {
+  color: var(--text-dark);
+  border-radius: 6px;
+  margin: 2px 4px;
+}
+
+.sidebar-light-primary .nav-link:hover {
+  background: rgba(107, 115, 255, 0.08);
+}
+
+.sidebar-light-primary .nav-link.active {
+  background: var(--soft-blue);
+  color: white;
+}
+
+/* Clean breadcrumbs */
+.breadcrumb {
+  background: none;
+  padding: 0.75rem 0;
+}
+
+.breadcrumb-item a {
+  color: var(--soft-blue);
+  text-decoration: none;
+}
+
+/* Subtle alerts */
+.alert {
+  border-radius: 6px;
+  border: none;
+}
+
+.alert-info {
+  background: rgba(107, 115, 255, 0.08);
+  color: var(--text-dark);
+}
+
+.alert-success {
+  background: rgba(0, 212, 170, 0.08);
+  color: var(--text-dark);
+}
+
+/* Clean search bar */
+.navbar-search-block .form-control {
+  border-radius: 20px;
+  border: 1px solid var(--border-light);
+}
+
+/* Enhanced responsive adjustments */
+@media (max-width: 768px) {
+  .card {
+    margin: 0.5rem 0;
+  }
+
+  .btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Smooth transitions */
+.btn,
+.form-control,
+.nav-link {
+  transition: all 0.2s ease !important;
+}
