@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_web/controllers/address_controller.dart';
 // import 'package:flutter_web/controller/auth_controller.dart';
 import 'package:flutter_web/controllers/auth_controller.dart';
+import 'package:flutter_web/controllers/checkout_controller.dart';
 import 'package:flutter_web/models/cart_item.dart';
 import 'package:flutter_web/models/info_user.dart';
 // import 'package:flutter_web/controller/cart_controller.dart';
@@ -18,14 +19,9 @@ import 'package:google_fonts/google_fonts.dart';
 // import '../../controller/page_controller.dart'; 
 // import '../../controller/cart_controller.dart';
 
-class CheckoutPage extends StatefulWidget {
-  const CheckoutPage({super.key});
+class CheckoutPage extends GetView<CheckoutController> {
+  CheckoutPage({super.key});
 
-  @override
-  State<CheckoutPage> createState() => _CheckoutPageState();
-}
-
-class _CheckoutPageState extends State<CheckoutPage> {
   // final CartController cartController = Get.find<CartController>();
   final CartService cartService = Get.find<CartService>();
   // final _firstNameController = TextEditingController();
@@ -37,9 +33,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
   // final userId = AuthService.getUserId();
 
 
-  String? _selectedAddressId;
-  InfoUser? _selectedAddressUser;
-  String? _selectedPayment = 'Direct bank transfer';
+  // String? _selectedAddressId;
+  // InfoUser? _selectedAddressUser;
+  // String? _selectedPayment = 'Direct bank transfer';
 
 //   @override
 //   void initState() {
@@ -59,7 +55,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
           IconButton(
             icon: const Icon(Icons.history),
             onPressed: () {
-              Get.to(() => ProductInfoPage()); // Pindah ke halaman order history
+              Get.toNamed(ProductInfoPage.TAG);// Pindah ke halaman order history
             },
           ),
         ],
@@ -81,7 +77,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     const SizedBox(width: 10),
                     ElevatedButton(
                       onPressed: () {
-                        Get.to(() => AddressPage());  // Kalau mau tambah/ganti alamat ➔ buka halaman AddressPage
+                        // AddressPage.TAG;
+                        Get.toNamed(AddressPage.TAG);
+                        // Get.to(() => AddressPage());  // Kalau mau tambah/ganti alamat ➔ buka halaman AddressPage
                       },
                       child: Text("Manage Addresses"),
                     ),
@@ -89,14 +87,16 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 ),
                   const SizedBox(height: 10),
                   SingleChildScrollView(
-                    child: AddressListWidget(
-                      selectedAddressId: _selectedAddressId,
+                    child: Obx( () => AddressListWidget(
+                      selectedAddressId: controller.selectedAddressId.value,
                       onAddressSelected: (id) {
-                        setState(() {
-                          _selectedAddressId = id;
-                          _selectedAddressUser = Get.find<AddressController>().addresses.firstWhereOrNull((a) => a.id == id);
-                        });
+                        // setState(() {
+                          controller.selectedAddressId.value = id!;
+                          controller.selectedAddressUser.value = Get.find<AddressController>().addresses.firstWhereOrNull((a) => a.id == id);
+                        // }
+                        // );
                       },
+                    ),
                     ),
                   ),
               ],
@@ -161,21 +161,21 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       final checkoutService = Get.find<CheckoutService>();
                       // final userId = authService.getUserId() ?? '';
                       final userEmail = authController.getUserEmail() ?? '';
-                      if (_selectedAddressUser == null) {
+                      if (controller.selectedAddressUser.value == null) {
                         Get.snackbar("Error", "Please select an address first.");
                         return;
                       }
                       final order = OrderHistoryItem(
                         timestamp: DateTime.now(),
                         items: List<CartItem>.from(cartService.cartItems),
-                        infoUser: [_selectedAddressUser!], // Menggunakan alamat yang dipilih
-                        paymentMethod: _selectedPayment ?? 'Cash on Delivery',
+                        infoUser: [controller.selectedAddressUser.value!], // Menggunakan alamat yang dipilih
+                        paymentMethod: controller.selectedPayment.value,
                       );
                       cartService.orderHistory.add(order);
-                      await checkoutService.saveOrderToSupabase(order, _selectedPayment!);
+                      await checkoutService.saveOrderToSupabase(order, controller.selectedPayment.value);
                       await Get.find<CartService>().clearCartFromSupabase(userEmail);
                       cartService.clearCart();
-                      Get.to(() => ProductInfoPage());
+                      Get.toNamed(ProductInfoPage.TAG);
                     },
 
                     style: ElevatedButton.styleFrom(
@@ -244,18 +244,20 @@ class _CheckoutPageState extends State<CheckoutPage> {
   }
 
   Widget _radioOption(String label) {
-    return Row(
+    return Obx(() => Row(
       children: [
         Radio <String>(
           value: label, 
-          groupValue: _selectedPayment, 
-          onChanged: (String? value) {
-            setState(() {
-              _selectedPayment = value;
-            });
+          groupValue: controller.selectedPayment.value, 
+          onChanged: (value) {
+            // setState(() {
+              // _selectedPayment = value;
+              if (value != null) controller.selectedPayment.value = value;
+            // });
           }),
         Text(label, style: GoogleFonts.poppins(fontSize: 14)),
       ],
+    ),
     );
   }
 

@@ -5,6 +5,7 @@ import 'contact_page.dart';
 // import 'package:get/get.dart';
 
 class ContactPage1 extends StatelessWidget {
+  static final String TAG = '/contact';
   const ContactPage1({super.key});
 
   @override

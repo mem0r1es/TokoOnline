@@ -30,4 +30,17 @@ class CartItem {
         imageUrl: json['imageUrl'],
         quantity: json['quantity'],
       );
+
+  factory CartItem.fromDatabase(String name, int quantity) {
+  return CartItem(
+    id: '',            // Kalau tidak ada ID-nya, diisi kosong
+    name: name.trim(),
+    price: 0.0,        // Harga belum diketahui
+    imageUrl: '',      // Kosong juga
+    quantity: quantity,
+  );
+}
+
+
+  String toDatabaseString() => '$name x $quantity';
 }

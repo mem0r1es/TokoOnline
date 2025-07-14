@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web/controllers/scroll_controller.dart';
+import 'package:get/get.dart';
 // import 'package:flutter_web/services/product_service.dart';
 // import 'package:flutter_web/widgets/billing.dart';
 import '../../widgets/header_bar.dart';
@@ -9,20 +11,18 @@ import '../contact/contact_page.dart';
 // import '../widgets/billing.dart';// Pastikan path ini sesuai dengan struktur proyek And
 // import 'package:get/get.dart';
 
-class DashboardPage extends StatefulWidget {
-  
-  const DashboardPage({super.key});
+class HomePage extends GetView<CustomScrollController> {
+  static final String TAG = '/';
 
-  @override
-  State<DashboardPage> createState() => _DashboardPageState();
-}
+  const HomePage({super.key});
 
-class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
+      // final scrollController = Get.find<CustomScrollController>().getController('home_scroll');
     return Scaffold(
       backgroundColor: Colors.white,
       body: ListView(
+        controller: controller.scrollController,
         children: [
           const HeaderPages(),
           const Isi(),

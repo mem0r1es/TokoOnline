@@ -5,6 +5,7 @@ import 'package:flutter_web/controllers/auth_controller.dart';
 import 'package:flutter_web/controllers/product_controller.dart';
 import 'package:flutter_web/models/cart_item.dart';
 import 'package:flutter_web/pages/auth/auth_dialog.dart';
+import 'package:flutter_web/pages/shop/product_dialog.dart';
 import 'package:flutter_web/services/cart_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
@@ -15,6 +16,7 @@ import '../../models/product_model.dart';
 class SearchResultPage extends StatelessWidget {
   final String query;
   final List<Product> results;
+  static final String TAG = '/searchresult';
 
   SearchResultPage({super.key, required this.query, required this.results});
   // final favC = Get.find<FavoriteController>();
@@ -69,9 +71,9 @@ class SearchResultPage extends StatelessWidget {
                 ],
               ),
             ),
-
+      
             const SizedBox(height: 20),
-
+      
             // Search results
             Expanded(
               child: results.isEmpty
@@ -153,224 +155,239 @@ class SearchResultPage extends StatelessWidget {
   
     return SizedBox(
       width: 280,
-      child: Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        color: Color(0xFFF8F4FF),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Product Image
-            Container(
-              width: double.infinity,
-              height: 200,
-              padding: const EdgeInsets.all(12),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: _buildProductImage(product),
+      child: GestureDetector(
+        onTap: (){
+          Get.toNamed('${ProductDialog.TAG}?id=${product.id}');
+          // Get.to(ProductDialog(product: product));
+          // Get.toNamed('/product', arguments: product);
+        },
+        child: Card(
+          elevation: 4,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          color: Color(0xFFF8F4FF),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Product Image
+              Container(
+                width: double.infinity,
+                height: 200,
+                padding: const EdgeInsets.all(12),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: _buildProductImage(product),
+                ),
               ),
-            ),
-
-            // Product Info
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Product Name
-                  Text(
-                    product.title,
-                    style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  // Product Description
-                  Text(
-                    product.description,
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.grey[600],
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // Price and Category
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Rp ${_formatPrice(product.price)}',
-                            style: GoogleFonts.poppins(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.green[600],
-                            ),
-                          ),
-                          if (product.category != null) ...[
-                            SizedBox(height: 4),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.blue[100],
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                product.category!,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  color: Colors.blue[700],
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ],
+        
+              // Product Info
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Product Name
+                    Text(
+                      product.title,
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
                       ),
-
-                      // Stock info
-                      Obx(() {
-                        final updatedProduct = productController.getProductById(product.id ?? product.title);
-
-                        final stock = updatedProduct?.stock ?? 0;
-                        final stockColor = stock > 0 ? Colors.green[600] : Colors.red[600];
-
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+        
+                    const SizedBox(height: 8),
+                    Text(
+                      product.storeName ?? '',
+                      style: GoogleFonts.poppins(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    // const SizedBox(height: 8),
+        
+                    // Product Description
+                    // Text(
+                    //   product.description,
+                    //   style: GoogleFonts.poppins(
+                    //     fontSize: 14,
+                    //     fontWeight: FontWeight.w400,
+                    //     color: Colors.grey[600],
+                    //   ),
+                    //   maxLines: 2,
+                    //   overflow: TextOverflow.ellipsis,
+                    // ),
+        
+                    const SizedBox(height: 12),
+        
+                    // Price and Category
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Stock',
+                              'Rp ${_formatPrice(product.price)}',
                               style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                color: Colors.grey[600],
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.green[600],
                               ),
                             ),
-                            Text(
-                              '$stock',
-                              style: GoogleFonts.poppins(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: stockColor,
-                              ),
-                            ),
+                            // if (product.category != null) ...[
+                            //   SizedBox(height: 4),
+                            //   Container(
+                            //     padding: EdgeInsets.symmetric(
+                            //       horizontal: 8,
+                            //       vertical: 2,
+                            //     ),
+                            //     decoration: BoxDecoration(
+                            //       color: Colors.blue[100],
+                            //       borderRadius: BorderRadius.circular(12),
+                            //     ),
+                            //     child: Text(
+                            //       product.category!,
+                            //       style: GoogleFonts.poppins(
+                            //         fontSize: 12,
+                            //         color: Colors.blue[700],
+                            //         fontWeight: FontWeight.w500,
+                            //       ),
+                            //     ),
+                            //   ),
+                            // ],
                           ],
-                        );
-                      }),
-                    ],
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Action Buttons
-                  Row(
-                    children: [
-                      // Add to Cart Button
-                      Expanded(
-                        flex: 3,
-                        child: Obx(() {
-                          final cartItem = cartService.getItem(productId);
-
-                          if (cartItem != null) {
-                            // Sudah ada di cart ➔ Tampilkan tombol + -
-                            return Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  onPressed: () => cartService.decreaseQuantity(productId),
-                                  icon: Icon(Icons.remove_circle_outline),
-                                  constraints: BoxConstraints(minWidth: 24, minHeight: 24),
-                                ),
-                                Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.grey[300]!),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    '${cartItem.quantity}',
-                                    style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600),
-                                  ),
-                                ),
-                                IconButton(
-                                  onPressed: () => cartService.increaseQuantity(productId),
-                                  icon: Icon(Icons.add_circle_outline),
-                                  constraints: BoxConstraints(minWidth: 24, minHeight: 24),
-                                ),
-                              ],
-                            );
-                          } else {
-                            // Belum ada di cart ➔ Tampilkan tombol Add Cart
-                            return ElevatedButton.icon(
-                              onPressed: () => _handleAddToCart(product, productId, cartService, authController),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.black,
-                                foregroundColor: Colors.white,
-                                padding: EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                              ),
-                              icon: Icon(Icons.shopping_cart_outlined, size: 18),
-                              label: Text(
-                                'Add Cart',
-                                style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600),
-                              ),
-                            );
-                          }
-                        }),
-                      ),
-
-
-                      SizedBox(width: 8),
-
-                      // Favorite Button
-                      Obx(
-                        () => Container(
-                          decoration: BoxDecoration(
-                            color: favC.isFavorite(product)
-                                ? Colors.red[50]
-                                : Colors.grey[100],
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: favC.isFavorite(product)
-                                  ? Colors.red
-                                  : Colors.grey[300]!,
-                            ),
-                          ),
-                          child: IconButton(
-                            onPressed: () => _handleFavorite(product),
-                            icon: Icon(
-                              favC.isFavorite(product)
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
-                              color: favC.isFavorite(product)
-                                  ? Colors.red
-                                  : Colors.grey[600],
-                              size: 20,
-                            ),
-                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+        
+                        // Stock info
+                        // Obx(() {
+                        //   final updatedProduct = productController.getProductById(product.id ?? product.title);
+        
+                        //   final stock = updatedProduct?.stock ?? 0;
+                        //   final stockColor = stock > 0 ? Colors.green[600] : Colors.red[600];
+        
+                        //   return Column(
+                        //     crossAxisAlignment: CrossAxisAlignment.end,
+                        //     children: [
+                        //       Text(
+                        //         'Stock',
+                        //         style: GoogleFonts.poppins(
+                        //           fontSize: 12,
+                        //           color: Colors.grey[600],
+                        //         ),
+                        //       ),
+                        //       Text(
+                        //         '$stock',
+                        //         style: GoogleFonts.poppins(
+                        //           fontSize: 14,
+                        //           fontWeight: FontWeight.w600,
+                        //           color: stockColor,
+                        //         ),
+                        //       ),
+                        //     ],
+                        //   );
+                        // }),
+                      ],
+                    ),
+        
+                    const SizedBox(height: 16),
+        
+                    // Action Buttons
+                    // Row(
+                    //   children: [
+                    //     // Add to Cart Button
+                    //     Expanded(
+                    //       flex: 3,
+                    //       child: Obx(() {
+                    //         final cartItem = cartService.getItem(productId);
+        
+                    //         if (cartItem != null) {
+                    //           // Sudah ada di cart ➔ Tampilkan tombol + -
+                    //           return Row(
+                    //             mainAxisAlignment: MainAxisAlignment.center,
+                    //             mainAxisSize: MainAxisSize.min,
+                    //             children: [
+                    //               IconButton(
+                    //                 onPressed: () => cartService.decreaseQuantity(productId),
+                    //                 icon: Icon(Icons.remove_circle_outline),
+                    //                 constraints: BoxConstraints(minWidth: 24, minHeight: 24),
+                    //               ),
+                    //               Container(
+                    //                 padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    //                 decoration: BoxDecoration(
+                    //                   border: Border.all(color: Colors.grey[300]!),
+                    //                   borderRadius: BorderRadius.circular(4),
+                    //                 ),
+                    //                 child: Text(
+                    //                   '${cartItem.quantity}',
+                    //                   style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600),
+                    //                 ),
+                    //               ),
+                    //               IconButton(
+                    //                 onPressed: () => cartService.increaseQuantity(productId),
+                    //                 icon: Icon(Icons.add_circle_outline),
+                    //                 constraints: BoxConstraints(minWidth: 24, minHeight: 24),
+                    //               ),
+                    //             ],
+                    //           );
+                    //         } else {
+                    //           // Belum ada di cart ➔ Tampilkan tombol Add Cart
+                    //           return ElevatedButton.icon(
+                    //             onPressed: () => _handleAddToCart(product, productId, cartService, authController),
+                    //             style: ElevatedButton.styleFrom(
+                    //               backgroundColor: Colors.black,
+                    //               foregroundColor: Colors.white,
+                    //               padding: EdgeInsets.symmetric(vertical: 12),
+                    //               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    //             ),
+                    //             icon: Icon(Icons.shopping_cart_outlined, size: 18),
+                    //             label: Text(
+                    //               'Add Cart',
+                    //               style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600),
+                    //             ),
+                    //           );
+                    //         }
+                    //       }),
+                    //     ),
+        
+        
+                    //     SizedBox(width: 8),
+        
+                    //     // Favorite Button
+                    //     Obx(
+                    //       () => Container(
+                    //         decoration: BoxDecoration(
+                    //           color: favC.isFavorite(product)
+                    //               ? Colors.red[50]
+                    //               : Colors.grey[100],
+                    //           borderRadius: BorderRadius.circular(8),
+                    //           border: Border.all(
+                    //             color: favC.isFavorite(product)
+                    //                 ? Colors.red
+                    //                 : Colors.grey[300]!,
+                    //           ),
+                    //         ),
+                    //         child: IconButton(
+                    //           onPressed: () => _handleFavorite(product),
+                    //           icon: Icon(
+                    //             favC.isFavorite(product)
+                    //                 ? Icons.favorite
+                    //                 : Icons.favorite_border,
+                    //             color: favC.isFavorite(product)
+                    //                 ? Colors.red
+                    //                 : Colors.grey[600],
+                    //             size: 20,
+                    //           ),
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -501,6 +518,15 @@ class SearchResultPage extends StatelessWidget {
       ),
     );
   }
+
+  factory SearchResultPage.fromArguments() {
+  final args = Get.arguments as Map<String, dynamic>;
+
+  return SearchResultPage(
+    query: args['query'] ?? '',
+    results: args['results'] ?? [],
+  );
+}
 
   String _formatPrice(int price) {
     return price.toString().replaceAllMapped(

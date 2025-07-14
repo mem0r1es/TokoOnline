@@ -15,6 +15,12 @@ class AddressService {
       'email': userEmail,  // biar pasti nyambung ke akun yang login
       'phone': address.phone,
       'address': address.address,
+      'provinsi':address.provinsi,
+      'kota':address.kota,
+      'kecamatan':address.kecamatan,
+      'kode_pos':address.kodepos,
+      'detail':address.detail,
+
       'is_active': true,
       // 'created_at': DateTime.now().toIso8601String(),
     };

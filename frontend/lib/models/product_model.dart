@@ -8,6 +8,8 @@ class Product {
   int? stock;
   final bool? isActive;
   final DateTime? createdAt;
+  final String? sellerId;
+  final String? storeName;
 
   // For backward compatibility with old cart system
   int quantity;
@@ -23,6 +25,8 @@ class Product {
     this.stock,
     this.isActive,
     this.createdAt,
+    required this.sellerId,
+    this.storeName,
     this.quantity = 1, // Default quantity
   });
 
@@ -40,6 +44,8 @@ class Product {
       createdAt: data['created_at'] != null
           ? DateTime.parse(data['created_at'])
           : null,
+      sellerId: data['seller_id']?['id'] ?? data['seller_id'],
+      storeName: data['seller_id']?['store_name'],
       quantity: 1,
     );
   }
@@ -54,6 +60,8 @@ class Product {
       'category': category,
       'stock': stock,
       'is_active': isActive ?? true,
+      'seller_id': sellerId,
+      'storeName' : storeName,
     };
   }
 
@@ -69,6 +77,8 @@ class Product {
       'stock': stock,
       'quantity': quantity,
       'subtotal': subtotal,
+      'seller_id': sellerId,
+      'storeName' : storeName,
     };
   }
 
@@ -94,6 +104,8 @@ class Product {
       stock: stock ?? this.stock,
       isActive: isActive ?? this.isActive,
       createdAt: createdAt,
+      sellerId: sellerId ?? this.sellerId,
+      storeName: storeName ?? this.storeName,
       quantity: quantity ?? this.quantity,
     );
   }

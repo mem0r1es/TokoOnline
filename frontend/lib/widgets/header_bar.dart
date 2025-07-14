@@ -4,6 +4,7 @@ import 'package:flutter_web/controllers/auth_controller.dart';
 import 'package:flutter_web/controllers/cart_controller.dart';
 import 'package:flutter_web/controllers/favorite_controller.dart';
 import 'package:flutter_web/controllers/product_controller.dart';
+import 'package:flutter_web/services/scroll_controller_manager.dart';
 // import 'package:flutter_web/controllers/favorite_controller.dart';
 import 'package:flutter_web/pages/about/about_page.dart';
 import 'package:flutter_web/pages/contact/contact.dart';
@@ -14,7 +15,7 @@ import 'package:flutter_web/services/checkout_service.dart';
 import 'package:flutter_web/services/product_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
-import '../pages/dashboard/dashboard.dart';
+import '../pages/homepage/home_page.dart';
 import '../pages/shop/shops.dart';
 import '../pages/shoppingcart/shopping_cart.dart';
 import '../pages/about/about.dart';
@@ -26,25 +27,20 @@ import '../pages/auth/auth_dialog.dart';
 // import '../controller/product_controller.dart';
 import '../models/product_model.dart';
 
-class HeaderPages extends StatelessWidget {
+class HeaderPages extends GetView<ScrollControllerManager> {
   const HeaderPages({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Initialize ALL services and controller required (GUARANTEED TO WORK)
-    final AuthController authController = Get.put(AuthController());
-    final CartService cartService = Get.put(CartService());
-    final ProductService productService = Get.put(ProductService());
-    final AddressController addressController = Get.put(AddressController());
-    final CheckoutService checkoutService = Get.put(CheckoutService());
-    final CartController cartController = Get.put(CartController());
-    // final CheckoutService checkoutService = Get.put(CheckoutService());
-    // final FavoriteController favC = Get.put(FavoriteController());
-    // final ProductController productController = Get.put(ProductController());
+    final AuthController authController = Get.find();
+    final CartService cartService = Get.find();
+    final ProductService productService = Get.find();
+    final AddressController addressController = Get.find();
+    final CheckoutService checkoutService = Get.find();
+    final CartController cartController = Get.find();
 
     return Container(
       width: double.infinity,
-      height: 100,
       color: const Color(0xFFFFFFFF),
       padding: const EdgeInsets.symmetric(horizontal: 54, vertical: 29),
       child: Row(
@@ -72,13 +68,13 @@ class HeaderPages extends StatelessWidget {
           // Menu Navigasi
           Row(
             children: [
-              _navItem('Home', () => Get.to(const DashboardPage())),
+              _navItem('Home', () => Get.toNamed(HomePage.TAG)),
               const SizedBox(width: 20),
-              _navItem('Shop', () => Get.to(const ShopsPage())),
+              _navItem('Shop', () => Get.toNamed(ShopsPage.TAG)),
               const SizedBox(width: 20),
-              _navItem('About', () => Get.to(const AboutPage1())),
+              _navItem('About', () => Get.toNamed(AboutPage1.TAG)),
               const SizedBox(width: 20),
-              _navItem('Contact', () => Get.to(const ContactPage1())),
+              _navItem('Contact', () => Get.toNamed(ContactPage1.TAG)),
             ],
           ),
           // Icon Section
@@ -93,7 +89,7 @@ class HeaderPages extends StatelessWidget {
               const SizedBox(width: 10),
 
               // Favorite icon
-              _iconBtn(Icons.favorite_border, () => Get.to(FavoritePage())),
+              _iconBtn(Icons.favorite_border, () => Get.toNamed(FavoritePage.TAG)),
               const SizedBox(width: 10),
 
               // Cart icon dengan badge
@@ -186,7 +182,8 @@ class HeaderPages extends StatelessWidget {
               icon: Icons.person,
               title: 'Profile',
               onTap: () {
-                Get.to(()=> ProfilePage());
+                Get.toNamed(ProfilePage.TAG);
+                // Get.to(()=> ProfilePage());
                 // Get.snackbar('Info', 'Profile page coming soon!');
               },
             ),
@@ -195,7 +192,8 @@ class HeaderPages extends StatelessWidget {
               icon: Icons.shopping_bag,
               title: 'My Orders',
               onTap: () {
-                Get.to(()=> ProductInfoPage());
+                Get.toNamed(ProductInfoPage.TAG);
+                // Get.to(()=> ProductInfoPage());
                 // Get.snackbar('Info', 'Orders page coming soon!');
               },
             ),
@@ -263,7 +261,7 @@ class HeaderPages extends StatelessWidget {
     if (authService.isLoggedIn.value) {
       // User is logged in, go to cart
       if (cartService.isNotEmpty) {
-        Get.to(const ShoppingCart());
+        Get.toNamed(ShoppingCart.TAG);
       } else {
         // Cart is empty
         Get.dialog(
@@ -296,7 +294,7 @@ class HeaderPages extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   Get.back();
-                  Get.to(const ShopsPage());
+                  Get.to(ShopsPage());
                 },
                 child: Text('Shop Now'),
               ),
@@ -428,7 +426,13 @@ class HeaderPages extends StatelessWidget {
       }
 
       if (searchResults.isNotEmpty) {
-        Get.to(() => SearchResultPage(query: query, results: searchResults));
+        Get.toNamed(
+          SearchResultPage.TAG,
+          arguments: {
+            'query': query,
+            'results':searchResults,
+          }
+          );
       } else {
         Get.dialog(
           AlertDialog(

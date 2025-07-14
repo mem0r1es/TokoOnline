@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:get/get_connect/http/src/utils/utils.dart';
 
 class ProfilePage extends StatelessWidget {
+  static final String TAG = '/profile';
   const ProfilePage({super.key});
 
   @override
@@ -49,9 +50,7 @@ class ProfilePage extends StatelessWidget {
               trailing: const Icon(Icons.arrow_forward_ios, color: Colors.black),
               onTap: () {
                 // Aksi ketika alamat saya ditekan
-                Get.to(
-                  () => AddressPage(),
-                );
+                Get.toNamed(AddressPage.TAG);
               },
             ),
           ],

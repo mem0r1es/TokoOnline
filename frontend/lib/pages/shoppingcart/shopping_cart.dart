@@ -6,6 +6,7 @@ import '../../widgets/header_bar.dart';
 import 'cart.dart';
 
 class ShoppingCart extends StatelessWidget {
+  static const TAG = '/shoppingcart';
   const ShoppingCart({super.key});
 
   @override

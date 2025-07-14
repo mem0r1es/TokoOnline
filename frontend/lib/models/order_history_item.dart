@@ -4,7 +4,7 @@ import 'info_user.dart';
 class OrderHistoryItem {
   final DateTime timestamp;
   final List<CartItem> items;
-  final List<InfoUser> infoUser;  // Kamu sudah pakai list
+  final List<InfoUser> infoUser;
   final String paymentMethod;
 
   OrderHistoryItem({
@@ -13,5 +13,6 @@ class OrderHistoryItem {
     required this.infoUser,
     required this.paymentMethod,
   });
+  
 }
 

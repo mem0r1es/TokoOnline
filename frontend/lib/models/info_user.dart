@@ -4,7 +4,12 @@ class InfoUser {
   final String? email;
   final String? phone;
   final String? address;
-  final DateTime? timestamp; // Uncomment if you want to track when the address was added
+  final String? provinsi;
+  final String? kota;
+  final String? kecamatan;
+  final String? kodepos;
+  final String? detail;
+  final DateTime? timestamp;
 
   InfoUser({
     this.id,
@@ -12,29 +17,67 @@ class InfoUser {
     this.email,
     this.phone,
     this.address,
+    this.provinsi,
+    this.kota,
+    this.kodepos,
+    this.kecamatan,
+    this.detail,
     this.timestamp,
   });
 
-  factory InfoUser.fromDatabase(Map<String, dynamic> data) {
-    return InfoUser(
-      id: data['id']?.toString(),
-      fullName: data['full_name'] as String?,
-      email: data['email'] as String?,
-      phone: data['phone'] as String?,
-      address: data['address'] as String?,
-      timestamp: data['timestamp'] != null ? DateTime.tryParse(data['timestamp']) : null,
-    );
-  }
+  factory InfoUser.fromJson(Map<String, dynamic> json) => InfoUser(
+        id: json['id']?.toString(),
+        fullName: json['full_name'],
+        email: json['email'],
+        phone: json['phone'],
+        address: json['address'],
+        provinsi: json['provinsi'],
+        kota: json['kota'],
+        kodepos: json['kode_pos'],
+        kecamatan: json['kecamatan'],
+        detail: json['detail'],
+        timestamp: json['timestamp'] != null ? DateTime.tryParse(json['timestamp']) : null,
+      );
 
-  Map<String, dynamic> toDatabase() {
-    return {
-      'full_name': fullName,
-      'email': email,
-      'phone': phone,
-      'address': address,
-      'timestamp': timestamp?.toIso8601String(), // Uncomment if you want to save timestamp
-      'is_active': true,
-      // 'created_at': DateTime.now().toIso8601String(),
-    };
-  }
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'full_name': fullName,
+        'email': email,
+        'phone': phone,
+        'address': address,
+        'provinsi': provinsi,
+        'kota': kota,
+        'kode_pos': kodepos,
+        'kecamatan': kecamatan,
+        'detail': detail,
+        'timestamp': timestamp?.toIso8601String(),
+      };
+
+  factory InfoUser.fromDatabase(Map<String, dynamic> data) => InfoUser(
+        id: data['id']?.toString(),
+        fullName: data['full_name'],
+        email: data['email'],
+        phone: data['phone'],
+        address: data['address'],
+        provinsi: data['provinsi'],
+        kota: data['kota'],
+        kodepos: data['kode_pos'],
+        kecamatan: data['kecamatan'],
+        detail: data['detail'],
+        timestamp: data['timestamp'] != null ? DateTime.tryParse(data['timestamp']) : null,
+      );
+
+  Map<String, dynamic> toDatabase() => {
+        'full_name': fullName,
+        'email': email,
+        'phone': phone,
+        'address': address,
+        'provinsi': provinsi,
+        'kota': kota,
+        'kode_pos': kodepos,
+        'kecamatan': kecamatan,
+        'detail': detail,
+        'timestamp': timestamp?.toIso8601String(),
+        'is_active': true,
+      };
 }

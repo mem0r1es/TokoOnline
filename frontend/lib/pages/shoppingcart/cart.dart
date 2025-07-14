@@ -9,14 +9,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 // import '../../controller/cart_controller.dart';
 import 'checkout_page.dart';
 
-class CartPages extends StatefulWidget {
+class CartPages extends StatelessWidget {
   const CartPages({super.key});
 
-  @override
-  State<CartPages> createState() => _CartPagesState();
-}
-
-class _CartPagesState extends State<CartPages> {
   @override
   Widget build(BuildContext context) {
     // Gunakan CartService yang baru
@@ -89,6 +84,7 @@ class _CartPagesState extends State<CartPages> {
                   itemCount: cartService.cartItems.length,
                   itemBuilder: (_, i) {
                     final item = cartService.cartItems[i];
+                    
                     return Padding(
                       padding: const EdgeInsets.symmetric(
                         vertical: 10,
