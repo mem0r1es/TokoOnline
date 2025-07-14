@@ -1,47 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web/controllers/scroll_controller.dart';
+import 'package:flutter_web/controllers/shops_scroll.dart';
 import 'package:get/get.dart';
 import '../../widgets/header_bar.dart';
+// import '../widgets/isi.dart' ;// Pastikan path ini sesuai dengan struktur proyek And
 import 'our_product.dart';
-import 'package:flutter_web/controllers/scroll_controller_manager.dart'; 
-class ShopsPage extends StatefulWidget {
+// import 'package:get/get.dart';
+
+class ShopsPage extends GetView<ShopsScrollController> {
+  static final String TAG = '/shop';
   const ShopsPage({super.key});
+  // final scrollController = Get.find<CustomScrollController>().getController('unique_scroll_key');
 
-  @override
-  State<ShopsPage> createState() => _ShopsPageState();
-}
-
-class _ShopsPageState extends State<ShopsPage> {
-  final String scrollKey = 'shops_scroll'; 
-  late ScrollController _scrollController;
-  late ScrollControllerManager scrollManager; 
-
-  @override
-  void initState() {
-    super.initState();
-    scrollManager = Get.find<ScrollControllerManager>();
-    _scrollController = ScrollController(
-      initialScrollOffset: scrollManager.getOffset(scrollKey),
-    );
-    _scrollController.addListener(() {
-      scrollManager.saveOffset(scrollKey, _scrollController.offset);
-    });
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: ListView(
-        controller: _scrollController, 
+        controller: controller.scrollController,
         children: [
           const HeaderPages(),
-          const OurProduct(),
+          OurProduct(),
+          
 
           // Tambahkan bagian lainnya seperti Our Products di sini
           // const SizedBox(height: 40),
