@@ -1,8 +1,8 @@
-// Final Revised CheckoutPage with preserved commented code and fixed body layout
 import 'package:flutter/material.dart';
 import 'package:flutter_web/controllers/address_controller.dart';
 // import 'package:flutter_web/controller/auth_controller.dart';
 import 'package:flutter_web/controllers/auth_controller.dart';
+import 'package:flutter_web/controllers/checkout_controller.dart';
 import 'package:flutter_web/models/cart_item.dart';
 import 'package:flutter_web/models/info_user.dart';
 // import 'package:flutter_web/controller/cart_controller.dart';
@@ -19,14 +19,9 @@ import 'package:google_fonts/google_fonts.dart';
 // import '../../controller/page_controller.dart'; 
 // import '../../controller/cart_controller.dart';
 
-class CheckoutPage extends StatefulWidget {
-  const CheckoutPage({super.key});
+class CheckoutPage extends GetView<CheckoutController> {
+  CheckoutPage({super.key});
 
-  @override
-  State<CheckoutPage> createState() => _CheckoutPageState();
-}
-
-class _CheckoutPageState extends State<CheckoutPage> {
   // final CartController cartController = Get.find<CartController>();
   final CartService cartService = Get.find<CartService>();
   // final _firstNameController = TextEditingController();
@@ -37,9 +32,17 @@ class _CheckoutPageState extends State<CheckoutPage> {
   // final authController = Get.find<AuthController>();
   // final userId = AuthService.getUserId();
 
-  String? _selectedAddressId;
-  InfoUser? _selectedAddressUser;
-  String? _selectedPayment = 'Direct bank transfer';
+
+  // String? _selectedAddressId;
+  // InfoUser? _selectedAddressUser;
+  // String? _selectedPayment = 'Direct bank transfer';
+
+//   @override
+//   void initState() {
+//   super.initState();
+//   // final userEmail = authController.getUserEmail()?? '';
+//   _emailController.text = authController.getUserEmail() ?? '';
+// }
 
   @override
   Widget build(BuildContext context) {
@@ -52,129 +55,174 @@ class _CheckoutPageState extends State<CheckoutPage> {
           IconButton(
             icon: const Icon(Icons.history),
             onPressed: () {
-              Get.to(() => ProductInfoPage()); // Pindah ke halaman order history
+              Get.toNamed(ProductInfoPage.TAG);// Pindah ke halaman order history
             },
           ),
         ],
       ),
-      body: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // LEFT: Shipping Address and Manage Addresses
-          Expanded(
-            flex: 1,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 20, top : 8, bottom: 8),
-              child: Column(
+    body: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // LEFT: Shipping Address and Manage Addresses
+        Expanded(
+          flex: 1,
+          child: Padding(
+            padding: const EdgeInsets.only(left: 20, top : 8, bottom: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    _title("Shipping Address"),
+                    const SizedBox(width: 10),
+                    ElevatedButton(
+                      onPressed: () {
+                        // AddressPage.TAG;
+                        Get.toNamed(AddressPage.TAG);
+                        // Get.to(() => AddressPage());  // Kalau mau tambah/ganti alamat ➔ buka halaman AddressPage
+                      },
+                      child: Text("Manage Addresses"),
+                    ),
+                  ],
+                ),
+                  const SizedBox(height: 10),
+                  SingleChildScrollView(
+                    child: Obx( () => AddressListWidget(
+                      selectedAddressId: controller.selectedAddressId.value,
+                      onAddressSelected: (id) {
+                        // setState(() {
+                          controller.selectedAddressId.value = id!;
+                          controller.selectedAddressUser.value = Get.find<AddressController>().addresses.firstWhereOrNull((a) => a.id == id);
+                        // }
+                        // );
+                      },
+                    ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+            // TAMPILKAN ALAMAT
+          // const SizedBox(height: 10),
+          // ElevatedButton(
+          //   onPressed: () {
+          //     Get.to(() => AddressPage());  // Kalau mau tambah/ganti alamat ➔ buka halaman AddressPage
+          //   },
+          //   child: Text("Manage Addresses"),
+          // ),
+        // RIGHT: Cart Summary
+        Expanded(
+          flex: 1,
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Obx(() {
+              // final total = cartC.cartItems.fold(0, (sum, item) => sum + item.subtotal);
+              return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      _title("Shipping Address"),
-                      const SizedBox(width: 10),
-                      ElevatedButton(
-                        onPressed: () {
-                          Get.to(() => AddressPage());  // Kalau mau tambah/ganti alamat ➔ buka halaman AddressPage
-                        },
-                        child: Text("Manage Addresses"),
-                      ),
-                    ],
-                  ),
+                  _title("Product"),
                   const SizedBox(height: 10),
-                  Expanded(
-                    child: AddressListWidget(
-                      selectedAddressId: _selectedAddressId,
-                      onAddressSelected: (id) {
-                        setState(() {
-                          _selectedAddressId = id;
-                          _selectedAddressUser = Get.find<AddressController>().addresses.firstWhereOrNull((a) => a.id == id);
-                        });
-                      },
-                    ),
+
+                  // Produk dalam cart
+                  ...cartService.cartItems.map((item) => _orderRow(
+                        '${item.name} × ${item.quantity}',
+                        'Rp ${_rupiah(item.totalPrice)}',
+                      )),
+
+                  const Divider(),
+                  _orderRow("Subtotal", 'Rp ${_rupiah(cartService.totalPrice)}'),
+                  const SizedBox(height: 8),
+                  _orderRow(
+                    "Total",
+                    'Rp ${_rupiah(cartService.totalPrice)}',
+                    isBold: true,
+                    color: Colors.orange[800],
                   ),
+                  const SizedBox(height: 20),
+                  _title("Payment"),
+                  const SizedBox(height: 10),
+                  _radioOption("Direct bank transfer"),
+                  _radioOption("Cash on delivery"),
+                  const SizedBox(height: 10),
+                  Text(
+                    "Your personal data will be used to support your experience...",
+                    style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final authController = Get.find<AuthController>();
+                      final cartService = Get.find<CartService>();
+                      final checkoutService = Get.find<CheckoutService>();
+                      // final userId = authService.getUserId() ?? '';
+                      final userEmail = authController.getUserEmail() ?? '';
+                      if (controller.selectedAddressUser.value == null) {
+                        Get.snackbar("Error", "Please select an address first.");
+                        return;
+                      }
+                      final order = OrderHistoryItem(
+                        timestamp: DateTime.now(),
+                        items: List<CartItem>.from(cartService.cartItems),
+                        infoUser: [controller.selectedAddressUser.value!], // Menggunakan alamat yang dipilih
+                        paymentMethod: controller.selectedPayment.value,
+                      );
+                      cartService.orderHistory.add(order);
+                      await checkoutService.saveOrderToSupabase(order, controller.selectedPayment.value);
+                      await Get.find<CartService>().clearCartFromSupabase(userEmail);
+                      cartService.clearCart();
+                      Get.toNamed(ProductInfoPage.TAG);
+                    },
+
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                    ),
+                    child: Text("Place Order", style: GoogleFonts.poppins(fontSize: 16)),
+                  )
                 ],
-              ),
-            ),
+              );
+            }),
           ),
-          // RIGHT: Cart Summary
-          Expanded(
-            flex: 1,
-            child: Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Obx(() {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _title("Product"),
-                    const SizedBox(height: 10),
-                    ...cartService.cartItems.map((item) => _orderRow(
-                          '${item.name} × ${item.quantity}',
-                          'Rp ${_rupiah(item.totalPrice)}',
-                        )),
-                    const Divider(),
-                    _orderRow("Subtotal", 'Rp ${_rupiah(cartService.totalPrice)}'),
-                    const SizedBox(height: 8),
-                    _orderRow(
-                      "Total",
-                      'Rp ${_rupiah(cartService.totalPrice)}',
-                      isBold: true,
-                      color: Colors.orange[800],
-                    ),
-                    const SizedBox(height: 20),
-                    _title("Payment"),
-                    const SizedBox(height: 10),
-                    _radioOption("Direct bank transfer"),
-                    _radioOption("Cash on delivery"),
-                    const SizedBox(height: 10),
-                    Text(
-                      "Your personal data will be used to support your experience...",
-                      style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () async {
-                        Get.find<AuthController>();
-                        final checkoutService = Get.find<CheckoutService>();
-                        if (_selectedAddressUser == null) {
-                          Get.snackbar("Error", "Please select an address first.");
-                          return;
-                        }
-                        final order = OrderHistoryItem(
-                          timestamp: DateTime.now(),
-                          items: List<CartItem>.from(cartService.cartItems),
-                          infoUser: [_selectedAddressUser!],
-                          paymentMethod: _selectedPayment ?? 'Cash on Delivery',
-                        );
-                        cartService.orderHistory.add(order);
-                        await checkoutService.saveOrderToSupabase(order, _selectedPayment!);
-                        await cartService.clearCartFromSupabase('userEmail');
-                        cartService.clearCart();
-                        Get.to(() => ProductInfoPage());
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-                      ),
-                      child: Text("Place Order", style: GoogleFonts.poppins(fontSize: 16)),
-                    )
-                  ],
-                );
-              }),
-            ),
-          ),
-        ],
-      ),
-    );
+        ),
+      ],
+    ),
+  );
   }
 
   Widget _title(String text) => Text(
         text,
         style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w600),
       );
+
+  // Widget _formInput(String label, {TextEditingController? controller, bool readOnly = false}) => Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Text(label, style: GoogleFonts.poppins(fontSize: 14)),
+  //         const SizedBox(height: 8),
+  //         TextFormField(
+  //           controller: controller,
+  //           readOnly: readOnly,
+  //           decoration: InputDecoration(
+  //             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+  //             fillColor: readOnly ? Colors.grey[200] : Colors.white,
+  //             filled: true,
+  //           ),
+  //         ),
+  //       ],
+  //     );
+
+  // Widget _formRow(String leftLabel, String rightLabel) => Row(
+  //       children: [
+  //         Expanded(child: _formInput(leftLabel, controller: _firstNameController)),
+  //         const SizedBox(width: 16),
+  //         Expanded(child: _formInput(rightLabel, controller: _lastNameController)),
+  //       ],
+  //     );
 
   Widget _orderRow(String label, String value, {bool isBold = false, Color? color}) {
     return Padding(
@@ -196,19 +244,20 @@ class _CheckoutPageState extends State<CheckoutPage> {
   }
 
   Widget _radioOption(String label) {
-    return Row(
+    return Obx(() => Row(
       children: [
-        Radio<String>(
-          value: label,
-          groupValue: _selectedPayment,
-          onChanged: (String? value) {
-            setState(() {
-              _selectedPayment = value;
-            });
-          },
-        ),
+        Radio <String>(
+          value: label, 
+          groupValue: controller.selectedPayment.value, 
+          onChanged: (value) {
+            // setState(() {
+              // _selectedPayment = value;
+              if (value != null) controller.selectedPayment.value = value;
+            // });
+          }),
         Text(label, style: GoogleFonts.poppins(fontSize: 14)),
       ],
+    ),
     );
   }
 
@@ -220,4 +269,5 @@ class _CheckoutPageState extends State<CheckoutPage> {
           (m) => '${m[1]}.',
         );
   }
+
 }
