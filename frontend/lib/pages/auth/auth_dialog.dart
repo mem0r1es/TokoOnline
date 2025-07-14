@@ -17,7 +17,7 @@ class AuthDialog extends StatefulWidget {
 
 class _AuthDialogState extends State<AuthDialog> {
   final AuthService authService = Get.find<AuthService>();
-
+  
   bool isLogin = true; // true = login, false = register
   bool isLoading = false;
 
@@ -48,7 +48,7 @@ class _AuthDialogState extends State<AuthDialog> {
                 ),
               ),
               SizedBox(height: 20),
-
+                
               // Form
               if (!isLogin) ...[
                 _buildTextField(
@@ -58,7 +58,7 @@ class _AuthDialogState extends State<AuthDialog> {
                 ),
                 SizedBox(height: 16),
               ],
-
+                
               _buildTextField(
                 controller: emailController,
                 label: 'Email',
@@ -66,7 +66,7 @@ class _AuthDialogState extends State<AuthDialog> {
                 keyboardType: TextInputType.emailAddress,
               ),
               SizedBox(height: 16),
-
+                
               _buildTextField(
                 controller: passwordController,
                 label: 'Password',
@@ -83,7 +83,7 @@ class _AuthDialogState extends State<AuthDialog> {
                 ),
                 SizedBox(height: 16),
               ],
-
+                
               // Submit Button
               SizedBox(
                 width: double.infinity,
@@ -108,9 +108,9 @@ class _AuthDialogState extends State<AuthDialog> {
                         ),
                 ),
               ),
-
+                
               SizedBox(height: 16),
-
+                
               // Divider
               Row(
                 children: [
@@ -122,9 +122,9 @@ class _AuthDialogState extends State<AuthDialog> {
                   Expanded(child: Divider()),
                 ],
               ),
-
+                
               SizedBox(height: 16),
-
+                
               // Google Sign In Button
               SizedBox(
                 width: double.infinity,
@@ -136,15 +136,15 @@ class _AuthDialogState extends State<AuthDialog> {
                           setState(() {
                             isLoading = true;
                           });
-
+                
                           bool success = await authService.signInWithGoogle();
-
+                
                           setState(() {
                             isLoading = false;
                           });
-
+                
                           if (success) {
-                            Navigator.of(context).pop();
+                            Get.back();
                           }
                         },
                   icon: Icon(Icons.login, color: Colors.red),
@@ -164,9 +164,9 @@ class _AuthDialogState extends State<AuthDialog> {
                   ),
                 ),
               ),
-
+                
               SizedBox(height: 16),
-
+                
               // Toggle Login/Register
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -193,7 +193,7 @@ class _AuthDialogState extends State<AuthDialog> {
                   ),
                 ],
               ),
-
+                
               // Forgot Password (hanya saat login)
               if (isLogin) ...[
                 SizedBox(height: 8),
@@ -269,14 +269,6 @@ class _AuthDialogState extends State<AuthDialog> {
           await Get.find<CheckoutService>().loadOrderHistoryFromSupabase(email);
         }
         Get.back();
-        authService.refreshUser();
-        // final cartService = Get.find<CartService>();
-        //   cartService.infoUser.add(info);
-        //   await cartService.saveAddressToSupabase(info);
-
-        final addressController = Get.find<AddressController>();
-        await addressController.fetchAddresses(); // Buat method ini untuk update state user misalnya
-        Navigator.of(context).pop();
       }
     }
   }
@@ -322,9 +314,8 @@ class _AuthDialogState extends State<AuthDialog> {
   void _showForgotPassword() {
     final resetEmailController = TextEditingController();
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
+    Get.dialog(
+      AlertDialog(
         title: Text('Reset Password'),
         content: TextField(
           controller: resetEmailController,
@@ -334,14 +325,14 @@ class _AuthDialogState extends State<AuthDialog> {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(), child: Text('Batal')),
+          TextButton(onPressed: () => Get.back(), child: Text('Batal')),
           ElevatedButton(
             onPressed: () async {
               if (resetEmailController.text.trim().isNotEmpty) {
                 await authService.resetPassword(
                   resetEmailController.text.trim(),
                 );
-                Navigator.of(context).pop();
+                Get.back();
               }
             },
             child: Text('Kirim'),
