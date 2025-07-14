@@ -1,21 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web/services/general_service.dart';
 import 'package:google_fonts/google_fonts.dart'; 
-//import 'package:get/get.dart';
-import 'package:go_router/go_router.dart';
+import 'package:get/get.dart';
+import '../shop/shops.dart';
 
-class Isi extends StatelessWidget {
+class Isi extends GetView<GeneralService> {
   const Isi({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Image.asset(
-        'background1.png',
-        width: 1440,
-        height: 900,
-        fit: BoxFit.cover,
-      ),
+      //   Image.asset(
+      //   'background1.png',
+      //   width: 1440,
+      //   height: 900,
+      //   fit: BoxFit.cover,
+      // ),
+      Obx(() {
+        // final url = Get.find<GeneralService>().backgroundUrl.value;
+        final url = controller.backgroundUrl.value;
+        if (url.isEmpty) {
+          // fallback sementara: warna background atau gambar lokal
+          return Container(
+            width: 1440,
+            height: 900,
+            color: Colors.grey[200],
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+        return Image.network(
+          url,
+          width: 1440,
+          height: 900,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              width: 1440,
+              height: 900,
+              color: Colors.red[100],
+              child: Center(child: Text("Gagal load gambar")),
+            );
+          },
+        );
+      }),
+
     Padding(
       padding: const EdgeInsets.only(left:50, right: 58, top: 100),
       // mainAxisAlignment= MainAxisAlignment.end,
@@ -56,7 +85,7 @@ class Isi extends StatelessWidget {
                   margin: const EdgeInsets.only(top: 20),
                   child: ElevatedButton(
                     onPressed: () {
-                      context.go('/shop');
+                      Get.to(() => ShopsPage());
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF000000),
