@@ -10,19 +10,14 @@ class AuthController extends GetxController {
 
   @override
   void onInit() {
-    print('🟢 AuthController initialized');
-
     super.onInit();
     _checkInitialSession();
     Supabase.instance.client.auth.onAuthStateChange.listen((event) {
-          print('🔁 Auth state changed: ${event.event}');
       final session = event.session;
       if (session != null) {
-              print('✅ Session ditemukan: ${session.user.email}');
         isLoggedIn.value = true;
         currentUser.value = session.user;
       } else {
-              print('⚠️ Session null / logout');
         isLoggedIn.value = false;
         currentUser.value = null;
       }
