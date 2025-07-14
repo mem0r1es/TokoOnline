@@ -1,13 +1,14 @@
-// our_product.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_web/controllers/auth_controller.dart';
 import 'package:flutter_web/controllers/favorite_controller.dart';
 import 'package:flutter_web/controllers/product_controller.dart';
 import 'package:flutter_web/models/cart_item.dart';
 import 'package:flutter_web/pages/auth/auth_dialog.dart';
+import 'package:flutter_web/pages/history/history.dart';
+import 'package:flutter_web/pages/profile/profile_page.dart';
+import 'package:flutter_web/pages/shop/product_dialog.dart';
 import 'package:flutter_web/services/cart_service.dart';
-import 'package:flutter_web/controllers/scroll_controller_manager.dart'; 
+import 'package:get_storage/get_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 // import '../../controller/cart_controller.dart';
@@ -17,176 +18,144 @@ import 'package:get/get.dart';
 import '../../models/product_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class OurProduct extends StatefulWidget {
-  const OurProduct({super.key});
+class OurProduct extends GetView<ProductController> {
+  OurProduct({super.key});
 
-  @override
-  State<OurProduct> createState() => _OurProductState();
-}
-
-class _OurProductState extends State<OurProduct> {
   final FavoriteController favC = Get.put(FavoriteController());
+  final cartService = Get.find<CartService>();
+  final authController= Get.find<AuthController>();
+
   // final favC = Get.find<FavoriteController>();
-  // final productController = Get.find<ProductController>();
-  final productController = Get.put(ProductController());
-  final scrollKey = 'our_product_scroll'; // ✅ scroll key unik
-  late ScrollController _scrollController;
-  late ScrollControllerManager scrollManager;
+  // final ProductController productController = Get.put(ProductController());
 
+  // final favC = Get.find<FavoriteController>();
   @override
-  void initState() {
-    super.initState();
-    scrollManager = Get.find<ScrollControllerManager>();
-    _scrollController = ScrollController(
-      initialScrollOffset: scrollManager.getOffset(scrollKey),
-    );
-    _scrollController.addListener(() {
-      scrollManager.saveOffset(scrollKey, _scrollController.offset);
-    });
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }  // final favC = Get.find<FavoriteController>();
-  // final productController = Get.find<ProductController>();
-
-
-  @override
-  Widget build(BuildContext context) {
-    final cartService = Get.find<CartService>();
-    final authController = Get.find<AuthController>();
-
-    return SingleChildScrollView(
-      controller: _scrollController,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 50),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Header
-            Text(
-              'Our Products',
-              style: GoogleFonts.poppins(
-                fontSize: 40,
-                fontWeight: FontWeight.w700,
-              ),
+  Widget build(BuildContext context) { 
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 50),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Header
+          Text(
+            'Our Products',
+            style: GoogleFonts.poppins(
+              fontSize: 40,
+              fontWeight: FontWeight.w700,
             ),
-
-            const SizedBox(height: 10),
-
-            // Products Grid
-            Obx(() {
-              if (productController.isLoading.value) {
-                return SizedBox(
-                  height: 300,
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircularProgressIndicator(
-                          strokeWidth: 3,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
-                        ),
-                        SizedBox(height: 20),
-                        Text(
-                          'Loading products from database...',
-                          style: GoogleFonts.poppins(
-                            fontSize: 16,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }
-
-              if (productController.products.isEmpty) {
-                return SizedBox(
-                  height: 300,
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.inventory_2_outlined,
-                          size: 80,
-                          color: Colors.grey[400],
-                        ),
-                        SizedBox(height: 20),
-                        Text(
-                          'No products available',
-                          style: GoogleFonts.poppins(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        SizedBox(height: 10),
-                        Text(
-                          'Database might be empty or connection failed',
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            color: Colors.grey[500],
-                          ),
-                        ),
-                        SizedBox(height: 20),
-                        ElevatedButton.icon(
-                          onPressed: () => productController.refreshProducts(),
-                          icon: Icon(Icons.refresh),
-                          label: Text('Try Again'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.black,
-                            foregroundColor: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }
-
-              return Column(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(bottom: 20),
-                    child: Text(
-                      'Showing ${productController.products.length} products',
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        color: Colors.grey[600],
+          ),
+      
+          const SizedBox(height: 10),
+      
+          // Products Grid
+          Obx(() {
+            if (controller.isLoading.value) {
+              return SizedBox(
+                height: 300,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(
+                        strokeWidth: 3,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
                       ),
-                    ),
+                      SizedBox(height: 20),
+                      Text(
+                        'Loading products from database...',
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Wrap(
-                      spacing: 20,
-                      runSpacing: 20,
-                      alignment: WrapAlignment.center,
-                      children: productController.products
-                          .map(
-                            (product) => _productCard(
-                              product,
-                              cartService,
-                              authController,
-                            ),
-                          )
-                          .toList(),
-                    ),
-                  ),
-                ],
+                ),
               );
-            }),
-          ],
-        ),
+            }
+      
+            if (controller.products.isEmpty) {
+              return SizedBox(
+                height: 300,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.inventory_2_outlined,
+                        size: 80,
+                        color: Colors.grey[400],
+                      ),
+                      SizedBox(height: 20),
+                      Text(
+                        'No products available',
+                        style: GoogleFonts.poppins(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        'Database might be empty or connection failed',
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: Colors.grey[500],
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      ElevatedButton.icon(
+                        onPressed: () => controller.refreshProducts(),
+                        icon: Icon(Icons.refresh),
+                        label: Text('Try Again'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          foregroundColor: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+      
+            // Products grid
+            return Column(
+              children: [
+                // Products count info
+                Padding(
+                  padding: EdgeInsets.only(bottom: 20),
+                  child: Text(
+                    'Showing ${controller.products.length} products',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ),
+      
+                // Products grid
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Wrap(
+                    spacing: 20,
+                    runSpacing: 20,
+                    alignment: WrapAlignment.center,
+                    children: controller.products
+                        .map(
+                          (product) =>
+                              _productCard(product, cartService, authController),
+                        )
+                        .toList(),
+                  ),
+                ),
+              ],
+            );
+          }),
+        ],
       ),
     );
   }
-
-
 
   Widget _productCard(
     Product product,
@@ -198,239 +167,265 @@ class _OurProductState extends State<OurProduct> {
 
     return SizedBox(
       width: 200,
-      child: Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        color: Color(0xFFF8F4FF),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Product Image
-            Container(
-              width: double.infinity,
-              height: 200,
-              padding: const EdgeInsets.all(12),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: _buildProductImage(product),
+      child: GestureDetector(
+        onTap: (){
+          Get.toNamed('${ProductDialog.TAG}?id=${product.id}');
+          // Get.toNamed(ProductDialog.TAG, arguments: product);
+          // Get.to(ProductDialog(product: product));
+        },
+
+        child: Card(
+          elevation: 4,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          color: Color(0xFFF8F4FF),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Product Image
+              Container(
+                width: double.infinity,
+                height: 200,
+                padding: const EdgeInsets.all(12),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: _buildProductImage(product),
+                ),
               ),
-            ),
+        
+              // Product Info
+              Padding(
+                padding: const EdgeInsets.only(right: 16, left: 16, top: 8, bottom: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Product Name
 
-            // Product Info
-            Padding(
-              padding: const EdgeInsets.only(right: 16, left: 16, top: 8, bottom: 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Product Name
-                  SizedBox(
-                    height: 48,
-                    child: Text(
-                      product.title,
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
+                    SizedBox(
+                      height: 48,
+                      child: Text(
+                        product.title,
+                        style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
 
-                  const SizedBox(height: 8),
-
-                  // Product Description
-                  SizedBox(
-                    height: 48,
-                    child: Text(
-                      product.description,
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.grey[600],
+                    const SizedBox(height: 8),
+                    
+                    SizedBox(
+                      height: 48,
+                      child: Text(
+                        product.storeName ?? '',
+                        style: GoogleFonts.poppins(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // Price and Category
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Rp ${_rupiah(product.price)}',
-                            style: GoogleFonts.poppins(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.green[600],
-                            ),
-                          ),
-                          if (product.category != null) ...[
-                            SizedBox(height: 4),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.blue[100],
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                product.category!,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  color: Colors.blue[700],
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-
-                      // Stock info
-                      Obx(() {
-                        final updatedProduct = productController.getProductById(product.id ?? product.title);
-
-                        final stock = updatedProduct?.stock ?? 0;
-                        final stockColor = stock > 0 ? Colors.green[600] : Colors.red[600];
-
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
+        
+                    
+        
+                    // const SizedBox(height: 8),
+        
+                    // // Product Description
+                    // SizedBox(
+                    //   height: 48,
+                    //   child: Text(
+                    //     product.description,
+                    //     style: GoogleFonts.poppins(
+                    //       fontSize: 14,
+                    //       fontWeight: FontWeight.w400,
+                    //       color: Colors.grey[600],
+                    //     ),
+                    //     maxLines: 2,
+                    //     overflow: TextOverflow.ellipsis,
+                    //   ),
+                    // ),
+        
+                    const SizedBox(height: 12),
+        
+                    // Price and Category
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Stock',
+                              'Rp ${_rupiah(product.price)}',
                               style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                color: Colors.grey[600],
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.green[600],
                               ),
                             ),
-                            Text(
-                              '$stock',
-                              style: GoogleFonts.poppins(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: stockColor,
-                              ),
-                            ),
+                            // if (product.category != null) ...[
+                            //   SizedBox(height: 4),
+                            //   Container(
+                            //     padding: EdgeInsets.symmetric(
+                            //       horizontal: 8,
+                            //       vertical: 2,
+                            //     ),
+                            //     decoration: BoxDecoration(
+                            //       color: Colors.blue[100],
+                            //       borderRadius: BorderRadius.circular(12),
+                            //     ),
+                            //     child: Text(
+                            //       product.category!,
+                            //       style: GoogleFonts.poppins(
+                            //         fontSize: 12,
+                            //         color: Colors.blue[700],
+                            //         fontWeight: FontWeight.w500,
+                            //       ),
+                            //     ),
+                            //   ),
+                            // ],
                           ],
-                        );
-                      }),
-
-                    ],
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Action Buttons
-                  Row(
-                    children: [
-                      // Add to Cart Button
-                      Expanded(
-                        flex: 3,
-                        child: Obx(() {
-                          final cartItem = cartService.getItem(productId);
-
-                          if (cartItem != null) {
-                            // Sudah ada di cart ➔ Tampilkan tombol + -
-                            return Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  onPressed: () => cartService.decreaseQuantity(productId),
-                                  icon: Icon(Icons.remove_circle_outline),
-                                  constraints: BoxConstraints(minWidth: 24, minHeight: 24),
-                                ),
-                                Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.grey[300]!),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    '${cartItem.quantity}',
-                                    style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600),
-                                  ),
-                                ),
-                                IconButton(
-                                  onPressed: () {
-                                    cartService.increaseQuantity(productId);
-
-                                    final user = Supabase.instance.client.auth.currentUser;
-                                    final email = user?.email;
-
-                                    if (email != null) {
-                                      cartService.saveCartToSupabase(email);
-                                    }
-                                  },
-                                  icon: Icon(Icons.add_circle_outline),
-                                  constraints: BoxConstraints(minWidth: 24, minHeight: 24),
-                                ),
-                              ],
-                            );
-                          } else {
-                            // Belum ada di cart ➔ Tampilkan tombol Add Cart
-                            return ElevatedButton.icon(
-                              onPressed: () => _handleAddToCart(product, productId, cartService, authController),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.black,
-                                foregroundColor: Colors.white,
-                                padding: EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                              ),
-                              icon: Icon(Icons.shopping_cart_outlined, size: 18),
-                              label: Text(
-                                'Add Cart',
-                                style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600),
-                              ),
-                            );
-                          }
-                        }),
-                      ),
-
-                      SizedBox(width: 8),
-
-                      // Favorite Button
-                      Obx(
-                        () => Container(
-                          decoration: BoxDecoration(
-                            color: favC.isFavorite(product)
-                                ? Colors.red[50]
-                                : Colors.grey[100],
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: favC.isFavorite(product)
-                                  ? Colors.red
-                                  : Colors.grey[300]!,
-                            ),
-                          ),
-                          child: IconButton(
-                            onPressed: () => _handleFavorite(product),
-                            icon: Icon(
-                              favC.isFavorite(product)
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
-                              color: favC.isFavorite(product)
-                                  ? Colors.red
-                                  : Colors.grey[600],
-                              size: 20,
-                            ),
-                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+        
+                        // Stock info
+                        // Obx(() {
+                        //   final updatedProduct = productController.getProductById(product.id ?? product.title);
+        
+                        //   final stock = updatedProduct?.stock ?? 0;
+                        //   final stockColor = stock > 0 ? Colors.green[600] : Colors.red[600];
+        
+                        //   return Column(
+                        //     crossAxisAlignment: CrossAxisAlignment.end,
+                        //     children: [
+                        //       Text(
+                        //         'Stock',
+                        //         style: GoogleFonts.poppins(
+                        //           fontSize: 12,
+                        //           color: Colors.grey[600],
+                        //         ),
+                        //       ),
+                        //       Text(
+                        //         '$stock',
+                        //         style: GoogleFonts.poppins(
+                        //           fontSize: 14,
+                        //           fontWeight: FontWeight.w600,
+                        //           color: stockColor,
+                        //         ),
+                        //       ),
+                        //     ],
+                        //   );
+                        // }),
+        
+                      ],
+                    ),
+        
+                    const SizedBox(height: 16),
+        
+                    // Action Buttons
+                    // Row(
+                    //   children: [
+                    //     // Add to Cart Button
+                    //     Expanded(
+                    //       flex: 3,
+                    //       child: Obx(() {
+                    //         final cartItem = cartService.getItem(productId);
+        
+                    //         if (cartItem != null) {
+                    //           // Sudah ada di cart ➔ Tampilkan tombol + -
+                    //           return Row(
+                    //             mainAxisAlignment: MainAxisAlignment.center,
+                    //             mainAxisSize: MainAxisSize.min,
+                    //             children: [
+                    //               IconButton(
+                    //                 onPressed: () => cartService.decreaseQuantity(productId),
+                    //                 icon: Icon(Icons.remove_circle_outline),
+                    //                 constraints: BoxConstraints(minWidth: 24, minHeight: 24),
+                    //               ),
+                    //               Container(
+                    //                 padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    //                 decoration: BoxDecoration(
+                    //                   border: Border.all(color: Colors.grey[300]!),
+                    //                   borderRadius: BorderRadius.circular(4),
+                    //                 ),
+                    //                 child: Text(
+                    //                   '${cartItem.quantity}',
+                    //                   style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600),
+                    //                 ),
+                    //               ),
+                    //               IconButton(
+                    //                 onPressed: () {
+                    //                   cartService.increaseQuantity(productId);
+        
+                    //                   final user = Supabase.instance.client.auth.currentUser;
+                    //                   final email = user?.email;
+        
+                    //                   if (email != null) {
+                    //                     cartService.saveCartToSupabase(email);
+                    //                   }
+                    //                 },
+                    //                 icon: Icon(Icons.add_circle_outline),
+                    //                 constraints: BoxConstraints(minWidth: 24, minHeight: 24),
+                    //               ),
+                    //             ],
+                    //           );
+                    //         } else {
+                    //           // Belum ada di cart ➔ Tampilkan tombol Add Cart
+                    //           return ElevatedButton.icon(
+                    //             onPressed: () => _handleAddToCart(product, productId, cartService, authController),
+                    //             style: ElevatedButton.styleFrom(
+                    //               backgroundColor: Colors.black,
+                    //               foregroundColor: Colors.white,
+                    //               padding: EdgeInsets.symmetric(vertical: 12),
+                    //               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    //             ),
+                    //             icon: Icon(Icons.shopping_cart_outlined, size: 18),
+                    //             label: Text(
+                    //               'Add Cart',
+                    //               style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600),
+                    //             ),
+                    //           );
+                    //         }
+                    //       }),
+                    //     ),
+        
+                    //     SizedBox(width: 8),
+        
+                    //     // Favorite Button
+                    //     Obx(
+                    //       () => Container(
+                    //         decoration: BoxDecoration(
+                    //           color: favC.isFavorite(product)
+                    //               ? Colors.red[50]
+                    //               : Colors.grey[100],
+                    //           borderRadius: BorderRadius.circular(8),
+                    //           border: Border.all(
+                    //             color: favC.isFavorite(product)
+                    //                 ? Colors.red
+                    //                 : Colors.grey[300]!,
+                    //           ),
+                    //         ),
+                    //         child: IconButton(
+                    //           onPressed: () => _handleFavorite(product),
+                    //           icon: Icon(
+                    //             favC.isFavorite(product)
+                    //                 ? Icons.favorite
+                    //                 : Icons.favorite_border,
+                    //             color: favC.isFavorite(product)
+                    //                 ? Colors.red
+                    //                 : Colors.grey[600],
+                    //             size: 20,
+                    //           ),
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -533,16 +528,15 @@ class _OurProductState extends State<OurProduct> {
     return;
   }
 
-  cartService.addItem(CartItem(
-    id: productId,
-    name: product.title,
-    price: product.price.toDouble(),
-    imageUrl: product.imagePath,
-  ));
+  // cartService.addItem(CartItem(
+  //   id: productId,
+  //   name: product.title,
+  //   price: product.price.toDouble(),
+  //   imageUrl: product.imagePath,
+  // ));
 
   await cartService.saveCartToSupabase(currentUser.email!);
 }
-
 
   void _handleFavorite(Product product) {
     favC.toggleFavorite(product);
@@ -562,8 +556,6 @@ class _OurProductState extends State<OurProduct> {
       ),
     );
   }
-
-  
 
   String _rupiah(int n) => n.toString().replaceAllMapped(
     RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
