@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 // import 'package:flutter/material.dart';
 import '../models/product_model.dart';
 import '../services/product_service.dart';
+import 'package:collection/collection.dart';
 
 class ProductController extends GetxController {
   final ProductService productService = ProductService();
@@ -19,8 +20,8 @@ class ProductController extends GetxController {
   }
 
   Product? getProductById(String id) {
-    return products.firstWhereOrNull((p) => p.id == id);
-  }
+  return products.firstWhereOrNull((p) => p.id == id);
+}
 
   void decreaseStock(String productId) {
     final index = products.indexWhere((p) => p.id == productId);
@@ -56,7 +57,7 @@ class ProductController extends GetxController {
     isSearching.value = false;
   }
 
-  Future<void> migrateProducts() => productService.migrateStaticProductsToDatabase();
+  // Future<void> migrateProducts() => productService.migrateStaticProductsToDatabase();
 
   Future<void> refreshProducts() async {
     print('🔄 Refreshing products...');
