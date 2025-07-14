@@ -11,13 +11,34 @@
     }
 
     h1 {
+      margin-bottom: 10px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 20px;
+    }
+
+    .top-bar a.btn {
+      padding: 8px 16px;
+      text-decoration: none;
+      color: white;
+      background-color: #2ecc71;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .top-bar a.btn:hover {
+      background-color: #27ae60;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
       background: white;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
     }
 
     th, td {
@@ -37,15 +58,45 @@
       background-color: #3498db;
       border-radius: 4px;
       font-size: 14px;
+      margin-right: 5px;
     }
 
     a.btn:hover {
       background-color: #2980b9;
     }
+
+    .btn-delete {
+      background-color: #e74c3c;
+    }
+
+    .btn-delete:hover {
+      background-color: #c0392b;
+    }
+
+    .back-btn {
+      display: inline-block;
+      margin-bottom: 20px;
+      background-color: #9b59b6;
+      color: white;
+      padding: 8px 16px;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .back-btn:hover {
+      background-color: #8e44ad;
+    }
   </style>
 </head>
 <body>
-  <h1>Produk Saya</h1>
+
+  <a href="{% url 'penjual_dashboard' %}" class="back-btn">← Kembali ke Dashboard</a>
+
+  <div class="top-bar">
+    <h1>Produk Saya</h1>
+    <a href="{% url 'tambah_produk' %}" class="btn">+ Tambah Produk</a>
+  </div>
 
   <table>
     <thead>
@@ -64,7 +115,7 @@
         <td>{{ product.stock }}</td>
         <td>
           <a href="#" class="btn">Edit</a>
-          <a href="#" class="btn" style="background-color: #e74c3c;">Hapus</a>
+          <a href="#" class="btn btn-delete">Hapus</a>
         </td>
       </tr>
       {% empty %}
@@ -74,5 +125,6 @@
       {% endfor %}
     </tbody>
   </table>
+  
 </body>
 </html>

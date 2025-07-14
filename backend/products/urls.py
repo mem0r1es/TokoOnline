@@ -1,5 +1,8 @@
 from django.urls import path
 from . import views
+from django.urls import path
+from . import views
+
 
 urlpatterns = [
     path('', views.get_products, name='get_products'),
@@ -21,4 +24,7 @@ urlpatterns = [
     path('docs/', views.api_docs, name='api_docs'),
     path('category/<str:category>/', views.get_products_by_category, name='get_products_by_category'),
     path('<str:product_id>/', views.get_product_detail, name='get_product_detail'),
+    path('dashboard/', views.analytics_dashboard, name='analytics_dashboard'),
+    path('dashboard/api/', views.dashboard_api, name='dashboard_api'),
+    path('dashboard/quick-stats/', views.quick_stats_api, name='quick_stats_api'),
 ]

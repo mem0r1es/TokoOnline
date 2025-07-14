@@ -2,8 +2,13 @@ import 'package:flutter_web/models/info_user.dart';
 import 'package:flutter_web/models/product_model.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import 'pages/homepage/home_page.dart';
 import 'pages/homepage/isi.dart';
+=======
+import 'pages/dashboard/dashboard.dart';
+import 'pages/dashboard/isi.dart';
+>>>>>>> cd0fd906d99bfacc5179a260dc34a0e300c75bfa
 import 'pages/shop/our_product.dart';
 import 'pages/shop/shops.dart';
 import 'pages/shoppingcart/cart.dart';
@@ -25,7 +30,11 @@ final GoRouter goRouter = GoRouter(
     GoRoute(
       path: '/',
       name: 'dashboard',
+<<<<<<< HEAD
       builder: (context, state) => const HomePage(),
+=======
+      builder: (context, state) => const DashboardPage(),
+>>>>>>> cd0fd906d99bfacc5179a260dc34a0e300c75bfa
     ),
     GoRoute(
       path: '/isi',
@@ -35,7 +44,11 @@ final GoRouter goRouter = GoRouter(
     GoRoute(
       path: '/shop',
       name: 'shop',
+<<<<<<< HEAD
       builder: (context, state) => ShopsPage(),
+=======
+      builder: (context, state) => const ShopsPage(),
+>>>>>>> cd0fd906d99bfacc5179a260dc34a0e300c75bfa
     ),
     GoRoute(
       path: '/our-product',
@@ -50,7 +63,11 @@ final GoRouter goRouter = GoRouter(
     GoRoute(
       path: '/checkout',
       name: 'checkout',
+<<<<<<< HEAD
       builder: (context, state) => CheckoutPage(),
+=======
+      builder: (context, state) => const CheckoutPage(),
+>>>>>>> cd0fd906d99bfacc5179a260dc34a0e300c75bfa
     ),
     GoRoute(
       path: '/shopping-cart',
@@ -116,7 +133,10 @@ final GoRouter goRouter = GoRouter(
       builder: (context, state) => const AuthDialog(),
     ),
 
+<<<<<<< HEAD
     // Fallback Route 404 (opsional)
+=======
+>>>>>>> cd0fd906d99bfacc5179a260dc34a0e300c75bfa
     GoRoute(
       path: '/404',
       name: 'notFound',

@@ -1,20 +1,27 @@
-# api/urls.py - COMPLETE FIXED VERSION
+# api/urls.py - BASIC LAPTOP ONLY VERSION
 from django.contrib import admin
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
 from django.urls import path, include
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-import json
-import hashlib
-import secrets
+
+from supabase import create_client
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
+
+supabase = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 # ── Status endpoint
 def backend_status(request):
     return JsonResponse({
-        "status": "E-commerce Backend Running", 
+        "status": "E-commerce Backend Running",
         "admin_portal": "/admin/",
-        "penjual_portal": "/penjual/",
         "note": "Interactive e-commerce admin system"
     })
 
@@ -50,57 +57,69 @@ def penjual_register(request):
     if request.method == 'GET':
         return HttpResponse(get_penjual_register_html(), content_type='text/html')
     elif request.method == 'POST':
-        # Get form data
         nama_user = request.POST.get('nama_user', '').strip()
         nama_toko = request.POST.get('nama_toko', '').strip()
         email = request.POST.get('email', '').strip().lower()
-        alamat_toko = request.POST.get('alamat_toko', '').strip()
+        alamat_toko = request.POST.get('alamat_toko', '').strip()  # tetap pakai ini dari form
         password = request.POST.get('password', '')
-        
-        # Basic validation
+
         if not all([nama_user, nama_toko, email, alamat_toko, password]):
             error = "Semua field harus diisi"
             return HttpResponse(get_penjual_register_html(error), content_type='text/html')
-        
+
         if len(password) < 6:
             error = "Password minimal 6 karakter"
             return HttpResponse(get_penjual_register_html(error), content_type='text/html')
-        
-        # Hash password
+
         password_hash = hashlib.sha256(password.encode()).hexdigest()
-        
-        # TODO: Save to Supabase
+
         seller_data = {
-            'nama_user': nama_user,
-            'nama_toko': nama_toko,
+            'owner_name': nama_user,
+            'store_name': nama_toko,
             'email': email,
-            'alamat_toko': alamat_toko,
+            'address': alamat_toko,  # ganti dari alamat_toko → address
             'password_hash': password_hash,
         }
-        
-        # Redirect to dashboard with success
+
+        supabase.table('sellers').insert(seller_data).execute()
+
         return redirect(f'/penjual/dashboard/?welcome=true&store={nama_toko}')
+
 
 @csrf_exempt  
 def penjual_login(request):
     """Handle penjual login"""
     if request.method == 'GET':
         return HttpResponse(get_penjual_login_html(), content_type='text/html')
+
     elif request.method == 'POST':
         email = request.POST.get('email', '').strip().lower()
         password = request.POST.get('password', '')
-        
+
         if not all([email, password]):
             error = "Email dan password harus diisi"
             return HttpResponse(get_penjual_login_html(error), content_type='text/html')
-        
-        # TODO: Verify with Supabase
-        # For now, simulate login
-        if email == "test@penjual.com" and password == "password":
-            return redirect('/penjual/dashboard/')
-        else:
-            error = "Email atau password salah"
+
+        # Ambil seller dari Supabase
+        response = supabase.table("sellers").select("*").eq("email", email).execute()
+        sellers = response.data
+
+        if not sellers:
+            error = "Akun tidak ditemukan"
             return HttpResponse(get_penjual_login_html(error), content_type='text/html')
+
+        seller = sellers[0]
+
+        # Bandingkan password yang di-hash
+        input_hash = hashlib.sha256(password.encode()).hexdigest()
+        if input_hash != seller.get("password_hash"):
+            error = "Password salah"
+            return HttpResponse(get_penjual_login_html(error), content_type='text/html')
+
+        # Login berhasil → redirect ke dashboard
+        return redirect(f'/penjual/dashboard/?store={seller.get("nama_toko")}')
+
+
 
 def penjual_google_auth(request):
     """Handle Google OAuth for penjual"""
@@ -913,31 +932,9 @@ def get_interactive_html(error=None):
         .landing-subtitle {{
             color: #bdc3c7;
             font-size: 1.2rem;
-            margin-bottom: 30px;
+            margin-bottom: 50px;
             font-weight: 300;
             letter-spacing: 1px;
-        }}
-
-        .landing-links {{
-            margin-bottom: 40px;
-        }}
-
-        .portal-link {{
-            display: inline-block;
-            margin: 0 15px;
-            padding: 12px 24px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            text-decoration: none;
-            border-radius: 25px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }}
-
-        .portal-link:hover {{
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
         }}
         
         .laptop-container {{
@@ -1363,10 +1360,6 @@ def get_interactive_html(error=None):
         <h1 class="landing-title">Store Admin Portal</h1>
         <p class="landing-subtitle">Professional E-commerce Management</p>
         
-        <div class="landing-links">
-            <a href="/penjual/" class="portal-link">💰 Portal Penjual</a>
-        </div>
-        
         <div class="laptop-container" onclick="showLogin()">
             <div class="laptop">
                 <div class="screen">
@@ -1466,19 +1459,11 @@ def get_interactive_html(error=None):
 
 urlpatterns = [
     # ===============================================
-    # ADMIN PORTAL (LAPTOP INTERFACE)
+    # INTERACTIVE E-COMMERCE ADMIN PORTAL
     # ===============================================
     path('admin/', nuclear_admin_login, name='interactive_admin'),
     path('admin/login/', nuclear_admin_login, name='admin_login_interactive'),
     path('django-admin/', admin.site.urls),  # Django admin backend
-    
-    # ===============================================
-    # PENJUAL PORTAL & AUTHENTICATION
-    # ===============================================
-    path('penjual/', penjual_portal, name='penjual_portal'),
-    path('penjual/register/', penjual_register, name='penjual_register'),
-    path('penjual/login/', penjual_login, name='penjual_login'),
-    path('penjual/google-auth/', penjual_google_auth, name='penjual_google_auth'),
     
     # ===============================================
     # BACKEND STATUS
@@ -1486,7 +1471,7 @@ urlpatterns = [
     path('', backend_status, name='backend_status'),
 
     # ===============================================
-    # PENJUAL APP (Dashboard & Features)
+    # PENJUAL / SELLER PANEL (for future)
     # ===============================================
-    path('penjual/', include('penjual.urls')),  # Penjual dashboard (dashboard/, products/, etc.)
+    path('penjual/', include('penjual.urls')),
 ]
