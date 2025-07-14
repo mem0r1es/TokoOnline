@@ -1,28 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import '../../controllers/address_controller.dart';
+import 'package:flutter_web/extensions/extension.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../models/info_user.dart';
+import '../../pages/profile/add_address.dart';
+import '../../controllers/address_controller.dart';
 
-class AddressPage extends StatefulWidget {
+class AddressPage extends GetView<AddressController> {
+  static final String TAG = '/address';
 
   const AddressPage({super.key});
 
-  @override
-  State<AddressPage> createState() => _AddressPageState();
-}
-
-class _AddressPageState extends State<AddressPage> {
   // final AddressController addressController = Get.put(AddressController());
-  final AddressController addressController = Get.find<AddressController>();
+  // final AddressController addressController = Get.find<AddressController>();
 
+  // String? _selectedAddressId;
 
 //   @override
-//   void initState() {
-//   super.initState();
-//   // final userEmail = authController.getUserEmail()?? '';
-//   _emailController.text = authController.getUserEmail() ?? '';
-// }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,10 +37,10 @@ class _AddressPageState extends State<AddressPage> {
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Obx(() {
-          if (addressController.isLoading.value) {
+          if (controller.isLoading.value) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (addressController.addresses.isEmpty) {
+          if (controller.addresses.isEmpty) {
             return const Center(
               child: Text(
                 "No addresses added yet.",
@@ -55,9 +49,10 @@ class _AddressPageState extends State<AddressPage> {
             );
           }
           return ListView.builder(
-            itemCount: addressController.addresses.length,
+            itemCount: controller.addresses.length,
             itemBuilder: (context, index) {
-              final address = addressController.addresses[index];
+              final address = controller.addresses[index];
+              final addressId = address.id ?? index.toString();
               
               return Card(
                 margin: const EdgeInsets.symmetric(vertical: 8),
@@ -72,36 +67,81 @@ class _AddressPageState extends State<AddressPage> {
                   //     });
                   //   },
                   // ),
-                  title: Row(
+                  title: Column(
                     children: [
-                      Expanded(child: Text(address.fullName ?? '')),
-                      Center(
-                        child: GestureDetector(
-                          onTap: () {
-                            Get.defaultDialog(
-                              title: 'Delete Address?',
-                              middleText: 'Are you sure you want to delete this address?',
-                              textConfirm: 'Yes',
-                              textCancel: 'No',
-                              confirmTextColor: Colors.white,
-                              onConfirm: () {
-                                // Pastikan ID-nya ada di model InfoUser
-                                if (address.id != null) {
-                                  addressController.deactivateAddress(address.id!);
-                                }
-                                Get.back();
-                              },
-                            );
-                          },
-                          child: const Icon(Icons.delete, color: Colors.blue),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: RichText(
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: address.fullName ?? '',
+                                    style: context.titleMedium,
+                                //     style: GoogleFonts.montserrat(
+                                //     fontSize: 20,
+                                //     fontWeight: FontWeight.bold,
+                                // ), 
+                              ),
+                              TextSpan(
+                                text: ' | ${address.phone ?? ''}',
+                                style: GoogleFonts.montserrat(
+                                fontSize: 15,
+                                fontWeight: FontWeight.normal,
+                                color: Colors.grey.shade600,
+                                ), 
+                              )
+                            ]
+                          ),
                         ),
-                      )
+                      ),
+                            // Text(
+                            //   address.fullName ?? '', 
+                            //   style: GoogleFonts.montserrat(
+                            //     fontSize: 20,
+                            //     fontWeight: FontWeight.bold,
+                            //   ), 
+                            // ), 
+                            // ),
+                            // Text(
+                            //   address.phone ?? '',
+                            //   style: GoogleFonts.montserrat(
+                            //     fontSize: 15,
+                            //     fontWeight: FontWeight.normal,
+                            //     color: Colors.grey.shade300,
+                            //   ),
+                            // ),
+                          Center(
+                            child: GestureDetector(
+                              onTap: () {
+                                Get.defaultDialog(
+                                  title: 'Delete Address?',
+                                  middleText: 'Are you sure you want to delete this address?',
+                                  textConfirm: 'Yes',
+                                  textCancel: 'No',
+                                  confirmTextColor: Colors.white,
+                                  onConfirm: () {
+                                    // Pastikan ID-nya ada di model InfoUser
+                                    if (address.id != null) {
+                                      controller.deactivateAddress(address.id!);
+                                    }
+                                    Get.back();
+                                  },
+                                );
+                              },
+                              child: const Icon(Icons.delete, color: Colors.blue),
+                            ),
+                          )
+                        ],
+                      ),
                     ],
                   ),
-                  subtitle: Text('${address.address}\n${address.phone ?? ''}'),
+                  subtitle: Text('${address.address ?? ''}, '
+                  '${address.kecamatan ??''}, ${address.kota??''}, '
+                  '${address.provinsi?? ''}, ${address.kodepos ?? ''}'),
                   onTap: () {
-                    context.goNamed('addAddress', extra: address);
-
+                    // Get.toNamed(AddAddress.TAG);
+                    Get.to(() => AddAddress(existingAddress: address));
                       // Optional: Hapus atau nonaktifkan
                       // Get.snackbar('comingsoon',
                       //   'This feature is coming soon!',
@@ -117,7 +157,8 @@ class _AddressPageState extends State<AddressPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          context.go('add-addres');
+          Get.toNamed(AddAddress.TAG);
+          // Get.to(() => const AddAddress());
         },
         backgroundColor: Colors.amber,
         child: const Icon(Icons.add),
