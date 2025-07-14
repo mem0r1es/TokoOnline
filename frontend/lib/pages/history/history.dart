@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_web/controllers/address_controller.dart';
+import 'package:flutter_web/models/info_user.dart';
 // import 'package:flutter_web/controller/cart_controller.dart';
 // import 'package:flutter_web/controllers/cart_controller.dart';
 import 'package:flutter_web/models/order_history_item.dart';
@@ -12,6 +13,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 
 class ProductInfoPage extends StatefulWidget {
+  static const TAG = '/productinfo';
   ProductInfoPage({super.key});
 
   @override
@@ -80,15 +82,32 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
 }
 
 
-class OrderDetailPage extends StatelessWidget {
+class OrderDetailPage extends StatefulWidget {
   final OrderHistoryItem order;
-  final AddressController addressController = Get.find<AddressController>();
-  
 
   OrderDetailPage({super.key, required this.order});
 
   @override
+  State<OrderDetailPage> createState() => _OrderDetailPageState();
+}
+
+class _OrderDetailPageState extends State<OrderDetailPage> {
+  final AddressController addressController = Get.find<AddressController>();
+  final CheckoutService checkoutService = Get.find<CheckoutService>();
+
+  @override
+  void initState() {
+    super.initState();
+    final email = Supabase.instance.client.auth.currentUser?.email;
+    if (email != null) {
+      checkoutService.loadOrderHistoryFromSupabase(email);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final info = widget.order.infoUser.isNotEmpty ? widget.order.infoUser.first : InfoUser();
+    final selectedAddress = addressController.addresses.isNotEmpty ? addressController.addresses.first : InfoUser();
 
     return Scaffold(
       appBar: AppBar(
@@ -103,7 +122,7 @@ class OrderDetailPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Ordered at ${order.infoUser.isNotEmpty ? (order.infoUser.first.timestamp ?? '') : ''}',
+                'Ordered at ${widget.order.timestamp}',
                 style: GoogleFonts.poppins(fontSize: 14),
               ),
               const SizedBox(height: 10),
@@ -120,10 +139,10 @@ class OrderDetailPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
-              Text("Full Name: ${order.infoUser.isNotEmpty ? (order.infoUser.first.fullName ?? '') : ''}", style: GoogleFonts.poppins(fontSize: 14)),
-              Text("Email: ${order.infoUser.isNotEmpty ? (order.infoUser.first.email ?? '') : ''}", style: GoogleFonts.poppins(fontSize: 14)),
-              Text("Phone: ${order.infoUser.isNotEmpty ? (order.infoUser.first.phone ?? '') : ''}", style: GoogleFonts.poppins(fontSize: 14)),
-              Text("Address: ${order.infoUser.isNotEmpty ? (order.infoUser.first.address ?? '') : ''}", style: GoogleFonts.poppins(fontSize: 14)),
+              Text("Full Name: ${info.fullName}", style: GoogleFonts.poppins(fontSize: 14)),
+              Text("Email: ${info.email}", style: GoogleFonts.poppins(fontSize: 14)),
+              Text("Phone: ${info.phone}", style: GoogleFonts.poppins(fontSize: 14)),
+              Text("Address: ${info.address}", style: GoogleFonts.poppins(fontSize: 14)),
               const SizedBox(height: 20),
 
               Container(
@@ -139,7 +158,7 @@ class OrderDetailPage extends StatelessWidget {
               ),
               const SizedBox(height: 10),
 
-              ...order.items.map((item) => Padding(
+              ...widget.order.items.map((item) => Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -152,7 +171,7 @@ class OrderDetailPage extends StatelessWidget {
               const SizedBox(height: 10),
 
               Text(
-                "Total Price: Rp ${_rupiah(order.items.fold(0.0, (sum, item) => sum + item.totalPrice))}",
+                "Total Price: Rp ${_rupiah(widget.order.items.fold(0.0, (sum, item) => sum + item.totalPrice))}",
                 style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ],
