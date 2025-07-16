@@ -18,34 +18,31 @@ class SocialLoginButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 45,
-      child: ElevatedButton(
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: OutlinedButton(
         onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
+        style: OutlinedButton.styleFrom(
           backgroundColor: color,
-          foregroundColor: textColor,
+          side: BorderSide(color: color),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          elevation: 0,
-          padding: EdgeInsets.symmetric(horizontal: text.isEmpty ? 0 : 12),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: text.isEmpty ? MainAxisSize.min : MainAxisSize.max,
           children: [
-            Icon(icon, size: 20),
-            if (text.isNotEmpty) ...[
-              SizedBox(width: 8),
-              Text(
-                text,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+            Icon(icon, color: textColor, size: 20),
+            SizedBox(width: 12),
+            Text(
+              text,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: textColor,
               ),
-            ],
+            ),
           ],
         ),
       ),

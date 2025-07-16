@@ -1,0 +1,50 @@
+### Test API Authentication
+
+### 1. Register User Baru
+POST http://localhost:8000/api/auth/register/
+Content-Type: application/json
+
+{
+    "email": "sahabat@example.com",
+    "username": "asek",
+    "first_name": "otong",
+    "last_name": "User",
+    "password": "testpass122",
+    "password_confirm": "testpass122"
+}
+
+### 2. Login User
+POST http://localhost:8000/api/auth/login/
+Content-Type: application/json
+
+{
+    "email": "sahabat@example.com",
+    "password": "testpass122"
+}
+
+### 3. Get Profile (butuh token dari login)
+GET http://localhost:8000/api/auth/profile/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyNjQ2ODExLCJpYXQiOjE3NTI2NDMyMTEsImp0aSI6IjdlYzYyNTU2M2JiYzQ0MDJiNmFjMzJlNWQwMTFlMTJmIiwidXNlcl9pZCI6Mn0.6e2A8kJOHAvs1I38BbDizhHGXwnPtjPaxm4eg4ONUKo
+Content-Type: application/json
+
+### 4. Update Profile (butuh token)
+PUT http://localhost:8000/api/auth/profile/update/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyNjQ2ODExLCJpYXQiOjE3NTI2NDMyMTEsImp0aSI6IjdlYzYyNTU2M2JiYzQ0MDJiNmFjMzJlNWQwMTFlMTJmIiwidXNlcl9pZCI6Mn0.6e2A8kJOHAvs1I38BbDizhHGXwnPtjPaxm4eg4ONUKo
+Content-Type: application/json
+
+{
+    "first_name": "Updated Otong",
+    "last_name": "Super User"
+}
+
+
+### 5. Change Password (butuh token)
+POST http://localhost:8000/api/auth/change-password/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyNjQ2ODExLCJpYXQiOjE3NTI2NDMyMTEsImp0aSI6IjdlYzYyNTU2M2JiYzQ0MDJiNmFjMzJlNWQwMTFlMTJmIiwidXNlcl9pZCI6Mn0.6e2A8kJOHAvs1I38BbDizhHGXwnPtjPaxm4eg4ONUKo
+Content-Type: application/json
+
+{
+    "old_password": "testpass122",
+    "new_password": "newpass123",
+    "new_password_confirm": "newpass123"
+}
