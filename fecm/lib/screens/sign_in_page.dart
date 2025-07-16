@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart'; // Tambah ini
+import 'package:provider/provider.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/social_login_button.dart';
-import '../providers/auth_provider.dart'; // Ganti dari auth_service ke auth_provider
+import '../providers/auth_provider.dart';
 import 'sign_up_page.dart';
-import 'dashboard_page.dart';
 
 class SignInPage extends StatefulWidget {
+  const SignInPage({Key? key}) : super(key: key);
+
   @override
   _SignInPageState createState() => _SignInPageState();
 }
@@ -17,34 +18,51 @@ class _SignInPageState extends State<SignInPage> {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  // Update fungsi _signIn untuk pake AuthProvider
-  void _signIn(AuthProvider authProvider) async {
-    print('🔄 Sign in button clicked!'); // Debug print
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
-    if (_formKey.currentState!.validate()) {
-      print('✅ Form validation passed'); // Debug print
+  Future<void> _signIn(AuthProvider authProvider) async {
+    if (!_formKey.currentState!.validate()) return;
 
-      // Clear previous errors
-      authProvider.clearError();
+    // Clear previous errors
+    authProvider.clearError();
 
-      print('📧 Email: ${_emailController.text.trim()}'); // Debug print
-      print('🔐 Password: ${_passwordController.text}'); // Debug print
+    final success = await authProvider.login(
+      _emailController.text.trim(),
+      _passwordController.text,
+    );
 
-      final success = await authProvider.login(
-        _emailController.text.trim(),
-        _passwordController.text,
-      );
-
-      print('🎯 Login result: $success'); // Debug print
-
-      if (success) {
-        print('✅ Login successful - should navigate to dashboard');
-      } else {
-        print('❌ Login failed');
-      }
-    } else {
-      print('❌ Form validation failed'); // Debug print
+    if (success) {
+      // Navigation akan di-handle oleh AuthWrapper
+      print('Login successful');
     }
+    // Error sudah di-handle oleh AuthProvider dan akan ditampilkan di UI
+  }
+
+  Future<void> _handleGoogleSignIn(AuthProvider authProvider) async {
+    authProvider.clearError();
+
+    final success = await authProvider.signInWithGoogle();
+
+    if (success) {
+      print('Google Sign In successful');
+      // Navigation akan di-handle oleh AuthWrapper
+    }
+    // Error sudah di-handle oleh AuthProvider dan akan ditampilkan di UI
+  }
+
+  void _handleForgotPassword() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Forgot password feature coming soon!'),
+        backgroundColor: Colors.orange,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   @override
@@ -52,7 +70,6 @@ class _SignInPageState extends State<SignInPage> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       body: Consumer<AuthProvider>(
-        // Wrap dengan Consumer
         builder: (context, authProvider, child) {
           return SingleChildScrollView(
             child: Container(
@@ -173,7 +190,7 @@ class _SignInPageState extends State<SignInPage> {
                                 ),
                                 SizedBox(height: 30),
 
-                                // Tambah Error Message dari AuthProvider
+                                // Error Message
                                 if (authProvider.error != null) ...[
                                   Container(
                                     width: double.infinity,
@@ -213,23 +230,44 @@ class _SignInPageState extends State<SignInPage> {
                                   ),
                                 ],
 
-                                // Social Login Button
+                                // Google Sign In Button
                                 SocialLoginButton(
                                   icon: Icons.login,
-                                  text: 'Sign in with Google',
+                                  text: authProvider.isLoading
+                                      ? 'Signing in...'
+                                      : 'Sign in with Google',
                                   color: Colors.blue[50]!,
                                   textColor: Colors.blue,
-                                  onPressed: () {
-                                    // TODO: Implement Google Sign In
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                            'Google Sign In not implemented yet'),
-                                        backgroundColor: Colors.orange,
-                                      ),
-                                    );
-                                  },
+                                  onPressed: authProvider.isLoading
+                                      ? () {}
+                                      : () => _handleGoogleSignIn(authProvider),
                                 ),
+
+                                SizedBox(height: 30),
+
+                                // Divider
+                                Row(
+                                  children: [
+                                    Expanded(
+                                        child:
+                                            Divider(color: Colors.grey[300])),
+                                    Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(horizontal: 16),
+                                      child: Text(
+                                        'Or continue with email',
+                                        style: TextStyle(
+                                          color: Colors.grey[600],
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                        child:
+                                            Divider(color: Colors.grey[300])),
+                                  ],
+                                ),
+
                                 SizedBox(height: 30),
 
                                 // Email Field
@@ -251,8 +289,7 @@ class _SignInPageState extends State<SignInPage> {
                                     }
                                     return null;
                                   },
-                                  onChanged: (_) => authProvider
-                                      .clearError(), // Clear error saat typing
+                                  onChanged: (_) => authProvider.clearError(),
                                 ),
                                 SizedBox(height: 20),
 
@@ -276,8 +313,7 @@ class _SignInPageState extends State<SignInPage> {
                                     }
                                     return null;
                                   },
-                                  onChanged: (_) => authProvider
-                                      .clearError(), // Clear error saat typing
+                                  onChanged: (_) => authProvider.clearError(),
                                 ),
                                 SizedBox(height: 10),
 
@@ -285,16 +321,7 @@ class _SignInPageState extends State<SignInPage> {
                                 Align(
                                   alignment: Alignment.centerRight,
                                   child: GestureDetector(
-                                    onTap: () {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                              'Forgot password feature coming soon'),
-                                          backgroundColor: Colors.orange,
-                                        ),
-                                      );
-                                    },
+                                    onTap: _handleForgotPassword,
                                     child: Text(
                                       'Forgot Password',
                                       style: TextStyle(
@@ -306,17 +333,47 @@ class _SignInPageState extends State<SignInPage> {
                                 ),
                                 SizedBox(height: 30),
 
-                                // Sign In Button - Update untuk pake AuthProvider
+                                // Sign In Button
                                 CustomButton(
                                   text: 'Sign in',
-                                  onPressed: authProvider
-                                          .isLoading // Check loading state
+                                  onPressed: authProvider.isLoading
                                       ? null
-                                      : () => _signIn(
-                                          authProvider), // Pass authProvider
-                                  isLoading: authProvider
-                                      .isLoading, // Show loading indicator
+                                      : () => _signIn(authProvider),
+                                  isLoading: authProvider.isLoading,
                                 ),
+
+                                SizedBox(height: 20),
+
+                                // Auth method info
+                                if (authProvider.authMethod != 'none') ...[
+                                  Container(
+                                    padding: EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green.shade50,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                          color: Colors.green.shade200),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                            authProvider.authMethod == 'google'
+                                                ? Icons.account_circle
+                                                : Icons.email,
+                                            color: Colors.green.shade600,
+                                            size: 16),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          'Last signed in with ${authProvider.authMethod == 'google' ? 'Google' : 'Email'}',
+                                          style: TextStyle(
+                                            color: Colors.green.shade700,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
                           ),
@@ -331,12 +388,5 @@ class _SignInPageState extends State<SignInPage> {
         },
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
   }
 }

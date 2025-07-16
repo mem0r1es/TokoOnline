@@ -1,5 +1,5 @@
 name: flutter_auth_app
-description: Flutter app with Django authentication
+description: Flutter app with Django authentication and Google Sign In
 
 # Prevent publishing to pub.dev
 publish_to: "none"
@@ -26,6 +26,7 @@ dependencies:
   # State management
   provider: ^6.1.2
 
+  # Google Sign In
   google_sign_in: ^6.2.1
 
   # Navigation (optional)
@@ -33,6 +34,30 @@ dependencies:
 
   # JSON annotation (optional, untuk model classes)
   json_annotation: ^4.9.0
+
+  # Shared preferences (optional)
+  shared_preferences: ^2.2.2
+
+  # URL launcher (optional)
+  url_launcher: ^6.2.5
+
+  # Image picker (optional, untuk future features)
+  image_picker: ^1.0.7
+
+  # Cached network image (optional)
+  cached_network_image: ^3.3.1
+
+  # Intl for internationalization
+  intl: ^0.19.0
+
+  # Path provider for file operations
+  path_provider: ^2.1.2
+
+  # Device info
+  device_info_plus: ^10.1.0
+
+  # Connectivity checker
+  connectivity_plus: ^5.0.2
 
 dev_dependencies:
   flutter_test:
@@ -45,18 +70,31 @@ dev_dependencies:
   json_serializable: ^6.8.0
   build_runner: ^2.4.13
 
+  # Testing utilities
+  mockito: ^5.4.4
+  build_test: ^2.2.1
+
 flutter:
   uses-material-design: true
 
-  # Assets (uncomment jika butuh)
+  # Assets - uncomment jika butuh
   # assets:
   #   - images/
   #   - icons/
+  #   - assets/logos/
+  #   - assets/images/
 
-  # Fonts (uncomment jika butuh custom fonts)
+  # Fonts - uncomment jika butuh custom fonts
   # fonts:
-  #   - family: Schyler
+  #   - family: Roboto
   #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
+  #       - asset: fonts/Roboto-Regular.ttf
+  #       - asset: fonts/Roboto-Bold.ttf
+  #         weight: 700
+  #       - asset: fonts/Roboto-Light.ttf
+  #         weight: 300
+
+  # Generate localizations
+  generate: false
+# Platform specific configurations
+# Flutter web will automatically include required web plugins

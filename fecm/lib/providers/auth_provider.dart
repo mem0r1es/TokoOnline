@@ -7,12 +7,14 @@ class AuthProvider with ChangeNotifier {
   User? _user;
   bool _isLoading = false;
   String? _error;
+  String _authMethod = 'none'; // 'regular', 'google', 'none'
 
   // Getters
   bool get isAuthenticated => _isAuthenticated;
   User? get user => _user;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  String get authMethod => _authMethod;
 
   // Check if user is logged in saat app start
   Future<void> checkAuthStatus() async {
@@ -21,31 +23,39 @@ class AuthProvider with ChangeNotifier {
 
     try {
       _isAuthenticated = await AuthService.isLoggedIn();
+      _authMethod = await AuthService.getAuthMethod();
 
       if (_isAuthenticated) {
         _user = await AuthService.getProfile();
         if (_user == null) {
           _isAuthenticated = false;
+          _authMethod = 'none';
         }
       }
     } catch (e) {
       _isAuthenticated = false;
       _user = null;
+      _authMethod = 'none';
     }
 
     _isLoading = false;
     notifyListeners();
   }
 
-  // Login function
-  Future<bool> login(String email, String password) async {
-    print('🔄 AuthProvider.login called'); // Debug print
+  // Initialize Google Sign In
+  Future<void> initializeGoogleSignIn() async {
+    try {
+      await AuthService.initializeGoogleSignIn();
+    } catch (e) {
+      print('Google Sign In initialization error: $e');
+    }
+  }
 
+  // Regular login function
+  Future<bool> login(String email, String password) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
-
-    print('⏳ Loading state set to true'); // Debug print
 
     try {
       final result = await AuthService.login(
@@ -53,27 +63,53 @@ class AuthProvider with ChangeNotifier {
         password: password,
       );
 
-      print('📥 AuthService result: $result'); // Debug print
-
       if (result != null && result['success'] == true) {
         _isAuthenticated = true;
         _user = User.fromJson(result['user']);
+        _authMethod = 'regular';
         _isLoading = false;
         notifyListeners();
-        print('✅ Auth state updated successfully'); // Debug print
         return true;
       } else {
         _error = result?['message'] ?? 'Login gagal';
         _isLoading = false;
         notifyListeners();
-        print('❌ Login failed with error: $_error'); // Debug print
         return false;
       }
     } catch (e) {
       _error = 'Network error: $e';
       _isLoading = false;
       notifyListeners();
-      print('💥 Exception in login: $e'); // Debug print
+      return false;
+    }
+  }
+
+  // Google Sign In
+  Future<bool> signInWithGoogle() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final result = await AuthService.signInWithGoogle();
+
+      if (result != null && result['success'] == true) {
+        _isAuthenticated = true;
+        _user = User.fromJson(result['user']);
+        _authMethod = 'google';
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _error = result?['message'] ?? 'Google Sign In failed';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _error = 'Google Sign In error: $e';
+      _isLoading = false;
+      notifyListeners();
       return false;
     }
   }
@@ -104,6 +140,7 @@ class AuthProvider with ChangeNotifier {
       if (result != null && result['success'] == true) {
         _isAuthenticated = true;
         _user = User.fromJson(result['user']);
+        _authMethod = 'regular';
         _isLoading = false;
         notifyListeners();
         return true;
@@ -138,10 +175,14 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  // Logout function
+  // Enhanced logout function
   Future<void> logout() async {
+    _isLoading = true;
+    notifyListeners();
+
     try {
-      await AuthService.logout();
+      await AuthService
+          .logout(); // This now handles both regular and Google logout
     } catch (e) {
       print('Logout error: $e');
     }
@@ -149,6 +190,8 @@ class AuthProvider with ChangeNotifier {
     _isAuthenticated = false;
     _user = null;
     _error = null;
+    _authMethod = 'none';
+    _isLoading = false;
     notifyListeners();
   }
 
@@ -170,6 +213,23 @@ class AuthProvider with ChangeNotifier {
       } catch (e) {
         print('Refresh profile error: $e');
       }
+    }
+  }
+
+  // Check if user is signed in with Google
+  Future<bool> isSignedInWithGoogle() async {
+    return await AuthService.isSignedInWithGoogle();
+  }
+
+  // Get current Google user info
+  Future<void> getCurrentGoogleUser() async {
+    try {
+      final googleUser = await AuthService.getCurrentGoogleUser();
+      if (googleUser != null) {
+        print('Current Google user: ${googleUser.email}');
+      }
+    } catch (e) {
+      print('Error getting current Google user: $e');
     }
   }
 }

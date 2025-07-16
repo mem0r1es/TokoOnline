@@ -5,6 +5,8 @@ import '../widgets/custom_text_field.dart';
 import '../providers/auth_provider.dart'; // Ganti dari auth_service ke auth_provider
 import 'sign_in_page.dart';
 
+
+
 class SignUpPage extends StatefulWidget {
   @override
   _SignUpPageState createState() => _SignUpPageState();
@@ -404,3 +406,4 @@ class _SignUpPageState extends State<SignUpPage> {
     super.dispose();
   }
 }
+

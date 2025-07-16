@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <!--
+  <head>
+    <!--
     If you are serving your web app in a path other than the root, change the
     href value below to reflect the base path you are serving from.
 
@@ -14,25 +14,221 @@
     This is a placeholder for base href that will be replaced by the value of
     the `--base-href` argument provided to `flutter build`.
   -->
-  <base href="$FLUTTER_BASE_HREF">
+    <base href="$FLUTTER_BASE_HREF" />
 
-  <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+    <meta charset="UTF-8" />
+    <meta content="IE=Edge" http-equiv="X-UA-Compatible" />
+    <meta name="description" content="Flutter Auth App with Google Sign In" />
 
-  <!-- iOS meta tags & icons -->
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="fecm">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+    <!-- iOS meta tags & icons -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="flutter_auth_app" />
+    <link rel="apple-touch-icon" href="icons/Icon-192.png" />
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png" />
 
-  <title>fecm</title>
-  <link rel="manifest" href="manifest.json">
-</head>
-<body>
-  <script src="flutter_bootstrap.js" async></script>
-</body>
+    <title>Flutter Auth App</title>
+    <link rel="manifest" href="manifest.json" />
+
+    <!-- Google Sign In Library -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <!-- Google APIs -->
+    <script src="https://apis.google.com/js/api.js" async defer></script>
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+          sans-serif;
+        background-color: #f5f5f5;
+      }
+
+      #loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #ffffff;
+      }
+
+      .loader {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #4caf50;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .loading-text {
+        margin-top: 20px;
+        color: #666;
+        font-size: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Loading screen -->
+    <div id="loading">
+      <div style="text-align: center">
+        <div class="loader"></div>
+        <div class="loading-text">Loading Flutter Auth App...</div>
+      </div>
+    </div>
+
+    <script>
+      // Google Sign In configuration
+      window.googleSignInConfig = {
+        client_id: "804408446728-l0v3hbai7qgpqflh06vitfosnlmmpne7.apps.googleusercontent.com", // Ganti dengan Client ID lo
+      };
+
+      // Initialize Google Sign In
+      function initializeGoogleSignIn() {
+        console.log("🔄 Initializing Google Sign In...");
+
+        if (typeof google !== "undefined" && google.accounts) {
+          console.log("✅ Google accounts API loaded");
+
+          google.accounts.id.initialize({
+            client_id: window.googleSignInConfig.client_id,
+            callback: handleCredentialResponse,
+            auto_select: false,
+            cancel_on_tap_outside: false,
+          });
+
+          console.log("✅ Google Sign In initialized");
+        } else {
+          console.log("❌ Google accounts API not loaded");
+          // Retry after 1 second
+          setTimeout(initializeGoogleSignIn, 1000);
+        }
+      }
+
+      // Handle Google credential response
+      function handleCredentialResponse(response) {
+        console.log("📥 Google credential response received");
+        console.log(
+          "🔑 Credential:",
+          response.credential ? "Present" : "Missing"
+        );
+
+        // This will be handled by Flutter's Google Sign In
+        if (response.credential) {
+          console.log("✅ Google credential received successfully");
+        }
+      }
+
+      // Load Google APIs
+      function loadGoogleAPIs() {
+        console.log("🔄 Loading Google APIs...");
+
+        if (typeof gapi !== "undefined") {
+          gapi.load("auth2", function () {
+            console.log("✅ Google Auth2 API loaded");
+
+            gapi.auth2
+              .init({
+                client_id: window.googleSignInConfig.client_id,
+                scope: "email profile openid",
+              })
+              .then(function () {
+                console.log("✅ Google Auth2 initialized");
+              })
+              .catch(function (error) {
+                console.error("❌ Google Auth2 initialization failed:", error);
+              });
+          });
+        } else {
+          console.log("ℹ️ Google API not yet loaded, retrying...");
+          setTimeout(loadGoogleAPIs, 500);
+        }
+      }
+
+      // Initialize everything when page loads
+      window.addEventListener("load", function () {
+        console.log("🔄 Page loaded, initializing Google Sign In...");
+
+        // Hide loading screen after Flutter loads
+        setTimeout(function () {
+          const loadingDiv = document.getElementById("loading");
+          if (loadingDiv) {
+            loadingDiv.style.display = "none";
+          }
+        }, 3000);
+
+        // Initialize Google Sign In
+        setTimeout(initializeGoogleSignIn, 1000);
+
+        // Load Google APIs
+        setTimeout(loadGoogleAPIs, 1500);
+      });
+
+      // Handle Google Sign In errors
+      window.addEventListener("error", function (event) {
+        if (
+          event.message.includes("google") ||
+          event.message.includes("gapi")
+        ) {
+          console.error("❌ Google Sign In related error:", event.message);
+        }
+      });
+
+      // Debug function for testing
+      window.testGoogleSignIn = function () {
+        console.log("🧪 Testing Google Sign In...");
+        console.log("Client ID:", window.googleSignInConfig.client_id);
+        console.log("Google available:", typeof google !== "undefined");
+        console.log("GAPI available:", typeof gapi !== "undefined");
+      };
+    </script>
+
+    <!-- Service Worker -->
+    <script>
+      var serviceWorkerVersion = null;
+      var scriptLoaded = false;
+
+      function loadMainDartJs() {
+        if (scriptLoaded) {
+          return;
+        }
+        scriptLoaded = true;
+
+        var scriptTag = document.createElement("script");
+        scriptTag.src = "flutter.js";
+        scriptTag.type = "application/javascript";
+        document.body.append(scriptTag);
+
+        scriptTag.addEventListener("load", function (ev) {
+          // Download main.dart.js
+          _flutter.loader.loadEntrypoint({
+            serviceWorker: {
+              serviceWorkerVersion: serviceWorkerVersion,
+            },
+            onEntrypointLoaded: function (engineInitializer) {
+              engineInitializer.initializeEngine().then(function (appRunner) {
+                console.log("🚀 Flutter app starting...");
+                appRunner.runApp();
+              });
+            },
+          });
+        });
+      }
+
+      // Load the app
+      loadMainDartJs();
+    </script>
+  </body>
 </html>
