@@ -22,7 +22,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final _contactController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
-  String _selectedUserType = 'seller';
+  final String _selectedUserType = 'seller'; // Fixed to seller only
 
   @override
   void dispose() {
@@ -45,7 +45,6 @@ class _SignUpPageState extends State<SignUpPage> {
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
         contactNumber: _contactController.text.trim(),
-        userType: _selectedUserType,
         password: _passwordController.text,
         passwordConfirm: _passwordController.text,
       );
@@ -53,7 +52,7 @@ class _SignUpPageState extends State<SignUpPage> {
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Registration successful! Please sign in.'),
+            content: Text('Seller account registered successfully! Please sign in.'),
             backgroundColor: Colors.green,
           ),
         );
@@ -382,40 +381,40 @@ class _SignUpPageState extends State<SignUpPage> {
                                   const SizedBox(height: 20),
                                   
                                   // User Type Selection
-                                  const Text(
-                                    'User Type',
-                                    style: TextStyle(fontSize: 14, color: Colors.grey),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.grey.shade300),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: DropdownButtonHideUnderline(
-                                      child: DropdownButton<String>(
-                                        value: _selectedUserType,
-                                        isExpanded: true,
-                                        onChanged: (String? newValue) {
-                                          setState(() {
-                                            _selectedUserType = newValue!;
-                                          });
-                                        },
-                                        items: const [
-                                          DropdownMenuItem(
-                                            value: 'seller',
-                                            child: Text('Seller'),
-                                          ),
-                                          DropdownMenuItem(
-                                            value: 'admin',
-                                            child: Text('Admin'),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 20),
+                                  // const Text(
+                                  //   'User Type',
+                                  //   style: TextStyle(fontSize: 14, color: Colors.grey),
+                                  // ),
+                                  // const SizedBox(height: 8),
+                                  // Container(
+                                  //   padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  //   decoration: BoxDecoration(
+                                  //     border: Border.all(color: Colors.grey.shade300),
+                                  //     borderRadius: BorderRadius.circular(8),
+                                  //   ),
+                                  //   child: DropdownButtonHideUnderline(
+                                  //     child: DropdownButton<String>(
+                                  //       value: _selectedUserType,
+                                  //       isExpanded: true,
+                                  //       onChanged: (String? newValue) {
+                                  //         // setState(() {
+                                  //         //   _selectedUserType = newValue!;
+                                  //         // });
+                                  //       },
+                                  //       items: const [
+                                  //         DropdownMenuItem(
+                                  //           value: 'seller',
+                                  //           child: Text('Seller'),
+                                  //         ),
+                                  //         DropdownMenuItem(
+                                  //           value: 'admin',
+                                  //           child: Text('Admin'),
+                                  //         ),
+                                  //       ],
+                                  //     ),
+                                  //   ),
+                                  // ),
+                                  // const SizedBox(height: 20),
                                   
                                   // Password Field
                                   const Text(

@@ -14,7 +14,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'username', 'email', 'first_name', 'last_name', 
-            'contact_number', 'user_type', 'password', 'password_confirm'
+            'contact_number', 'password', 'password_confirm'
         ]
     
     def validate(self, attrs):
@@ -25,6 +25,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.pop('password_confirm')
         password = validated_data.pop('password')
+        # Force user_type to seller for public registration
+        validated_data['user_type'] = 'seller'
         user = User.objects.create_user(**validated_data)
         user.set_password(password)
         user.save()

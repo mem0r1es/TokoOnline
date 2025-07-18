@@ -69,14 +69,13 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  // Register
+  // Register (only for sellers)
   Future<bool> register({
     required String username,
     required String email,
     required String firstName,
     required String lastName,
     required String contactNumber,
-    required String userType,
     required String password,
     required String passwordConfirm,
   }) async {
@@ -91,7 +90,6 @@ class AuthProvider with ChangeNotifier {
         firstName: firstName,
         lastName: lastName,
         contactNumber: contactNumber,
-        userType: userType,
         password: password,
         passwordConfirm: passwordConfirm,
       );

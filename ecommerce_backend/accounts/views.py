@@ -11,8 +11,12 @@ from .supabase_client import supabase_client
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register(request):
-    """Register a new user"""
-    serializer = UserRegistrationSerializer(data=request.data)
+    """Register a new seller user (admin can only be created via backend)"""
+    # Force user_type to be 'seller' for public registration
+    data = request.data.copy()
+    data['user_type'] = 'seller'
+    
+    serializer = UserRegistrationSerializer(data=data)
     if serializer.is_valid():
         user = serializer.save()
         
@@ -32,7 +36,7 @@ def register(request):
             print(f"Supabase sync error: {e}")
         
         return Response({
-            'message': 'User registered successfully',
+            'message': 'Seller account registered successfully',
             'user': UserProfileSerializer(user).data
         }, status=status.HTTP_201_CREATED)
     

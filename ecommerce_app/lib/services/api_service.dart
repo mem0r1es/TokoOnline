@@ -14,14 +14,13 @@ class ApiService {
     'Authorization': 'Bearer $token',
   };
 
-  // Register user
+  // Register user (seller only)
   static Future<RegisterResponse> register({
     required String username,
     required String email,
     required String firstName,
     required String lastName,
     required String contactNumber,
-    required String userType,
     required String password,
     required String passwordConfirm,
   }) async {
@@ -34,9 +33,9 @@ class ApiService {
         'first_name': firstName,
         'last_name': lastName,
         'contact_number': contactNumber,
-        'user_type': userType,
         'password': password,
         'password_confirm': passwordConfirm,
+        // user_type will be automatically set to 'seller' in backend
       }),
     );
 
