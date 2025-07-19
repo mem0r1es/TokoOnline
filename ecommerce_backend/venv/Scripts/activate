@@ -35,7 +35,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="D:\CODE\Web_Dev\seller_admin\ecommerce_backend\venv"
+VIRTUAL_ENV="D:\TokoOnline\ecommerce_backend\venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
