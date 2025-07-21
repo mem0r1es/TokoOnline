@@ -14,6 +14,7 @@ class DashboardSidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isAdmin = user.userType == 'admin';
+    final currentRoute = ModalRoute.of(context)?.settings.name;
     
     return Container(
       width: 280,
@@ -63,23 +64,43 @@ class DashboardSidebar extends StatelessWidget {
                 _buildNavItem(
                   icon: Icons.dashboard_outlined,
                   title: 'Dashboard',
-                  isActive: true,
+                  isActive: currentRoute == '/dashboard',
+                  onTap: () {
+                    Navigator.pushNamed(context, '/dashboard');
+                  },
                 ),
                 _buildNavItem(
                   icon: Icons.people_outline,
                   title: 'Users',
+                  isActive: currentRoute == '/users',
+                  onTap: () {
+                    Navigator.pushNamed(context, '/Users');
+                  }
                 ),
                 _buildNavItem(
                   icon: Icons.inventory_2_outlined,
                   title: 'Products',
+                  isActive: currentRoute == '/products',
+                  onTap: () {
+                    print('Navigating to products...');
+                    Navigator.pushNamed(context, '/products');
+                  }
                 ),
                 _buildNavItem(
                   icon: Icons.shopping_cart_outlined,
                   title: 'Orders',
+                  isActive: currentRoute == '/Orders',
+                  onTap: () {
+                    Navigator.pushNamed(context, '/Orders');
+                  }
                 ),
                 _buildNavItem(
                   icon: Icons.receipt_long_outlined,
                   title: 'Transactions',
+                  isActive: currentRoute == '/Transactions',
+                  onTap: () {
+                    Navigator.pushNamed(context, '/Transactions');
+                  }
                 ),
                 if (isAdmin) ...[
                   _buildNavItem(
@@ -196,6 +217,7 @@ class DashboardSidebar extends StatelessWidget {
     required String title,
     bool isActive = false,
     String? badge,
+    VoidCallback? onTap,
   }) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
@@ -234,7 +256,7 @@ class DashboardSidebar extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
         ),
         tileColor: isActive ? Colors.blue.shade50 : null,
-        onTap: () {},
+        onTap: onTap,
       ),
     );
   }

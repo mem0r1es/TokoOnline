@@ -24,6 +24,7 @@ class DashboardPage extends StatelessWidget {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
         final user = authProvider.user;
+        String currentRoute = ModalRoute.of(context)?.settings.name ?? '/dashboard';
         
         if (user == null) {
           return const SignInPage();
@@ -38,6 +39,7 @@ class DashboardPage extends StatelessWidget {
                 user: user,
                 onLogout: () => _logout(context),
               ),
+
               // Main Content
               Expanded(
                 child: Column(
