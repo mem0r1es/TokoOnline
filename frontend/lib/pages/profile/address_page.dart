@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web/controllers/checkout_controller.dart';
 import 'package:flutter_web/extensions/extension.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,12 +10,15 @@ import '../../controllers/address_controller.dart';
 class AddressPage extends GetView<AddressController> {
   static final String TAG = '/address';
 
-  const AddressPage({super.key});
+  AddressPage({super.key});
+
+  final checkoutController = Get.find<CheckoutController>();
+
 
   // final AddressController addressController = Get.put(AddressController());
   // final AddressController addressController = Get.find<AddressController>();
 
-  // String? _selectedAddressId;
+  String? _selectedAddressId;
 
 //   @override
   @override
@@ -26,7 +30,7 @@ class AddressPage extends GetView<AddressController> {
         // foregroundColor: Colors.black,
         // shadowColor: Colors.black,
         title: const Text(
-          'My Address',
+          'Alamat Saya',
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -50,23 +54,30 @@ class AddressPage extends GetView<AddressController> {
           }
           return ListView.builder(
             itemCount: controller.addresses.length,
-            itemBuilder: (context, index) {
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemBuilder: (context, index){
+              final defaultAddressId = controller.addresses.firstWhereOrNull((a) => a.isDefault == true)?.id;
               final address = controller.addresses[index];
-              final addressId = address.id ?? index.toString();
+              // final addressId = address.id ?? index.toString();
+              if (address.id == null) return SizedBox.shrink();
+              final addressId = address.id!;
+              
+
+
               
               return Card(
                 margin: const EdgeInsets.symmetric(vertical: 8),
                 child: ListTile(
                   tileColor: Color(0xFFFFF3E3).withOpacity(0.9),
-                  // leading: Radio<String>(
-                  //   value: addressId,
-                  //   groupValue: _selectedAddressId,
-                  //   onChanged: (value) {
-                  //     setState(() {
-                  //       _selectedAddressId = value;
-                  //     });
-                  //   },
-                  // ),
+                  leading: Obx(() => Radio<String>(
+                    value: address.id!, // tambahkan ! di sini
+                    groupValue: controller.selectedAddressId.value,
+                    onChanged: (value) {
+  if (value != null) controller.setDefaultAddress(value);
+},
+
+                  )),
                   title: Column(
                     children: [
                       Row(
@@ -131,16 +142,24 @@ class AddressPage extends GetView<AddressController> {
                               },
                               child: const Icon(Icons.delete, color: Colors.blue),
                             ),
-                          )
+                          ),
+  //                         if (address.isDefault == true)
+  // Chip(
+  //   label: const Text('Default'),
+  //   backgroundColor: Colors.orange.shade100,
+  // ),
                         ],
+                        
                       ),
                     ],
                   ),
+                  
                   subtitle: Text('${address.address ?? ''}, '
                   '${address.kecamatan ??''}, ${address.kota??''}, '
                   '${address.provinsi?? ''}, ${address.kodepos ?? ''}'),
                   onTap: () {
                     // Get.toNamed(AddAddress.TAG);
+                    Get.put(CheckoutController());
                     Get.to(() => AddAddress(existingAddress: address));
                       // Optional: Hapus atau nonaktifkan
                       // Get.snackbar('comingsoon',

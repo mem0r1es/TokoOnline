@@ -55,7 +55,7 @@ class Isi extends GetView<GeneralService> {
           width: 643,
           height: 443,
           decoration: BoxDecoration(
-            color: Color(0xFFFFF3E3).withOpacity(0.9),
+            color: Color.fromARGB(255, 243, 229, 242).withOpacity(0.9),
           // color: const Color(0xFFF3E3),
           ),
           child: 

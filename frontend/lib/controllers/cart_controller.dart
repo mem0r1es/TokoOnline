@@ -26,6 +26,7 @@ class CartController extends GetxController {
 
     isLoading.value = true;
     try {
+      // cartService.loadCartFromLocalStorage(user.email!);
       await cartService.loadCartFromSupabase(user.email!);
     } catch (e) {
       print('Error fetching cart: $e');

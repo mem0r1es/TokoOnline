@@ -10,6 +10,10 @@ class AddressController extends GetxController {
   final AuthService authService = Get.find<AuthService>();
   var addresses = <InfoUser>[].obs;
   var isLoading = false.obs;
+  var selectedAddressId = ''.obs;
+  var selectedAddressUser = Rxn<InfoUser>();
+
+
 
   @override
   void onInit() {
@@ -18,19 +22,23 @@ class AddressController extends GetxController {
   }
 
   Future<void> fetchAddresses() async {
-  final user = authService.currentUser.value;
-  if (user == null) return;
+  final data = await supabase.from('addresses').select();
+  addresses.assignAll(data.map((e) => InfoUser.fromJson(e)));
 
-  isLoading.value = true;
-  try {
-    final result = await _addressService.fetchAddresses();
-    addresses.value = result;
-  } catch (e) {
-    print('Error fetching addresses: $e');
-  } finally {
-    isLoading.value = false;
+  // Set selectedAddressId ke yang default
+  // Set selectedAddressId ke yang default
+  final defaultAddress = addresses.firstWhereOrNull((a) => a.isDefault == true);
+  if (defaultAddress != null) {
+    selectedAddressId.value = defaultAddress.id!;
+    selectedAddressUser.value = defaultAddress;
+  } else {
+    selectedAddressId.value = '';
+    selectedAddressUser.value = null;
   }
+
 }
+
+
 
 
   Future<void> saveAddress(InfoUser address) async {
@@ -42,4 +50,24 @@ class AddressController extends GetxController {
     await _addressService.deactivateAddress(id);
     fetchAddresses();
   }
+
+  Future<void> setDefaultAddress(String addressId) async {
+  final email = Supabase.instance.client.auth.currentUser?.email;
+  if (email == null) return;
+
+  try {
+    await supabase.from('addresses').update({'is_default': false}).eq('email', email);
+    await supabase.from('addresses').update({'is_default': true}).eq('id', addressId);
+
+    await fetchAddresses();
+
+    selectedAddressId.value = addressId; // ✅ pastikan ini ada
+    final selected = addresses.firstWhereOrNull((a) => a.id == addressId);
+    selectedAddressUser.value = selected;
+
+  } catch (e) {
+    Get.snackbar('Error', 'Failed to set default address');
+  }
+}
+
 }

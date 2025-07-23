@@ -9,42 +9,44 @@ import '../models/cart_item.dart';
 class CheckoutService extends GetxService {
   var orderHistory = <OrderHistoryItem>[].obs;
 
+  String? userId;
+
   @override
   void initState() {
     super.onInit();
     final email = Supabase.instance.client.auth.currentUser?.email;
+    userId = Supabase.instance.client.auth.currentUser?.id;
     if (email != null) {
       loadOrderHistoryFromSupabase(email);
     }
   }
 
   Future<void> saveOrderToSupabase(OrderHistoryItem order, String paymentMethod) async {
-    try {
-      final fullName = order.infoUser.isNotEmpty ? order.infoUser.first.fullName ?? '' : '';
-      final phone = order.infoUser.isNotEmpty ? order.infoUser.first.phone ?? '' : '';
-      final address = order.infoUser.isNotEmpty ? order.infoUser.first.address ?? '' : '';
-      final email = order.infoUser.isNotEmpty ? order.infoUser.first.email ?? '' : '';
+  try {
+    final info = order.infoUser.first;
+    final timestamp = order.timestamp.toIso8601String();
 
+    // Simpan setiap item sebagai 1 row
+    for (final item in order.items) {
       await supabase.from('order_history').insert({
-        'timestamp': order.timestamp.toIso8601String(),
-        'full_name': order.infoUser.first.fullName,
-        'email': order.infoUser.first.email,
-        'phone': order.infoUser.first.phone,
-        'address': order.infoUser.first.address,
+        'timestamp': timestamp,
+        'full_name': info.fullName,
+        'email': info.email,
+        'phone': info.phone,
+        'address': info.address,
         'payment_method': paymentMethod,
-        // 'items': order.items.map((e) => '${e.name} x${e.quantity}').join(', '),
-        // 'item_quantity': order.items.map((e) => e.quantity.toString()).join(','),
-        // 'total_price': order.items.fold(0.0, (sum, item) => sum + item.totalPrice),
-        'items': order.items.first.name,
-        'item_quantity':order.items.first.quantity,
-        'total_price':order.items.first.price,
+        'items': item.name,
+        'item_quantity': item.quantity,
+        'total_price': item.totalPrice, // total untuk item ini aja
       });
-
-      print('Order saved successfully');
-    } catch (e) {
-      print('Error saving order: $e');
     }
+
+    print('✅ Order saved per item!');
+  } catch (e) {
+    print('❌ Error saving order: $e');
   }
+}
+
 
   // Future<void> clearCartFromSupabase(String userEmail) async {
   //   try {
@@ -95,43 +97,57 @@ class CheckoutService extends GetxService {
 //   }
 // }
 Future<void> loadOrderHistoryFromSupabase(String email) async {
-  final response = await supabase
-      .from('order_history')
-      .select()
-      .eq('email', email);
+  print("📥 Load order history untuk: $email");
 
-  orderHistory.clear();
+  try {
+    final response = await supabase
+        .from('order_history')
+        .select()
+        .eq('email', email)
+        .order('timestamp');
 
-  for (final item in response) {
-    // 1. Buat info user
-    final infoUser = InfoUser(
-      fullName: item['full_name'],
-      email: item['email'],
-      phone: item['phone'],
-      address: item['address'],
-      timestamp: DateTime.tryParse(item['timestamp']),
-    );
+    orderHistory.clear();
 
-    // 2. Buat satu CartItem dari data Supabase
-    final singleCartItem = CartItem(
-      id: item['items'], // bisa pakai nama sebagai ID sementara
-      name: item['items'],
-      price: double.tryParse(item['total_price'].toString()) ?? 0.0,
-      imageUrl: '', // kosong karena gak disimpan
-      quantity: int.tryParse(item['item_quantity'].toString()) ?? 1,
-    );
+    // Grup by timestamp
+    final grouped = <String, List<Map<String, dynamic>>>{};
+    for (final row in response) {
+      final key = row['timestamp'];
+      grouped.putIfAbsent(key, () => []).add(row);
+    }
 
-    // 3. Bangun order object
-    final order = OrderHistoryItem(
-      timestamp: DateTime.parse(item['timestamp']),
-      paymentMethod: item['payment_method'] ?? '',
-      infoUser: [infoUser],
-      items: [singleCartItem], // masukkan ke dalam list
-    );
+    for (final entry in grouped.entries) {
+      final items = entry.value.map((item) => CartItem(
+        id: item['items'],
+        name: item['items'],
+        quantity: item['item_quantity'],
+        price: (item['total_price'] ?? 0).toDouble(),
+        imageUrl: '', // opsional
+      )).toList();
 
-    orderHistory.add(order);
+      final infoUser = InfoUser(
+        fullName: entry.value.first['full_name'],
+        email: entry.value.first['email'],
+        phone: entry.value.first['phone'],
+        address: entry.value.first['address'],
+        timestamp: DateTime.tryParse(entry.key),
+      );
+
+      orderHistory.add(OrderHistoryItem(
+        timestamp: DateTime.parse(entry.key),
+        paymentMethod: entry.value.first['payment_method'] ?? '',
+        infoUser: [infoUser],
+        items: items,
+        id: '', // kalau pakai
+      ));
+    }
+
+    print("✅ Loaded ${orderHistory.length} order history (grouped)");
+  } catch (e) {
+    print('❌ Error load order: $e');
   }
 }
+
+
 
 
 // Future<void> loadOrderHistoryFromSupabase(String email) async {

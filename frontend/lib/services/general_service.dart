@@ -11,14 +11,23 @@ class GeneralService extends GetxService {
   }
 
   Future<void> fetchLandingBackground() async {
-    final response = await Supabase.instance.client
-        .from('backgrounds')
-        .select('image_url')
-        .limit(1)
-        .maybeSingle();
+    try {
+      print('Fetching backgrounds...');
+      final response = await Supabase.instance.client
+          .from('backgrounds')
+          .select('image_url')
+          .limit(1)
+          .maybeSingle();
 
-    if (response != null && response['image_url'] != null) {
-      backgroundUrl.value = response['image_url'];
+      print('Response: $response');
+
+      if (response != null && response['image_url'] != null) {
+        backgroundUrl.value = response['image_url'];
+      } else {
+        print('No background image found.');
+      }
+    } catch (e) {
+      print('Error fetching background image: $e');
     }
   }
 }

@@ -3,7 +3,7 @@ import 'package:get_storage/get_storage.dart';
 
 class ScrollControllerManager extends GetxService {
   final _scrollOffsets = <String, double>{}.obs;
-  final _storage = GetStorage(); // ✅ storage lokal browser
+  final _storage = GetStorage(); // storage lokal browser
 
   void saveOffset(String key, double offset) {
     _scrollOffsets[key] = offset;

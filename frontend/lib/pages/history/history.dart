@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_web/controllers/address_controller.dart';
+import 'package:flutter_web/controllers/scroll_controller.dart';
 import 'package:flutter_web/models/info_user.dart';
 // import 'package:flutter_web/controller/cart_controller.dart';
 // import 'package:flutter_web/controllers/cart_controller.dart';
@@ -11,6 +12,15 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+
+import 'package:flutter/material.dart';
+import 'package:flutter_web/controllers/scroll_controller.dart';
+import 'package:flutter_web/models/order_history_item.dart';
+import 'package:flutter_web/services/checkout_service.dart';
+import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:intl/intl.dart';
 
 class ProductInfoPage extends StatefulWidget {
   static const TAG = '/productinfo';
@@ -34,6 +44,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
 
   @override
   Widget build(BuildContext context) {
+    final scrollController = Get.find<CustomScrollController>();
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -56,18 +67,21 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
           }
 
           return ListView.builder(
+            controller: scrollController.scrollController,
             itemCount: checkoutService.orderHistory.length,
             itemBuilder: (context, index) {
               final order = checkoutService.orderHistory[index];
+              final formattedTime = DateFormat('dd MMM yyyy • HH:mm').format(order.timestamp);
+
               return Card(
                 margin: const EdgeInsets.symmetric(vertical: 8),
                 child: ListTile(
                   tileColor: Colors.white,
                   title: Text(
-                    'Order at ${order.timestamp}',
-                    style: GoogleFonts.poppins(fontSize: 14),
+                    'Order at $formattedTime',
+                    style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w500),
                   ),
-                  trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
                   onTap: () {
                     Get.to(() => OrderDetailPage(order: order));
                   },
@@ -82,37 +96,25 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
 }
 
 
-class OrderDetailPage extends StatefulWidget {
+
+class OrderDetailPage extends StatelessWidget {
   final OrderHistoryItem order;
 
   OrderDetailPage({super.key, required this.order});
 
-  @override
-  State<OrderDetailPage> createState() => _OrderDetailPageState();
-}
-
-class _OrderDetailPageState extends State<OrderDetailPage> {
-  final AddressController addressController = Get.find<AddressController>();
-  final CheckoutService checkoutService = Get.find<CheckoutService>();
-
-  @override
-  void initState() {
-    super.initState();
-    final email = Supabase.instance.client.auth.currentUser?.email;
-    if (email != null) {
-      checkoutService.loadOrderHistoryFromSupabase(email);
-    }
-  }
+  final addressController = Get.find<AddressController>();
+  final checkoutService = Get.find<CheckoutService>();
 
   @override
   Widget build(BuildContext context) {
-    final info = widget.order.infoUser.isNotEmpty ? widget.order.infoUser.first : InfoUser();
-    final selectedAddress = addressController.addresses.isNotEmpty ? addressController.addresses.first : InfoUser();
+    final info = order.infoUser.isNotEmpty ? order.infoUser.first : InfoUser();
+
+    final formattedTime = DateFormat('dd MMM yyyy • HH:mm').format(order.timestamp);
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: Text("Order Details"),
+        title: Text("Order Details", style: GoogleFonts.poppins()),
       ),
       backgroundColor: Colors.white,
       body: Padding(
@@ -121,58 +123,36 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Ordered at ${widget.order.timestamp}',
-                style: GoogleFonts.poppins(fontSize: 14),
-              ),
-              const SizedBox(height: 10),
+              Text('Ordered at $formattedTime', style: GoogleFonts.poppins(fontSize: 14)),
+              const SizedBox(height: 16),
 
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  "Contact Information",
-                  style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-              ),
-              const SizedBox(height: 10),
+              _sectionTitle("Contact Information"),
               Text("Full Name: ${info.fullName}", style: GoogleFonts.poppins(fontSize: 14)),
               Text("Email: ${info.email}", style: GoogleFonts.poppins(fontSize: 14)),
               Text("Phone: ${info.phone}", style: GoogleFonts.poppins(fontSize: 14)),
               Text("Address: ${info.address}", style: GoogleFonts.poppins(fontSize: 14)),
               const SizedBox(height: 20),
 
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  "Order Summary",
-                  style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
+              _sectionTitle("Order Summary"),
+              const SizedBox(height: 10),
+
+              _orderSummarySection(),
+              const SizedBox(height: 10),
+              const Divider(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Total Price:",
+                    style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                  Text("Rp ${_rupiah(order.items.fold(0.0, (sum, item) => sum + item.totalPrice))}")
+                ],
               ),
               const SizedBox(height: 10),
-
-              ...widget.order.items.map((item) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('${item.name} × ${item.quantity}', style: GoogleFonts.poppins()),
-                    Text('Rp ${_rupiah(item.totalPrice)}', style: GoogleFonts.poppins()),
-                  ],
-                ),
-              )),
-              const SizedBox(height: 10),
-
               Text(
-                "Total Price: Rp ${_rupiah(widget.order.items.fold(0.0, (sum, item) => sum + item.totalPrice))}",
-                style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
+                'Payment Method: ${order.paymentMethod}',
+                style: GoogleFonts.poppins(fontSize: 14),
               ),
             ],
           ),
@@ -181,12 +161,53 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     );
   }
 
-  String _rupiah(double price) {
-    return price
-        .toStringAsFixed(0)
-        .replaceAllMapped(
-          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-          (m) => '${m[1]}.',
+  Widget _sectionTitle(String text) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        text,
+        style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
+      ),
+    );
+  }
+
+  Widget _orderSummarySection() {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      ...order.items.map((item) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  '${item.name} × ${item.quantity}',
+                  style: GoogleFonts.poppins(fontSize: 14),
+                ),
+              ),
+              Text(
+                'Rp ${_rupiah(item.totalPrice)}',
+                style: GoogleFonts.poppins(fontSize: 14),
+              ),
+            ],
+          ),
         );
+      }).toList(),
+    ],
+  );
+}
+
+  String _rupiah(double price) {
+    return price.toStringAsFixed(0).replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (m) => '${m[1]}.',
+    );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:flutter_web/controllers/favorite_controller.dart';
 import 'package:get/get.dart';
 import '../services/auth_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -48,10 +49,12 @@ class AuthController extends GetxController {
       final response = await _authService.signIn(email, password);
       if (response?.user != null) {
         Get.snackbar('Success', 'Welcome ${response!.user!.email}', backgroundColor: Get.theme.primaryColor);
+        
       }
     } catch (e) {
       Get.snackbar('Error', e.toString(), backgroundColor: Get.theme.colorScheme.error);
     }
+    
   }
 
   Future<void> loginWithGoogle() async {
@@ -81,6 +84,10 @@ class AuthController extends GetxController {
     // Get user profile
   String? getUserEmail() {
     return currentUser.value?.email;
+  }
+
+  String? getUserName(){
+    return currentUser.value?.userMetadata?['full_name'] ?? currentUser.value?.email?.split('@')[0];
   }
   bool get isAuthenticated => isLoggedIn.value;
 }

@@ -10,6 +10,7 @@ class InfoUser {
   final String? kodepos;
   final String? detail;
   final DateTime? timestamp;
+  final bool? isDefault;
 
   InfoUser({
     this.id,
@@ -23,6 +24,7 @@ class InfoUser {
     this.kecamatan,
     this.detail,
     this.timestamp,
+    this.isDefault,
   });
 
   factory InfoUser.fromJson(Map<String, dynamic> json) => InfoUser(
@@ -37,6 +39,7 @@ class InfoUser {
         kecamatan: json['kecamatan'],
         detail: json['detail'],
         timestamp: json['timestamp'] != null ? DateTime.tryParse(json['timestamp']) : null,
+        isDefault: json['is_default'] ?? false,
       );
 
   Map<String, dynamic> toJson() => {
@@ -51,6 +54,7 @@ class InfoUser {
         'kecamatan': kecamatan,
         'detail': detail,
         'timestamp': timestamp?.toIso8601String(),
+        'is_default': isDefault ?? false,
       };
 
   factory InfoUser.fromDatabase(Map<String, dynamic> data) => InfoUser(

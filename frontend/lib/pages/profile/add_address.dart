@@ -60,7 +60,7 @@ class _AddAddressState extends State<AddAddress> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0x0fffffff),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         title: Text(
@@ -102,7 +102,7 @@ class _AddAddressState extends State<AddAddress> {
                   ElevatedButton(
                     onPressed: _handleSaveOrUpdate,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
+                      backgroundColor: const Color.fromARGB(255, 249, 248, 248),
                       padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
                     ),
                     child: Text(isEditing ? "Update" : "Submit", style: GoogleFonts.poppins(fontSize: 16)),

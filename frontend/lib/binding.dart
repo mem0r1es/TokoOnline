@@ -5,6 +5,7 @@ import 'package:flutter_web/controllers/cart_controller.dart';
 import 'package:flutter_web/controllers/checkout_controller.dart';
 import 'package:flutter_web/controllers/product_controller.dart';
 import 'package:flutter_web/controllers/scroll_controller.dart';
+import 'package:flutter_web/controllers/search_controller.dart';
 import 'package:flutter_web/controllers/shops_scroll.dart';
 import 'package:flutter_web/services/scroll_controller_manager.dart';
 import 'package:flutter_web/services/cart_service.dart';
@@ -31,5 +32,6 @@ class InitialScreenBindings implements Bindings {
     final ScrollControllerManager scrollControllerManager = Get.put(ScrollControllerManager());
     final CustomScrollController customScrollController = Get.put(CustomScrollController());
     final ShopsScrollController shopsScrollController =Get.put(ShopsScrollController());
+    final SearchController searchController = Get.put(SearchController());
   }
 }

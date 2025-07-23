@@ -30,13 +30,23 @@ class OurProduct extends GetView<ProductController> {
 
   // final favC = Get.find<FavoriteController>();
   @override
-  Widget build(BuildContext context) { 
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isLargeScreen = screenWidth > 600; // bisa kamu atur ambangnya
+    final childAspectRatio = isLargeScreen ? 0.75 : 0.65;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // int crossAxisCount = (constraints.maxWidth ~/ 250).clamp(1, 4);
+        int crossAxisCount = constraints.maxWidth < 600
+      ? 2: constraints.maxWidth < 900 ? 3: 4;
+
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 50),
+      padding: const EdgeInsets.symmetric(horizontal: 30),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Header
           Text(
             'Our Products',
             style: GoogleFonts.poppins(
@@ -44,10 +54,7 @@ class OurProduct extends GetView<ProductController> {
               fontWeight: FontWeight.w700,
             ),
           ),
-      
           const SizedBox(height: 10),
-      
-          // Products Grid
           Obx(() {
             if (controller.isLoading.value) {
               return SizedBox(
@@ -118,13 +125,11 @@ class OurProduct extends GetView<ProductController> {
                 ),
               );
             }
-      
-            // Products grid
+
             return Column(
               children: [
-                // Products count info
                 Padding(
-                  padding: EdgeInsets.only(bottom: 20),
+                  padding: const EdgeInsets.only(bottom: 20),
                   child: Text(
                     'Showing ${controller.products.length} products',
                     style: GoogleFonts.poppins(
@@ -133,28 +138,163 @@ class OurProduct extends GetView<ProductController> {
                     ),
                   ),
                 ),
-      
-                // Products grid
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Wrap(
-                    spacing: 20,
-                    runSpacing: 20,
-                    alignment: WrapAlignment.center,
-                    children: controller.products
-                        .map(
-                          (product) =>
-                              _productCard(product, cartService, authController),
-                        )
-                        .toList(),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: controller.products.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
+                    crossAxisSpacing: 20,
+                    mainAxisSpacing: 20,
+                    childAspectRatio: childAspectRatio,
                   ),
-                ),
+                  itemBuilder: (context, index) {
+                    final product = controller.products[index];
+                    return _productCard(product, cartService, authController);
+                  },
+                )
               ],
             );
           }),
         ],
       ),
     );
+  },
+);
+
+//     return Padding(
+//       padding: const EdgeInsets.symmetric(horizontal: 50),
+//       child: Column(
+//         crossAxisAlignment: CrossAxisAlignment.center,
+//         children: [
+//           // Header
+//           Text(
+//             'Our Products',
+//             style: GoogleFonts.poppins(
+//               fontSize: 40,
+//               fontWeight: FontWeight.w700,
+//             ),
+//           ),
+      
+//           const SizedBox(height: 10),
+      
+//           // Products Grid
+//           Obx(() {
+//             if (controller.isLoading.value) {
+//               return SizedBox(
+//                 height: 300,
+//                 child: Center(
+//                   child: Column(
+//                     mainAxisAlignment: MainAxisAlignment.center,
+//                     children: [
+//                       CircularProgressIndicator(
+//                         strokeWidth: 3,
+//                         valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+//                       ),
+//                       SizedBox(height: 20),
+//                       Text(
+//                         'Loading products from database...',
+//                         style: GoogleFonts.poppins(
+//                           fontSize: 16,
+//                           color: Colors.grey[600],
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//               );
+//             }
+      
+//             if (controller.products.isEmpty) {
+//               return SizedBox(
+//                 height: 300,
+//                 child: Center(
+//                   child: Column(
+//                     mainAxisAlignment: MainAxisAlignment.center,
+//                     children: [
+//                       Icon(
+//                         Icons.inventory_2_outlined,
+//                         size: 80,
+//                         color: Colors.grey[400],
+//                       ),
+//                       SizedBox(height: 20),
+//                       Text(
+//                         'No products available',
+//                         style: GoogleFonts.poppins(
+//                           fontSize: 20,
+//                           fontWeight: FontWeight.w600,
+//                           color: Colors.grey[600],
+//                         ),
+//                       ),
+//                       SizedBox(height: 10),
+//                       Text(
+//                         'Database might be empty or connection failed',
+//                         style: GoogleFonts.poppins(
+//                           fontSize: 14,
+//                           color: Colors.grey[500],
+//                         ),
+//                       ),
+//                       SizedBox(height: 20),
+//                       ElevatedButton.icon(
+//                         onPressed: () => controller.refreshProducts(),
+//                         icon: Icon(Icons.refresh),
+//                         label: Text('Try Again'),
+//                         style: ElevatedButton.styleFrom(
+//                           backgroundColor: Colors.black,
+//                           foregroundColor: Colors.white,
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//               );
+//             }
+      
+//             // Products grid
+//             return Column(
+//               children: [
+//                 // Products count info
+//                 Padding(
+//                   padding: EdgeInsets.only(bottom: 20),
+//                   child: Text(
+//                     'Showing ${controller.products.length} products',
+//                     style: GoogleFonts.poppins(
+//                       fontSize: 14,
+//                       color: Colors.grey[600],
+//                     ),
+//                   ),
+//                 ),
+
+//                 // Products grid
+//                 LayoutBuilder(
+//   builder: (context, constraints) {
+//     int crossAxisCount = (constraints.maxWidth ~/ 250).clamp(1, 4); // Responsive columns
+
+//     return GridView.builder(
+//       shrinkWrap: true,
+//       physics: NeverScrollableScrollPhysics(),
+//       padding: const EdgeInsets.all(12),
+//       itemCount: controller.products.length,
+//       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+//         crossAxisCount: crossAxisCount,
+//         crossAxisSpacing: 20,
+//         mainAxisSpacing: 20,
+//         childAspectRatio: 1.5, // adjust if card looks too tall/wide
+//       ),
+//       itemBuilder: (context, index) {
+//         final product = controller.products[index];
+//         return _productCard(product, cartService, authController);
+//       },
+//     );
+//   },
+// ),
+
+//               ],
+//             );
+//           }),
+//         ],
+//       ),
+//     );
   }
 
   Widget _productCard(
@@ -166,7 +306,7 @@ class OurProduct extends GetView<ProductController> {
     String productId = product.id ?? product.title;
 
     return SizedBox(
-      width: 200,
+      width: 160,
       child: GestureDetector(
         onTap: (){
           Get.toNamed('${ProductDialog.TAG}?id=${product.id}');
@@ -184,28 +324,28 @@ class OurProduct extends GetView<ProductController> {
               // Product Image
               Container(
                 width: double.infinity,
-                height: 200,
-                padding: const EdgeInsets.all(12),
+                height: 120,
+                padding: const EdgeInsets.all(8),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(6),
                   child: _buildProductImage(product),
                 ),
               ),
         
               // Product Info
               Padding(
-                padding: const EdgeInsets.only(right: 16, left: 16, top: 8, bottom: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Product Name
 
                     SizedBox(
-                      height: 48,
+                      height: 36,
                       child: Text(
                         product.title,
                         style: GoogleFonts.poppins(
-                          fontSize: 18,
+                          fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
                         maxLines: 2,
@@ -213,114 +353,34 @@ class OurProduct extends GetView<ProductController> {
                       ),
                     ),
 
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     
                     SizedBox(
-                      height: 48,
+                      height: 32,
                       child: Text(
                         product.storeName ?? '',
                         style: GoogleFonts.poppins(
-                          fontSize: 15,
+                          fontSize: 12,
                           fontWeight: FontWeight.w800,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,                      
                       ),
                     ),
         
-                    
-        
-                    // const SizedBox(height: 8),
-        
-                    // // Product Description
-                    // SizedBox(
-                    //   height: 48,
-                    //   child: Text(
-                    //     product.description,
-                    //     style: GoogleFonts.poppins(
-                    //       fontSize: 14,
-                    //       fontWeight: FontWeight.w400,
-                    //       color: Colors.grey[600],
-                    //     ),
-                    //     maxLines: 2,
-                    //     overflow: TextOverflow.ellipsis,
-                    //   ),
-                    // ),
-        
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 4),
         
                     // Price and Category
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Rp ${_rupiah(product.price)}',
-                              style: GoogleFonts.poppins(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.green[600],
-                              ),
-                            ),
-                            // if (product.category != null) ...[
-                            //   SizedBox(height: 4),
-                            //   Container(
-                            //     padding: EdgeInsets.symmetric(
-                            //       horizontal: 8,
-                            //       vertical: 2,
-                            //     ),
-                            //     decoration: BoxDecoration(
-                            //       color: Colors.blue[100],
-                            //       borderRadius: BorderRadius.circular(12),
-                            //     ),
-                            //     child: Text(
-                            //       product.category!,
-                            //       style: GoogleFonts.poppins(
-                            //         fontSize: 12,
-                            //         color: Colors.blue[700],
-                            //         fontWeight: FontWeight.w500,
-                            //       ),
-                            //     ),
-                            //   ),
-                            // ],
-                          ],
-                        ),
-        
-                        // Stock info
-                        // Obx(() {
-                        //   final updatedProduct = productController.getProductById(product.id ?? product.title);
-        
-                        //   final stock = updatedProduct?.stock ?? 0;
-                        //   final stockColor = stock > 0 ? Colors.green[600] : Colors.red[600];
-        
-                        //   return Column(
-                        //     crossAxisAlignment: CrossAxisAlignment.end,
-                        //     children: [
-                        //       Text(
-                        //         'Stock',
-                        //         style: GoogleFonts.poppins(
-                        //           fontSize: 12,
-                        //           color: Colors.grey[600],
-                        //         ),
-                        //       ),
-                        //       Text(
-                        //         '$stock',
-                        //         style: GoogleFonts.poppins(
-                        //           fontSize: 14,
-                        //           fontWeight: FontWeight.w600,
-                        //           color: stockColor,
-                        //         ),
-                        //       ),
-                        //     ],
-                        //   );
-                        // }),
-        
-                      ],
+                    Text(
+                      'Rp ${_rupiah(product.price)}',
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.green[600],
+                      ),
                     ),
         
-                    const SizedBox(height: 16),
+                    // const SizedBox(height: 16),
         
                     // Action Buttons
                     // Row(
@@ -437,8 +497,8 @@ class OurProduct extends GetView<ProductController> {
       return Image.network(
         product.imagePath,
         fit: BoxFit.cover,
-        width: double.infinity,
-        height: double.infinity,
+        width: 50,
+        height: 100,
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
           return Center(

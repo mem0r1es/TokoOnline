@@ -24,6 +24,9 @@ class CheckoutPage extends GetView<CheckoutController> {
 
   // final CartController cartController = Get.find<CartController>();
   final CartService cartService = Get.find<CartService>();
+  final CheckoutController checkoutController = Get.find();
+  final addressController = Get.find<AddressController>();
+
   // final _firstNameController = TextEditingController();
   // final _lastNameController = TextEditingController();
   // final _emailController = TextEditingController();
@@ -45,154 +48,169 @@ class CheckoutPage extends GetView<CheckoutController> {
 // }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0x0fffffff),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: Text("Checkout Page", style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600)),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.history),
-            onPressed: () {
-              Get.toNamed(ProductInfoPage.TAG);// Pindah ke halaman order history
-            },
-          ),
-        ],
-      ),
-    body: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // LEFT: Shipping Address and Manage Addresses
-        Expanded(
-          flex: 1,
-          child: Padding(
-            padding: const EdgeInsets.only(left: 20, top : 8, bottom: 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    _title("Shipping Address"),
-                    const SizedBox(width: 10),
-                    ElevatedButton(
-                      onPressed: () {
-                        // AddressPage.TAG;
-                        Get.toNamed(AddressPage.TAG);
-                        // Get.to(() => AddressPage());  // Kalau mau tambah/ganti alamat ➔ buka halaman AddressPage
-                      },
-                      child: Text("Manage Addresses"),
-                    ),
-                  ],
-                ),
-                  const SizedBox(height: 10),
-                  SingleChildScrollView(
-                    child: Obx( () => AddressListWidget(
-                      selectedAddressId: controller.selectedAddressId.value,
-                      onAddressSelected: (id) {
-                        // setState(() {
-                          controller.selectedAddressId.value = id!;
-                          controller.selectedAddressUser.value = Get.find<AddressController>().addresses.firstWhereOrNull((a) => a.id == id);
-                        // }
-                        // );
-                      },
-                    ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-            // TAMPILKAN ALAMAT
-          // const SizedBox(height: 10),
-          // ElevatedButton(
-          //   onPressed: () {
-          //     Get.to(() => AddressPage());  // Kalau mau tambah/ganti alamat ➔ buka halaman AddressPage
-          //   },
-          //   child: Text("Manage Addresses"),
-          // ),
-        // RIGHT: Cart Summary
-        Expanded(
-          flex: 1,
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Obx(() {
-              // final total = cartC.cartItems.fold(0, (sum, item) => sum + item.subtotal);
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _title("Product"),
-                  const SizedBox(height: 10),
-
-                  // Produk dalam cart
-                  ...cartService.cartItems.map((item) => _orderRow(
-                        '${item.name} × ${item.quantity}',
-                        'Rp ${_rupiah(item.totalPrice)}',
-                      )),
-
-                  const Divider(),
-                  _orderRow("Subtotal", 'Rp ${_rupiah(cartService.totalPrice)}'),
-                  const SizedBox(height: 8),
-                  _orderRow(
-                    "Total",
-                    'Rp ${_rupiah(cartService.totalPrice)}',
-                    isBold: true,
-                    color: Colors.orange[800],
-                  ),
-                  const SizedBox(height: 20),
-                  _title("Payment"),
-                  const SizedBox(height: 10),
-                  _radioOption("Direct bank transfer"),
-                  _radioOption("Cash on delivery"),
-                  const SizedBox(height: 10),
-                  Text(
-                    "Your personal data will be used to support your experience...",
-                    style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () async {
-                      final authController = Get.find<AuthController>();
-                      final cartService = Get.find<CartService>();
-                      final checkoutService = Get.find<CheckoutService>();
-                      // final userId = authService.getUserId() ?? '';
-                      final userEmail = authController.getUserEmail() ?? '';
-                      if (controller.selectedAddressUser.value == null) {
-                        Get.snackbar("Error", "Please select an address first.");
-                        return;
-                      }
-                      final order = OrderHistoryItem(
-                        timestamp: DateTime.now(),
-                        items: List<CartItem>.from(cartService.cartItems),
-                        infoUser: [controller.selectedAddressUser.value!], // Menggunakan alamat yang dipilih
-                        paymentMethod: controller.selectedPayment.value,
-                      );
-                      cartService.orderHistory.add(order);
-                      await checkoutService.saveOrderToSupabase(order, controller.selectedPayment.value);
-                      await Get.find<CartService>().clearCartFromSupabase(userEmail);
-                      cartService.clearCart();
-                      Get.toNamed(ProductInfoPage.TAG);
-                    },
-
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-                    ),
-                    child: Text("Place Order", style: GoogleFonts.poppins(fontSize: 16)),
-                  )
-                ],
-              );
-            }),
-          ),
+Widget build(BuildContext context) {
+  return Scaffold(
+    backgroundColor: Colors.white,
+    appBar: AppBar(
+      backgroundColor: Color.fromARGB(255, 243, 229, 242).withOpacity(0.9),
+      title: Text("Checkout Page", style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600)),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.history),
+          onPressed: () {
+            Get.toNamed(ProductInfoPage.TAG);
+          },
         ),
       ],
     ),
+    body: Padding(
+      padding: const EdgeInsets.all(20),
+      child: Obx(() {
+        final address = addressController.selectedAddressUser.value;
+
+        return SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  _title("Shipping Address"),
+                  const SizedBox(width: 10),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                    backgroundColor: Color.fromARGB(255, 243, 229, 242).withOpacity(0.9),),
+                    onPressed: () {
+                      Get.toNamed(AddressPage.TAG);
+                    },
+                    child: Text(
+                      "Manage Addresses",
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                      color: Colors.purple[20],
+                      fontWeight: FontWeight.bold
+                    )
+                      ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+          
+              // ✅ Menampilkan 1 default address
+              if (address != null)
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                       Text(
+                        'Fullname: ${address.fullName ?? 'Unknown'}',
+                        style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Phone: ${address.phone ?? 'Unknown'}',
+                      style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Address: ${address.address ?? 'Unknown'}',
+                      style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                Text("No address selected", style: GoogleFonts.poppins(fontSize: 14, color: Colors.red)),
+          
+              const SizedBox(height: 20),
+          
+              // ✅ RINGKASAN PRODUK + TOTAL
+              Container(
+                margin: const EdgeInsets.only(top: 20),
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _title("Product"),
+                    const SizedBox(height: 10),
+                    ...cartService.cartItems.map((item) => _orderRow(
+                          '${item.name} × ${item.quantity}',
+                          'Rp ${_rupiah(item.totalPrice)}',
+                        )),
+                    const Divider(),
+                    // _orderRow("Subtotal", 'Rp ${_rupiah(cartService.totalPrice)}'),
+                    // const SizedBox(height: 8),
+                    _orderRow(
+                      "Total",
+                      'Rp ${_rupiah(cartService.totalPrice)}',
+                      isBold: true,
+                      color: Colors.purple[800],
+                    ),
+                    const SizedBox(height: 20),
+              
+                    _title("Payment"),
+                    const SizedBox(height: 10),
+                    _radioOption("Direct bank transfer"),
+                    _radioOption("Cash on delivery"),
+                    const SizedBox(height: 10),
+                    Text(
+                      "Your personal data will be used to support your experience...",
+                      style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () async {
+                        final authController = Get.find<AuthController>();
+                        final cartService = Get.find<CartService>();
+                        final checkoutService = Get.find<CheckoutService>();
+                        final userEmail = authController.getUserEmail() ?? '';
+                        final addressController = Get.find<AddressController>();
+              
+                        if (addressController.selectedAddressUser.value == null) {
+                          Get.snackbar("Error", "Please select an address first.");
+                          return;
+                        }
+              
+                        final order = OrderHistoryItem(
+                          timestamp: DateTime.now(),
+                          items: List<CartItem>.from(cartService.cartItems),
+                          infoUser: [addressController.selectedAddressUser.value!],
+                          paymentMethod: controller.selectedPayment.value, id: '',
+                        );
+              
+                        cartService.orderHistory.add(order);
+                        await checkoutService.saveOrderToSupabase(order, controller.selectedPayment.value);
+                        await Get.find<CartService>().clearCartFromSupabase(userEmail);
+                        cartService.clearCart();
+              
+                        Get.toNamed(ProductInfoPage.TAG);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(255, 248, 243, 243),
+                        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                      ),
+                      child: Text("Place Order", style: GoogleFonts.poppins(fontSize: 16)),
+                    )
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      }),
+    ),
   );
-  }
+}
+
 
   Widget _title(String text) => Text(
         text,

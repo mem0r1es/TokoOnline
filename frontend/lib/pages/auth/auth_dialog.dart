@@ -265,7 +265,8 @@ class _AuthDialogState extends State<AuthDialog> {
 
         if (email != null) {
           await Get.find<AddressController>().fetchAddresses();
-          await Get.find<CartService>().loadCartFromSupabase(email);
+          // Get.find<CartService>().loadCartFromLocalStorage(email);
+          Get.find<CartService>().loadCartFromSupabase(email);
           await Get.find<CheckoutService>().loadOrderHistoryFromSupabase(email);
         }
         Get.back();

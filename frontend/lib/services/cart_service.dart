@@ -1,6 +1,7 @@
 import 'package:flutter_web/models/info_user.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/cart_item.dart';
 import '../models/order_history_item.dart';
@@ -8,6 +9,10 @@ import '../controllers/product_controller.dart';
 import '../models/cart_historyitem.dart';
 
 final supabase = Supabase.instance.client;
+final _localStorage = GetStorage();
+
+String _cartKey(String userEmail) => 'cart_$userEmail';
+
 
 class CartService extends GetxService {
   var cartItems = <CartItem>[].obs;
@@ -55,7 +60,7 @@ class CartService extends GetxService {
   }
 
   cartItems.refresh();
-  _saveCartToMemory();
+  // _saveCartToMemory();
 
   Get.snackbar('Cart Updated', '${item.name} added to cart',
     snackPosition: SnackPosition.BOTTOM,
@@ -80,7 +85,7 @@ void increaseQuantity(String id) {
       cartItems[index].quantity++;
       productController.decreaseStock(id); // Kurangi stok produk
       cartItems.refresh();
-      _saveCartToMemory();
+      // _saveCartToMemory();
     } else {
       // Stok habis ➔ Tampilkan notifikasi
       Get.snackbar(
@@ -112,6 +117,7 @@ void decreaseQuantity(String id) async {
       cartItems[index].quantity--;
       productController.increaseStock(id);
       cartItems.refresh();
+      
 
       if (email != null) {
         await supabase.from('cart_history').update({
@@ -126,6 +132,7 @@ void decreaseQuantity(String id) async {
       cartItems.removeAt(index);
       productController.increaseStock(id);
       cartItems.refresh();
+      
 
       if (email != null) {
         await supabase.from('cart_history').update({
@@ -137,6 +144,7 @@ void decreaseQuantity(String id) async {
         .eq('product_id', id);
       }
     }
+    // _saveCartToMemory();
   }
 
   isUpdating.value = false;
@@ -160,17 +168,40 @@ void decreaseQuantity(String id) async {
     })
     .eq('user_id', email)
     .eq('product_id', id);
+    // _saveCartToMemory();
   }
 }
 
 
-    void _saveCartToMemory() {
-      print('Cart saved to memory');
-    }
+    // void _saveCartToMemory() {
+    //   print('Cart saved to memory');
+    // }
 
     CartItem? getItem(String id) {
       return cartItems.firstWhereOrNull((item) => item.id == id);
     }
+
+//   void _saveCartToMemory() {
+//     final user = Supabase.instance.client.auth.currentUser;
+//     final email = user?.email;
+
+//   if (email != null) {
+//     final cartJson = cartItems.map((item) => item.toJson()).toList();
+//     _localStorage.write(_cartKey(email), cartJson);
+//     print('Cart saved locally for $email');
+//   }
+// }
+
+// void loadCartFromLocalStorage(String userEmail) {
+//   final List? cartJson = _localStorage.read<List>(_cartKey(userEmail));
+
+//   if (cartJson != null) {
+//     cartItems.assignAll(cartJson.map((e) => CartItem.fromJson(Map<String, dynamic>.from(e))).toList());
+//     print('📦 Cart loaded from local storage for $userEmail');
+//   }
+// }
+
+
 
   //   Future<List<CartHistoryItem>> loadCartFromSupabase(String email) async {
   //   final response = await supabase.from('cart_history').select().eq('email', email);
@@ -203,39 +234,51 @@ void decreaseQuantity(String id) async {
   }
 
   Future<void> saveCartToSupabase(String userEmail) async {
+  print('Saving cart to Supabase for: $userEmail');
+  
   for (var item in cartItems) {
-    // 1. Cek apakah item ini sudah ada di Supabase
-    final existing = await supabase
-      .from('cart_history')
-      .select()
-      .eq('user_id', userEmail)
-      .eq('product_id', item.id)
-      .eq('is_active', true)
-      .maybeSingle();
+    print('Saving item: ${item.name} (id: ${item.id}, qty: ${item.quantity})');
 
-    if (existing != null) {
-      // 2. Kalau sudah ada ➔ update quantity-nya
-      await supabase.from('cart_history').update({
-        'quantity': item.quantity,  // ✅ Gunakan jumlah terbaru dari local
-        'timestamp': DateTime.now().toIso8601String(),
-      })
-      .eq('user_id', userEmail)
-      .eq('product_id', item.id);
-    } else {
-      // 3. Kalau belum ada ➔ insert baru
-      await supabase.from('cart_history').upsert({
-        'user_id': userEmail,
-        'product_id': item.id,
-        'name': item.name,
-        'price': item.price,
-        'image_url': item.imageUrl,
-        'quantity': item.quantity,
-        'is_active': true,
-        'timestamp': DateTime.now().toIso8601String(),
-      }, onConflict: 'user_id, product_id');
+    try {
+      final existing = await supabase
+          .from('cart_history')
+          .select()
+          .eq('user_id', userEmail)
+          .eq('product_id', item.id)
+          .eq('is_active', true)
+          .maybeSingle();
+
+      print('🔍 Existing item: $existing');
+
+      if (existing != null) {
+        await supabase.from('cart_history').update({
+          'quantity': item.quantity,
+          'timestamp': DateTime.now().toIso8601String(),
+        })
+        .eq('user_id', userEmail)
+        .eq('product_id', item.id)
+        .then((value) => print('✅ Updated ${item.name}'))
+        .catchError((e) => print('❌ Update failed: $e'));
+      } else {
+        await supabase.from('cart_history').upsert({
+          'user_id': userEmail,
+          'product_id': item.id,
+          'name': item.name,
+          'price': item.price,
+          'image_url': item.imageUrl,
+          'quantity': item.quantity,
+          'is_active': true,
+          'timestamp': DateTime.now().toIso8601String(),
+        }, onConflict: 'user_id, product_id')
+        .then((value) => print('✅ Inserted ${item.name}'))
+        .catchError((e) => print('❌ Insert failed: $e'));
+      }
+    } catch (e) {
+      print('🔥 Error saving item ${item.name}: $e');
     }
   }
 }
+
 
 
   Future<void> removeItemFromSupabase(String userEmail, String productId) async {
@@ -244,6 +287,7 @@ void decreaseQuantity(String id) async {
       .update({'is_active': false})
       .eq('user_id', userEmail)
       .eq('product_id', productId);
+      // _saveCartToMemory();
   }
 
   Future<void> clearCartFromSupabase(String userEmail) async {
@@ -257,11 +301,14 @@ void decreaseQuantity(String id) async {
           })
           .eq('user_id', userEmail)
           .eq('is_active', true);  // Optional: hanya clear yang aktif
+          // _saveCartToMemory();
       print('Cart cleared from Supabase');
     } catch (e) {
       print('Error clearing cart from Supabase: $e');
     }
   }
+
+  
 
 //   Future<void> saveOrderToSupabase(OrderHistoryItem order, String paymentMethod) async {
 //   try {

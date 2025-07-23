@@ -67,7 +67,7 @@ class ProductService {
         .select('*, seller_id (id, store_name)')
         .eq('is_active', true)
         .or(
-          'name.ilike.%$query%,description.ilike.%$query%,category.ilike.%$query%',
+          'name.ilike.%$query%,description.ilike.%$query%',
         )
         .order('name');
 
@@ -94,7 +94,7 @@ class ProductService {
   try {
     await supabase
         .from('products')
-        .update({'stock': newStock})
+        .update({'stock_quantity': newStock})
         .eq('id', productId);
 
     print('Stock updated in Supabase for product $productId to $newStock');

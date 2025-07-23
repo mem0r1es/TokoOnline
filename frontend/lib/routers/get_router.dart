@@ -5,6 +5,7 @@ import 'package:flutter_web/models/product_model.dart';
 import 'package:flutter_web/pages/favorite/favorite_page.dart';
 import 'package:flutter_web/pages/history/history.dart';
 import 'package:flutter_web/pages/search/search_page.dart';
+import 'package:flutter_web/pages/shoppingcart/cart.dart';
 import 'package:flutter_web/pages/shoppingcart/shopping_cart.dart';
 import 'package:get/get.dart';
 import 'package:get/get_navigation/src/routes/get_route.dart';
@@ -32,7 +33,7 @@ List<GetPage> _routes = [
   GetPage(name: ProductDialog.TAG, page: () => ProductDialog(), binding: InitialScreenBindings()),
   GetPage(name: ProductInfoPage.TAG, page: () => ProductInfoPage(), binding: InitialScreenBindings()),
   GetPage(name: FavoritePage.TAG, page: () => FavoritePage(), binding: InitialScreenBindings()),
-  GetPage(name: ShoppingCart.TAG, page: () => ShoppingCart(), binding: InitialScreenBindings()),
+  GetPage(name: CartPages.TAG, page: () => CartPages(), binding: InitialScreenBindings()), //'/shoppingcart'
 
 
   

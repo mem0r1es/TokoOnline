@@ -32,12 +32,17 @@ class FavoritePage extends StatelessWidget {
     final authController = Get.find<AuthController>();
 
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        title: Text('Favorite Saya', 
+        style: TextStyle(),),
+      ),
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const HeaderPages(),
+            // const HeaderPages(),
             const SizedBox(height: 20),
             Obx(() {
               final favorites = favC.favorites;
@@ -428,6 +433,7 @@ class FavoritePage extends StatelessWidget {
 
   void _handleFavorite(Product product) {
     favC.toggleFavorite(product);
+    
 
     Get.snackbar(
       "Favorites",

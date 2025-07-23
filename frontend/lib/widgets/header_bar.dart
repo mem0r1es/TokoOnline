@@ -1,14 +1,15 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide SearchController;
 import 'package:flutter_web/controllers/address_controller.dart';
 import 'package:flutter_web/controllers/auth_controller.dart';
 import 'package:flutter_web/controllers/cart_controller.dart';
+import 'package:flutter_web/controllers/checkout_controller.dart';
 import 'package:flutter_web/controllers/favorite_controller.dart';
 import 'package:flutter_web/controllers/product_controller.dart';
+import 'package:flutter_web/pages/shoppingcart/cart.dart';
 import 'package:flutter_web/services/scroll_controller_manager.dart';
-// import 'package:flutter_web/controllers/favorite_controller.dart';
-import 'package:flutter_web/pages/about/about_page.dart';
-import 'package:flutter_web/pages/contact/contact.dart';
-import 'package:flutter_web/pages/history/history.dart';
+import 'package:flutter_web/pages/about/about_page.dart'; // Periksa nama kelas AboutPage
+import 'package:flutter_web/pages/contact/contact.dart'; // Periksa nama kelas ContactPage
+import 'package:flutter_web/pages/history/history.dart'; // Ini ProductInfoPage?
 import 'package:flutter_web/pages/profile/profile_page.dart';
 import 'package:flutter_web/services/cart_service.dart';
 import 'package:flutter_web/services/checkout_service.dart';
@@ -22,75 +23,107 @@ import '../pages/about/about.dart';
 import '../pages/search/search_page.dart';
 import '../pages/favorite/favorite_page.dart';
 import '../pages/auth/auth_dialog.dart';
-// import '../controller/auth_controller.dart';
-// import '../controller/cart_controller.dart';
-// import '../controller/product_controller.dart';
 import '../models/product_model.dart';
 
-class HeaderPages extends GetView<ScrollControllerManager> {
+// Tambahkan import untuk SearchController yang baru
+import 'package:flutter_web/controllers/search_controller.dart'; // Pastikan path ini benar
+
+
+class HeaderPages extends GetView<ScrollControllerManager> { // Tetap gunakan ScrollControllerManager jika ini memang controller utama untuk header
   const HeaderPages({super.key});
 
   @override
   Widget build(BuildContext context) {
     final AuthController authController = Get.find();
     final CartService cartService = Get.find();
-    final ProductService productService = Get.find();
+    // final ProductService productService = Get.find(); // Tidak perlu lagi di sini, pindah ke SearchController
     final AddressController addressController = Get.find();
     final CheckoutService checkoutService = Get.find();
     final CartController cartController = Get.find();
+    final CheckoutController checkoutController = Get.find();
+
+    // Dapatkan instance SearchController
+    final SearchController searchController = Get.find<SearchController>();
+
 
     return Container(
       width: double.infinity,
-      color: const Color(0xFFFFFFFF),
+      color: Colors.purple[40],
       padding: const EdgeInsets.symmetric(horizontal: 54, vertical: 29),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          // Logo dan Teks
-          Row(
-            children: [
-              Image.asset(
-                'headers/MeubelHouse_Logos-05.png',
-                width: 50,
-                height: 32,
-              ),
-              const SizedBox(width: 5),
-              Text(
-                'Toko Online',
-                style: GoogleFonts.montserrat(
-                  fontSize: 34,
-                  color: const Color(0xFF000000),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
+          // Logo dan Teks (diuncomment jika ingin ditampilkan)
+          // Row(
+          //   children: [
+          //     Image.asset(
+          //       'headers/MeubelHouse_Logos-05.png', // Pastikan path ini benar
+          //       width: 50,
+          //       height: 32,
+          //     ),
+          //     const SizedBox(width: 5),
+          //     Text(
+          //       'Toko Online',
+          //       style: GoogleFonts.montserrat(
+          //         fontSize: 34,
+          //         color: const Color(0xFF000000),
+          //         fontWeight: FontWeight.w600,
+          //       ),
+          //     ),
+          //   ],
+          // ),
+          // const SizedBox(width: 40), // Spasi setelah logo
           // Menu Navigasi
-          Row(
-            children: [
-              _navItem('Home', () => Get.toNamed(HomePage.TAG)),
-              const SizedBox(width: 20),
-              _navItem('Shop', () => Get.toNamed(ShopsPage.TAG)),
-              const SizedBox(width: 20),
-              _navItem('About', () => Get.toNamed(AboutPage1.TAG)),
-              const SizedBox(width: 20),
-              _navItem('Contact', () => Get.toNamed(ContactPage1.TAG)),
-            ],
+          // Row(
+          //   children: [
+          //     // Sesuaikan TAG halaman Anda:
+          //     _navItem('About', () => Get.toNamed(AboutPage1.TAG)), // Jika AboutPage1
+          //     const SizedBox(width: 20),
+          //     _navItem('Contact', () => Get.toNamed(ContactPage1.TAG)), // Jika ContactPage1
+          //   ],
+          // ),
+          // const SizedBox(width: 40), // Spasi setelah navigasi
+
+          // Search Bar
+          Expanded(
+            child: Container(
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey[300]!),
+              ),
+              child: TextField(
+                controller: searchController.searchInputController, // Gunakan controller dari SearchController
+                decoration: InputDecoration(
+                  hintText: 'Search products...',
+                  hintStyle: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[500]),
+                  prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                  border: InputBorder.none,
+                  isCollapsed: true,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                onSubmitted: (query) {
+                  if (query.trim().isNotEmpty) {
+                    searchController.performSearch(query.trim()); // Panggil method dari SearchController
+                    // searchLogicController.clearSearchInput(); // Ini sudah dilakukan di performSearch jika sukses
+                  }
+                  searchController.searchInputController.clear();
+                },
+                textInputAction: TextInputAction.search,
+              ),
+            ),
           ),
+          const SizedBox(width: 20),
           // Icon Section
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              _iconBtn(Icons.person, () => _userlogin(authController)),
-              const SizedBox(width: 10),
+              // _iconBtn(Icons.person, () => _userlogin(authController)),
+              // const SizedBox(width: 10),
 
-              // Search icon
-              _iconBtn(Icons.search, () => _openSearchDialog()),
-              const SizedBox(width: 10),
-
-              // Favorite icon
-              _iconBtn(Icons.favorite_border, () => Get.toNamed(FavoritePage.TAG)),
-              const SizedBox(width: 10),
+              // _iconBtn(Icons.favorite_border, () => Get.toNamed(FavoritePage.TAG)),
+              // const SizedBox(width: 10),
 
               // Cart icon dengan badge
               Obx(
@@ -145,12 +178,12 @@ class HeaderPages extends GetView<ScrollControllerManager> {
     );
   }
 
-  // Show auth dialog
+  // --- Methods yang tidak terkait search tetap di sini ---
+
   void _showAuthDialog() {
     Get.dialog(AuthDialog());
   }
 
-  // Show user menu
   void _showUserMenu(AuthController authController) {
     Get.dialog(
       AlertDialog(
@@ -172,48 +205,34 @@ class HeaderPages extends GetView<ScrollControllerManager> {
             ),
             SizedBox(height: 4),
             Text(
-              authController.getUserEmail() ?? 'User',
+              authController.getUserName() ?? 'User',
               style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600]),
             ),
             SizedBox(height: 20),
-
-            // Menu options
             _userMenuOption(
               icon: Icons.person,
               title: 'Profile',
               onTap: () {
                 Get.toNamed(ProfilePage.TAG);
-                // Get.to(()=> ProfilePage());
-                // Get.snackbar('Info', 'Profile page coming soon!');
               },
             ),
-
             _userMenuOption(
               icon: Icons.shopping_bag,
               title: 'My Orders',
               onTap: () {
-                Get.toNamed(ProductInfoPage.TAG);
-                // Get.to(()=> ProductInfoPage());
-                // Get.snackbar('Info', 'Orders page coming soon!');
+                Get.toNamed(ProductInfoPage.TAG); // Pastikan ProductInfoPage.TAG ada
               },
             ),
-            // _userMenuOption(
-            //   icon: Icons.settings,
-            //   title: 'Settings',
-            //   onTap: () {
-            //     Get.back();
-            //     Get.snackbar('Info', 'Settings page coming soon!');
-            //   },
-            // ),
-
             SizedBox(height: 20),
-
-            // Logout button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () {
                   Get.back();
+                  final cartService = Get.find<CartService>();
+                  cartService.clearCart();
+                  final favController = Get.find<FavoriteController>();
+                  favController.clearFavorites();
                   authController.logout();
                 },
                 icon: Icon(Icons.logout, color: Colors.white),
@@ -256,36 +275,22 @@ class HeaderPages extends GetView<ScrollControllerManager> {
     }
   }
 
-  // Handle cart click
   void _handleCartClick(authService, CartService cartService) {
     if (authService.isLoggedIn.value) {
-      // User is logged in, go to cart
       if (cartService.isNotEmpty) {
-        Get.toNamed(ShoppingCart.TAG);
+        Get.toNamed(CartPages.TAG);
       } else {
-        // Cart is empty
         Get.dialog(
           AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            title: Text(
-              'Cart Empty',
-              style: GoogleFonts.montserrat(fontWeight: FontWeight.w600),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: Text('Cart Empty', style: GoogleFonts.montserrat(fontWeight: FontWeight.w600)),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.shopping_cart_outlined,
-                  size: 64,
-                  color: Colors.grey,
-                ),
+                Icon(Icons.shopping_cart_outlined, size: 64, color: Colors.grey),
                 SizedBox(height: 16),
-                Text(
-                  'Your cart is empty. Add some products to get started!',
-                  style: GoogleFonts.poppins(fontSize: 14),
-                  textAlign: TextAlign.center,
+                Text('Your cart is empty. Add some products to get started!',
+                  style: GoogleFonts.poppins(fontSize: 14), textAlign: TextAlign.center,
                 ),
               ],
             ),
@@ -303,25 +308,17 @@ class HeaderPages extends GetView<ScrollControllerManager> {
         );
       }
     } else {
-      // User not logged in
       Get.dialog(
         AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: Text(
-            'Login Required',
-            style: GoogleFonts.montserrat(fontWeight: FontWeight.w600),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text('Login Required', style: GoogleFonts.montserrat(fontWeight: FontWeight.w600)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(Icons.lock, size: 64, color: Colors.orange),
               SizedBox(height: 16),
-              Text(
-                'Please login to access your shopping cart and place orders.',
-                style: GoogleFonts.poppins(fontSize: 14),
-                textAlign: TextAlign.center,
+              Text('Please login to access your shopping cart and place orders.',
+                style: GoogleFonts.poppins(fontSize: 14), textAlign: TextAlign.center,
               ),
             ],
           ),
@@ -342,18 +339,18 @@ class HeaderPages extends GetView<ScrollControllerManager> {
   }
 
   Widget _iconBtn(IconData icon, [VoidCallback? onPressed]) {
-  return SizedBox(
-    width: 28,
-    height: 28,
-    child: IconButton(
-      icon: Icon(icon, color: Colors.black, size: 24),
-      onPressed: onPressed,
-      padding: EdgeInsets.zero, // ➔ HAPUS padding default
-      constraints: BoxConstraints(), // ➔ HAPUS size default
-      splashRadius: 20, // ➔ Biar ripple klik ga terlalu besar
-    ),
-  );
-}
+    return SizedBox(
+      width: 28,
+      height: 28,
+      child: IconButton(
+        icon: Icon(icon, color: Colors.black, size: 24),
+        onPressed: onPressed,
+        padding: EdgeInsets.zero,
+        constraints: BoxConstraints(),
+        splashRadius: 20,
+      ),
+    );
+  }
 
   Widget _navItem(String text, [VoidCallback? onTap]) {
     return GestureDetector(
@@ -367,115 +364,5 @@ class HeaderPages extends GetView<ScrollControllerManager> {
         ),
       ),
     );
-  }
-
-  void _openSearchDialog() {
-    String query = '';
-    showDialog(
-      context: Get.context!,
-      builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: Text('Search Product', style: GoogleFonts.poppins()),
-          content: TextField(
-            onChanged: (val) => query = val,
-            decoration: const InputDecoration(
-              hintText: 'Enter product name',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                Navigator.pop(context);
-                if (query.trim().isNotEmpty) {
-                  await _performSearch(query.trim());
-                }
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
-              child: const Text(
-                'Search',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _performSearch(String query) async {
-    try {
-      print('🔍 HEADER SEARCH: Starting search for "$query"');
-
-      // Get ProductService yang sudah di-initialize di build()
-      final ProductService productService = Get.find<ProductService>();
-      final List<Product> searchResults = await productService.searchProducts(
-        query,
-      );
-
-      print('HEADER SEARCH: Found ${searchResults.length} results');
-      for (var product in searchResults) {
-        print('   - ${product.title} (${product.category})');
-      }
-
-      if (searchResults.isNotEmpty) {
-        Get.toNamed(
-          SearchResultPage.TAG,
-          arguments: {
-            'query': query,
-            'results':searchResults,
-          }
-          );
-      } else {
-        Get.dialog(
-          AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            title: Text(
-              'No Results Found',
-              style: GoogleFonts.montserrat(fontWeight: FontWeight.w600),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.search_off, size: 64, color: Colors.grey),
-                SizedBox(height: 16),
-                Text(
-                  'No products found for "$query"',
-                  style: GoogleFonts.poppins(fontSize: 16),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(onPressed: () => Get.back(), child: Text('OK')),
-              ElevatedButton(
-                onPressed: () {
-                  Get.back();
-                  _openSearchDialog();
-                },
-                child: Text('Search Again'),
-              ),
-            ],
-          ),
-        );
-      }
-    } catch (e) {
-      print('SEARCH ERROR: $e');
-      Get.snackbar(
-        'Search Error',
-        'Failed to search products: ${e.toString()}',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-    }
   }
 }

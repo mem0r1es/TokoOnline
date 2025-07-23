@@ -9,6 +9,12 @@ class CustomScrollController extends GetxController {
 
   late ScrollController scrollController;
 
+  RxInt selectedIndex = 0.obs;
+
+  void changePage (int index) {
+    selectedIndex.value = index;
+  }
+
   @override
   void onInit() {
     scrollController = ScrollController(

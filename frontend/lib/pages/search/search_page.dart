@@ -13,7 +13,7 @@ import 'package:get/get.dart';
 // import '../../controller/auth_controller.dart';
 import '../../models/product_model.dart';
 
-class SearchResultPage extends StatelessWidget {
+class SearchResultPage extends GetView<FavoriteController> {
   final String query;
   final List<Product> results;
   static final String TAG = '/searchresult';
@@ -21,7 +21,7 @@ class SearchResultPage extends StatelessWidget {
   SearchResultPage({super.key, required this.query, required this.results});
   // final favC = Get.find<FavoriteController>();
   final ProductController productController = Get.put(ProductController());
-  final favC = Get.put(FavoriteController());
+  // final favC = Get.put(FavoriteController());
 
   @override
   Widget build(BuildContext context) {
@@ -130,20 +130,36 @@ class SearchResultPage extends StatelessWidget {
   // }
 
   Widget _buildSearchResults(CartService cartService, AuthController authController) {
-    return GridView.builder(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
-        childAspectRatio: 0.65,
-      ),
-      itemCount: results.length,
-      itemBuilder: (context, index) {
-        final product = results[index];
-        return _buildProductCard(product, cartService, authController);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        int crossAxisCount = 2; 
+
+        if (constraints.maxWidth >= 1200) {
+          crossAxisCount = 4;
+        } else if (constraints.maxWidth >= 800) {
+          crossAxisCount = 3;
+        }
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 20),
+          child: GridView.builder(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              childAspectRatio: 0.65,
+            ),
+            itemCount: results.length,
+            itemBuilder: (context, index) {
+              final product = results[index];
+              return _buildProductCard(product, cartService, authController);
+            },
+          ),
+        );
       },
     );
   }
+
 
   Widget _buildProductCard(
     Product product,
@@ -171,7 +187,7 @@ class SearchResultPage extends StatelessWidget {
               // Product Image
               Container(
                 width: double.infinity,
-                height: 200,
+                height: 120,
                 padding: const EdgeInsets.all(12),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
@@ -204,19 +220,6 @@ class SearchResultPage extends StatelessWidget {
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                    // const SizedBox(height: 8),
-        
-                    // Product Description
-                    // Text(
-                    //   product.description,
-                    //   style: GoogleFonts.poppins(
-                    //     fontSize: 14,
-                    //     fontWeight: FontWeight.w400,
-                    //     color: Colors.grey[600],
-                    //   ),
-                    //   maxLines: 2,
-                    //   overflow: TextOverflow.ellipsis,
-                    // ),
         
                     const SizedBox(height: 12),
         
@@ -235,154 +238,10 @@ class SearchResultPage extends StatelessWidget {
                                 color: Colors.green[600],
                               ),
                             ),
-                            // if (product.category != null) ...[
-                            //   SizedBox(height: 4),
-                            //   Container(
-                            //     padding: EdgeInsets.symmetric(
-                            //       horizontal: 8,
-                            //       vertical: 2,
-                            //     ),
-                            //     decoration: BoxDecoration(
-                            //       color: Colors.blue[100],
-                            //       borderRadius: BorderRadius.circular(12),
-                            //     ),
-                            //     child: Text(
-                            //       product.category!,
-                            //       style: GoogleFonts.poppins(
-                            //         fontSize: 12,
-                            //         color: Colors.blue[700],
-                            //         fontWeight: FontWeight.w500,
-                            //       ),
-                            //     ),
-                            //   ),
-                            // ],
                           ],
                         ),
-        
-                        // Stock info
-                        // Obx(() {
-                        //   final updatedProduct = productController.getProductById(product.id ?? product.title);
-        
-                        //   final stock = updatedProduct?.stock ?? 0;
-                        //   final stockColor = stock > 0 ? Colors.green[600] : Colors.red[600];
-        
-                        //   return Column(
-                        //     crossAxisAlignment: CrossAxisAlignment.end,
-                        //     children: [
-                        //       Text(
-                        //         'Stock',
-                        //         style: GoogleFonts.poppins(
-                        //           fontSize: 12,
-                        //           color: Colors.grey[600],
-                        //         ),
-                        //       ),
-                        //       Text(
-                        //         '$stock',
-                        //         style: GoogleFonts.poppins(
-                        //           fontSize: 14,
-                        //           fontWeight: FontWeight.w600,
-                        //           color: stockColor,
-                        //         ),
-                        //       ),
-                        //     ],
-                        //   );
-                        // }),
                       ],
                     ),
-        
-                    const SizedBox(height: 16),
-        
-                    // Action Buttons
-                    // Row(
-                    //   children: [
-                    //     // Add to Cart Button
-                    //     Expanded(
-                    //       flex: 3,
-                    //       child: Obx(() {
-                    //         final cartItem = cartService.getItem(productId);
-        
-                    //         if (cartItem != null) {
-                    //           // Sudah ada di cart ➔ Tampilkan tombol + -
-                    //           return Row(
-                    //             mainAxisAlignment: MainAxisAlignment.center,
-                    //             mainAxisSize: MainAxisSize.min,
-                    //             children: [
-                    //               IconButton(
-                    //                 onPressed: () => cartService.decreaseQuantity(productId),
-                    //                 icon: Icon(Icons.remove_circle_outline),
-                    //                 constraints: BoxConstraints(minWidth: 24, minHeight: 24),
-                    //               ),
-                    //               Container(
-                    //                 padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    //                 decoration: BoxDecoration(
-                    //                   border: Border.all(color: Colors.grey[300]!),
-                    //                   borderRadius: BorderRadius.circular(4),
-                    //                 ),
-                    //                 child: Text(
-                    //                   '${cartItem.quantity}',
-                    //                   style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600),
-                    //                 ),
-                    //               ),
-                    //               IconButton(
-                    //                 onPressed: () => cartService.increaseQuantity(productId),
-                    //                 icon: Icon(Icons.add_circle_outline),
-                    //                 constraints: BoxConstraints(minWidth: 24, minHeight: 24),
-                    //               ),
-                    //             ],
-                    //           );
-                    //         } else {
-                    //           // Belum ada di cart ➔ Tampilkan tombol Add Cart
-                    //           return ElevatedButton.icon(
-                    //             onPressed: () => _handleAddToCart(product, productId, cartService, authController),
-                    //             style: ElevatedButton.styleFrom(
-                    //               backgroundColor: Colors.black,
-                    //               foregroundColor: Colors.white,
-                    //               padding: EdgeInsets.symmetric(vertical: 12),
-                    //               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    //             ),
-                    //             icon: Icon(Icons.shopping_cart_outlined, size: 18),
-                    //             label: Text(
-                    //               'Add Cart',
-                    //               style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600),
-                    //             ),
-                    //           );
-                    //         }
-                    //       }),
-                    //     ),
-        
-        
-                    //     SizedBox(width: 8),
-        
-                    //     // Favorite Button
-                    //     Obx(
-                    //       () => Container(
-                    //         decoration: BoxDecoration(
-                    //           color: favC.isFavorite(product)
-                    //               ? Colors.red[50]
-                    //               : Colors.grey[100],
-                    //           borderRadius: BorderRadius.circular(8),
-                    //           border: Border.all(
-                    //             color: favC.isFavorite(product)
-                    //                 ? Colors.red
-                    //                 : Colors.grey[300]!,
-                    //           ),
-                    //         ),
-                    //         child: IconButton(
-                    //           onPressed: () => _handleFavorite(product),
-                    //           icon: Icon(
-                    //             favC.isFavorite(product)
-                    //                 ? Icons.favorite
-                    //                 : Icons.favorite_border,
-                    //             color: favC.isFavorite(product)
-                    //                 ? Colors.red
-                    //                 : Colors.grey[600],
-                    //             size: 20,
-                    //           ),
-                    //         ),
-                    //       ),
-                    //     ),
-                    //   ],
-                    // ),
                   ],
                 ),
               ),
@@ -501,19 +360,19 @@ class SearchResultPage extends StatelessWidget {
   }
 
   void _handleFavorite(Product product) {
-    favC.toggleFavorite(product);
+    controller.toggleFavorite(product);
 
     Get.snackbar(
       "Favorites",
-      favC.isFavorite(product)
+      controller.isFavorite(product)
           ? "${product.title} added to favorites"
           : "${product.title} removed from favorites",
-      backgroundColor: favC.isFavorite(product) ? Colors.red : Colors.grey,
+      backgroundColor: controller.isFavorite(product) ? Colors.red : Colors.grey,
       colorText: Colors.white,
       snackPosition: SnackPosition.BOTTOM,
       duration: Duration(seconds: 2),
       icon: Icon(
-        favC.isFavorite(product) ? Icons.favorite : Icons.favorite_border,
+        controller.isFavorite(product) ? Icons.favorite : Icons.favorite_border,
         color: Colors.white,
       ),
     );

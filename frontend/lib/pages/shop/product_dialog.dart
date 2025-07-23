@@ -87,69 +87,61 @@ class ProductDialogContent extends StatelessWidget {
       appBar: AppBar(title: Text(product.title)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: Row(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Flexible(
-              flex: 1,
-              child: AspectRatio(
-                aspectRatio: 4 / 4,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: _buildProductImage(product),
-                ),
+            AspectRatio(
+              aspectRatio: 4 / 4,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: _buildProductImage(product),
               ),
             ),
-            const SizedBox(width: 20),
-            Expanded(
-              flex: 2,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(product.title, style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  if (product.category != null) ...[
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.blue[100],
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        product.category!,
-                        style: GoogleFonts.poppins(fontSize: 12, color: Colors.blue[700], fontWeight: FontWeight.w500),
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 8),
-                  Text('Store: ${product.storeName ?? '-'}', style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[700])),
-                  const SizedBox(height: 12),
-                  Text(product.description, style: GoogleFonts.poppins(fontSize: 14)),
-                  const SizedBox(height: 16),
-                  Text('Rp ${_rupiah(product.price)}', style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.green[700])),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Text('Stock:', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
-                      const SizedBox(width: 5),
-                      Text('$stock', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: stockColor)),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Obx(() {
-                        final item = cartService.getItem(productId);
-                        return item != null
-                          ? _buildCartQuantityControls(productId, item)
-                          : _buildAddToCartButton(product, productId);
-                      }),
-                      const SizedBox(width: 8),
-                      Obx(() => _buildFavoriteButton()),
-                    ],
-                  )
-                ],
+            const SizedBox(height: 12),
+            Text(
+              product.title, 
+              style: GoogleFonts.poppins(fontSize: 22, 
+              fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            if (product.category != null) ...[
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.blue[100],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  product.category!,
+                  style: GoogleFonts.poppins(fontSize: 12, color: Colors.blue[700], fontWeight: FontWeight.w500),
+                ),
               ),
+            ],
+            const SizedBox(height: 8),
+            Text('Store: ${product.storeName ?? '-'}', style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[700])),
+            const SizedBox(height: 12),
+            Text(product.description, style: GoogleFonts.poppins(fontSize: 14)),
+            const SizedBox(height: 16),
+            Text('Rp ${_rupiah(product.price)}', style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.green[700])),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Text('Stock:', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
+                const SizedBox(width: 5),
+                Text('$stock', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: stockColor)),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Obx(() {
+                  final item = cartService.getItem(productId);
+                  return item != null
+                    ? _buildCartQuantityControls(productId, item)
+                    : _buildAddToCartButton(product, productId);
+                }),
+                const SizedBox(width: 8),
+                Obx(() => _buildFavoriteButton()),
+              ],
             )
           ],
         ),

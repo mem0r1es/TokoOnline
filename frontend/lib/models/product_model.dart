@@ -32,22 +32,31 @@ class Product {
 
   // Factory constructor untuk data dari database
   factory Product.fromDatabase(Map<String, dynamic> data) {
+    print('RAW PRODUCT DATA: $data');
+
+    print('DEBUG seller_id: ${data['seller_id']} (${data['seller_id'].runtimeType})');
     return Product(
-      id: data['id'],
+      id: data['id']?.toString(),
       title: data['name'] ?? '',
       imagePath: data['image_url'] ?? 'assets/placeholder.png',
       description: data['description'] ?? '',
       price: (data['price'] as num?)?.toInt() ?? 0,
       category: data['category'],
-      stock: data['stock'],
+      stock: data['stock_quantity'],
       isActive: data['is_active'],
       createdAt: data['created_at'] != null
           ? DateTime.parse(data['created_at'])
           : null,
-      sellerId: data['seller_id']?['id'] ?? data['seller_id'],
-      storeName: data['seller_id']?['store_name'],
+      sellerId: data['seller_id'] is Map
+          ? data['seller_id']['id']?.toString()
+          : data['seller_id']?.toString(),
+      storeName: data['seller_id'] is Map
+          ? data['seller_id']['store_name']
+          : null,
       quantity: 1,
+      
     );
+    
   }
 
   // Convert to JSON for database
@@ -58,12 +67,22 @@ class Product {
       'description': description,
       'price': price,
       'category': category,
-      'stock': stock,
+      'stock_quantity': stock,
       'is_active': isActive ?? true,
       'seller_id': sellerId,
       'storeName' : storeName,
     };
   }
+
+  factory Product.fromJson(Map<String, dynamic> json) => Product(
+    id: json['id'],
+    title: json['title'],
+    price: json['price'],
+    imagePath: json['imagePath'],
+    storeName: json['storeName'],
+    category: json['category'],
+    stock: json['stock_quantity'], description: '', sellerId: '',
+  );
 
   // For backward compatibility
   Map<String, dynamic> toJson() {
@@ -74,7 +93,7 @@ class Product {
       'description': description,
       'price': price,
       'category': category,
-      'stock': stock,
+      'stock_quantity': stock,
       'quantity': quantity,
       'subtotal': subtotal,
       'seller_id': sellerId,
