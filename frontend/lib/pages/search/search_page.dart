@@ -355,6 +355,7 @@ class SearchResultPage extends GetView<FavoriteController> {
       price: product.price.toDouble(),
       imageUrl: product.imagePath,
       quantity: 1, // Default quantity is 1
+      seller: product.storeName ?? 'Toko tidak diketahui',
       ),
     );
   }

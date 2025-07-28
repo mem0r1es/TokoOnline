@@ -149,12 +149,12 @@ class ProfilePage extends GetView<AuthController> {
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                                     decoration: BoxDecoration(
-                                      color: Colors.blue, // Warna yang lebih standar untuk login
+                                      color: Colors.purple[50], // Warna yang lebih standar untuk login
                                       borderRadius: BorderRadius.circular(50),
                                     ),
                                     child: Text(
                                       'Login',
-                                      style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.w600),
+                                      style: GoogleFonts.poppins(color: Colors.purple[500], fontWeight: FontWeight.w600),
                                     ),
                                   ),
                                 ),
@@ -204,6 +204,9 @@ class ProfilePage extends GetView<AuthController> {
                 ),
               ),
               ListTile(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadiusGeometry.circular(25)
+                ),
                 leading: const Icon(Icons.location_on),
                 tileColor: Color.fromARGB(255, 243, 229, 242).withOpacity(0.9),
                 // shape: Border.all(color: Colors.white),
@@ -232,6 +235,9 @@ class ProfilePage extends GetView<AuthController> {
               ),
               const SizedBox(height: 10),
               ListTile(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadiusGeometry.circular(25)
+                ),
                 leading: const Icon(Icons.favorite),
                 tileColor: Color.fromARGB(255, 243, 229, 242).withOpacity(0.9),
                 // shape: Border.all(color: Colors.white),
@@ -268,6 +274,9 @@ class ProfilePage extends GetView<AuthController> {
                 ),
               ),
               ListTile(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadiusGeometry.circular(25)
+                ),
                 leading: const Icon(Icons.shopping_bag),
                 tileColor: Color.fromARGB(255, 243, 229, 242).withOpacity(0.9),
                 // shape: Border.all(color: Colors.white),

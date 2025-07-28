@@ -3,6 +3,7 @@ class CartItem {
   final String name;
   final double price;
   final String imageUrl;
+  final String seller;
   int quantity;
 
   CartItem({
@@ -10,6 +11,7 @@ class CartItem {
     required this.name,
     required this.price,
     required this.imageUrl,
+    required this.seller,
     this.quantity = 1,
   });
 
@@ -21,6 +23,7 @@ class CartItem {
         'price': price,
         'imageUrl': imageUrl,
         'quantity': quantity,
+        'seller' : seller,
       };
 
   factory CartItem.fromJson(Map<String, dynamic> json) => CartItem(
@@ -29,6 +32,7 @@ class CartItem {
         price: json['price'].toDouble(),
         imageUrl: json['imageUrl'],
         quantity: json['quantity'],
+        seller: json['seller'],
       );
 
       factory CartItem.fromSupabaseOrderItem(Map<String, dynamic> map) {
@@ -38,6 +42,7 @@ class CartItem {
           price: (map['price_at_purchase'] as num).toDouble(), // Gunakan 'price_at_purchase'
           imageUrl: map['image_url'] as String,
           quantity: map['item_quantity'] as int,
+          seller: map['seller'] as String,
         );
       }
 

@@ -1,3 +1,4 @@
+import 'package:flutter_web/models/cargo_model.dart';
 import 'package:flutter_web/models/info_user.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -12,7 +13,7 @@ class CheckoutService extends GetxService {
   String? userId;
 
   @override
-  void initState() {
+  void onInit() {
     super.onInit();
     final email = Supabase.instance.client.auth.currentUser?.email;
     userId = Supabase.instance.client.auth.currentUser?.id;
@@ -21,24 +22,71 @@ class CheckoutService extends GetxService {
     }
   }
 
-  Future<void> saveOrderToSupabase(OrderHistoryItem order, String paymentMethod) async {
+  Future<void> saveOrderToSupabase(OrderHistoryItem order, String paymentMethod, CargoModel cargo)async {
   try {
     final info = order.infoUser.first;
     final timestamp = order.timestamp.toIso8601String();
+    final fullAddress = '${info.address}, '
+    '${info.kecamatan}, '
+    '${info.kota}, '
+    '${info.provinsi}, '
+    '${info.kodepos} ';
+    // final cargoCategory = order.cargoCategory;
+    // final cargoName = order.cargoName;
 
     // Simpan setiap item sebagai 1 row
     for (final item in order.items) {
+      print('🟢 Inserting order: ${{
+        'timestamp': timestamp,
+        'full_name': info.fullName,
+        'email': info.email,
+        'phone': info.phone,
+        'address': fullAddress,
+        'payment_method': paymentMethod,
+        'items': item.name,
+        'item_quantity': item.quantity,
+        'total_price': item.totalPrice,
+        'imageUrl': item.imageUrl,  // pastikan imageUrl bukan null
+        'seller': item.seller,
+        'cargo_name':cargo.name,
+        'cargo_category':cargo.kategori,
+      }}');
+
+      print('📦 cargo.name = ${cargo.name}');
+print('📦 cargo.kategori = ${cargo.kategori}');
+
+
       await supabase.from('order_history').insert({
         'timestamp': timestamp,
         'full_name': info.fullName,
         'email': info.email,
         'phone': info.phone,
-        'address': info.address,
+        'address': fullAddress,
         'payment_method': paymentMethod,
         'items': item.name,
         'item_quantity': item.quantity,
         'total_price': item.totalPrice, // total untuk item ini aja
+        'imageUrl': item.imageUrl,
+        'seller': item.seller,
+        'cargo_name':cargo.name,
+        'cargo_category':cargo.kategori,
       });
+
+      // Kurangi stok produk
+      final response = await supabase
+        .from('products')
+        .select('stock_quantity')
+        .eq('id', item.id)
+        .single();
+
+      final currentStock = response['stock_quantity'] ?? 0;
+      final newStock = currentStock - item.quantity;
+
+      await supabase
+        .from('products')
+        .update({'stock_quantity': newStock})
+        .eq('id', item.id);
+
     }
 
     print('✅ Order saved per item!');
@@ -121,24 +169,37 @@ Future<void> loadOrderHistoryFromSupabase(String email) async {
         name: item['items'],
         quantity: item['item_quantity'],
         price: (item['total_price'] ?? 0).toDouble(),
-        imageUrl: '', // opsional
+        imageUrl: item['imageUrl'] ?? '',
+        seller: item['seller'] ?? 'Toko Tidak Diketahui',
       )).toList();
 
-      final infoUser = InfoUser(
-        fullName: entry.value.first['full_name'],
-        email: entry.value.first['email'],
-        phone: entry.value.first['phone'],
-        address: entry.value.first['address'],
-        timestamp: DateTime.tryParse(entry.key),
-      );
+      // Group by seller
+      final sellerGroups = <String, List<CartItem>>{};
+      for (final item in items) {
+        sellerGroups.putIfAbsent(item.seller, () => []).add(item);
+      }
 
-      orderHistory.add(OrderHistoryItem(
-        timestamp: DateTime.parse(entry.key),
-        paymentMethod: entry.value.first['payment_method'] ?? '',
-        infoUser: [infoUser],
-        items: items,
-        id: '', // kalau pakai
-      ));
+      for (final sellerEntry in sellerGroups.entries) {
+        final sellerItems = sellerEntry.value;
+
+        final infoUser = InfoUser(
+          fullName: entry.value.first['full_name'],
+          email: entry.value.first['email'],
+          phone: entry.value.first['phone'],
+          address: entry.value.first['address'],
+          timestamp: DateTime.tryParse(entry.key),
+        );
+
+        orderHistory.add(OrderHistoryItem(
+          timestamp: DateTime.parse(entry.key),
+          paymentMethod: entry.value.first['payment_method'] ?? '',
+          infoUser: [infoUser],
+          items: sellerItems,
+          id: '', 
+          cargoCategory: entry.value.first['cargo_category'], 
+          cargoName: entry.value.first['cargo_name'], 
+        ));
+      }
     }
 
     print("✅ Loaded ${orderHistory.length} order history (grouped)");

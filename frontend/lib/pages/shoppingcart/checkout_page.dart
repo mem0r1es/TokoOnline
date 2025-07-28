@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_web/controllers/address_controller.dart';
 // import 'package:flutter_web/controller/auth_controller.dart';
 import 'package:flutter_web/controllers/auth_controller.dart';
+import 'package:flutter_web/controllers/cargo_controller.dart';
 import 'package:flutter_web/controllers/checkout_controller.dart';
+import 'package:flutter_web/extensions/extension.dart';
+import 'package:flutter_web/models/cargo_model.dart';
 import 'package:flutter_web/models/cart_item.dart';
 import 'package:flutter_web/models/info_user.dart';
 // import 'package:flutter_web/controller/cart_controller.dart';
 // import 'package:flutter_web/controllers/cart_controller.dart';
 import 'package:flutter_web/models/order_history_item.dart';
+import 'package:flutter_web/pages/pengiriman/cargo.dart';
 import 'package:flutter_web/pages/profile/address_page.dart';
 import 'package:flutter_web/services/cart_service.dart';
 import 'package:flutter_web/services/checkout_service.dart';
@@ -20,7 +24,10 @@ import 'package:google_fonts/google_fonts.dart';
 // import '../../controller/cart_controller.dart';
 
 class CheckoutPage extends GetView<CheckoutController> {
-  CheckoutPage({super.key});
+  final CartItem? singleItem;
+
+  CheckoutPage({this.singleItem});
+  // CheckoutPage({super.key});
 
   // final CartController cartController = Get.find<CartController>();
   final CartService cartService = Get.find<CartService>();
@@ -49,6 +56,24 @@ class CheckoutPage extends GetView<CheckoutController> {
 
   @override
 Widget build(BuildContext context) {
+  final double bottomPadding = MediaQuery.of(context).padding.bottom;
+  final itemsToCheckout = singleItem != null
+    ? [singleItem!]  // Kalau dari "Beli Sekarang", 1 produk aja
+    : cartService.cartItems;  // Kalau dari keranjang, ambil semua
+
+  final totalPrice = itemsToCheckout.fold<double>(
+  0,
+    (sum, item) => sum + item.totalPrice,
+  );
+  final groupedItems = <String, List<CartItem>>{};
+  for (final item in itemsToCheckout) {
+    final seller = item.seller ?? 'Toko Tidak Diketahui';
+    groupedItems.putIfAbsent(seller, () => []).add(item);
+  };
+
+  final cargoController = Get.find<CargoController>();
+
+
   return Scaffold(
     backgroundColor: Colors.white,
     appBar: AppBar(
@@ -72,135 +97,201 @@ Widget build(BuildContext context) {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  _title("Shipping Address"),
-                  const SizedBox(width: 10),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromARGB(255, 243, 229, 242).withOpacity(0.9),),
-                    onPressed: () {
-                      Get.toNamed(AddressPage.TAG);
-                    },
-                    child: Text(
-                      "Manage Addresses",
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                      color: Colors.purple[20],
-                      fontWeight: FontWeight.bold
-                    )
+              ListTile(
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _title("Shipping Address"),
+                    // const SizedBox(width: 10),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                      backgroundColor: Color.fromARGB(255, 243, 229, 242).withOpacity(0.9),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       ),
-                  ),
-                ],
+                      onPressed: () {
+                        Get.toNamed(AddressPage.TAG);
+                      },
+                      child: Text(
+                        "Manage Addresses",
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                        color: Colors.purple[20],
+                        fontWeight: FontWeight.bold
+                        )
+                      ),
+                    ),
+                  ],
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadiusGeometry.circular(20)
+                ),
+                tileColor: Colors.purple[50],
+                subtitle: address != null
+                  ? Container(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: RichText(
+                                  text: TextSpan(
+                                    children: [
+                                      WidgetSpan(
+                                        alignment: PlaceholderAlignment.middle,
+                                        child: Icon(Icons.location_on, size: 18, color: Colors.purple),
+                                      ),
+                                      const WidgetSpan(child: SizedBox(width: 4)),
+                                      TextSpan(
+                                        text: address.fullName ?? '',
+                                        style: context.titleMedium
+                                      ),
+                                      TextSpan(
+                                        text: ' | ${address.phone ?? ''}',
+                                        style: GoogleFonts.montserrat(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.normal,
+                                        color: Colors.grey.shade600,
+                                        ), 
+                                      )
+                                    ]
+                                  )
+                                  )
+                              )
+                            ],
+                          ),
+                          Text('${address.address ?? ''}, '
+                          '${address.kecamatan ??''}, ${address.kota??''}, '
+                          '${address.provinsi?? ''}, ${address.kodepos ?? ''}'),
+                        ],
+                      ),
+                    )
+                  : Text(
+                      "No address selected",
+                      style: GoogleFonts.poppins(fontSize: 14, color: Colors.red),
+                    ),
               ),
               const SizedBox(height: 10),
-          
-              // ✅ Menampilkan 1 default address
-              if (address != null)
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                       Text(
-                        'Fullname: ${address.fullName ?? 'Unknown'}',
-                        style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Phone: ${address.phone ?? 'Unknown'}',
-                      style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Address: ${address.address ?? 'Unknown'}',
-                      style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),
-                      ),
-                    ],
-                  ),
-                )
-              else
-                Text("No address selected", style: GoogleFonts.poppins(fontSize: 14, color: Colors.red)),
-          
-              const SizedBox(height: 20),
-          
+
               // ✅ RINGKASAN PRODUK + TOTAL
-              Container(
-                margin: const EdgeInsets.only(top: 20),
-                width: double.infinity,
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
+              ...groupedItems.entries.map((entry) {
+                final seller = entry.key;
+                final sellerItems = entry.value;
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: ListTile(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    tileColor: Colors.purple[50],
+                    title: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _title("$seller"),
+                        const SizedBox(height: 10),
+                        ...sellerItems.map((item) {
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, right: 8.0),
+                            child: Row(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(6),
+                                  child: Image.network(
+                                    item.imageUrl,
+                                    width: 60,
+                                    height: 60,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        width: 60,
+                                        height: 60,
+                                        color: Colors.grey[300],
+                                        child: const Icon(Icons.broken_image, color: Colors.grey),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: _orderRow(
+                                    '${item.name}  × ${item.quantity}',
+                                    'Rp ${_rupiah(item.price)}',
+                                    'Rp ${_rupiah(item.totalPrice)}',
+                                    // '× ${item.quantity}'
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                        const Divider(),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Total',
+                              style: GoogleFonts.poppins(fontWeight: FontWeight.bold)
+                            ),
+                            Text(
+                              'Rp ${_rupiah(sellerItems.fold<double>(0, (sum,item) => sum + item.totalPrice))}',
+                              style: TextStyle(
+                            fontWeight: FontWeight.w900, 
+                            fontSize: 16, 
+                            color: Colors.purple[800],
+                            ),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                );
+              }),
+              // const SizedBox(height: 10),
+
+              ListTile(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _title("Product"),
-                    const SizedBox(height: 10),
-                    ...cartService.cartItems.map((item) => _orderRow(
-                          '${item.name} × ${item.quantity}',
-                          'Rp ${_rupiah(item.totalPrice)}',
-                        )),
-                    const Divider(),
-                    // _orderRow("Subtotal", 'Rp ${_rupiah(cartService.totalPrice)}'),
-                    // const SizedBox(height: 8),
-                    _orderRow(
-                      "Total",
-                      'Rp ${_rupiah(cartService.totalPrice)}',
-                      isBold: true,
-                      color: Colors.purple[800],
+                tileColor: Colors.purple[50],
+                title: _title('Opsi Pengiriman'),
+                subtitle: Text(
+                  (cargoController.selectedCategory.value?.isNotEmpty == true && cargoController.selectedCargoName.value?.isNotEmpty == true)
+                    ? '${cargoController.selectedCategory.value} (${cargoController.selectedCargoName.value})'
+                    : '',
+                ),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                onTap: () {
+                  Get.toNamed(CargoPage.TAG);
+                },
+              ),
+              const SizedBox(height: 10),
+
+              //Payment
+              Container(
+                child: ListTile(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadiusGeometry.circular(20),
+                  ),
+                  tileColor: Colors.purple[50],
+                  title: 
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _title("Payment"),
+                        const SizedBox(height: 10),
+                        _radioOption("Direct bank transfer"),
+                        _radioOption("Cash on delivery"),
+                        const SizedBox(height: 10),
+                        Text(
+                          "Your personal data will be used to support your experience...",
+                          style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+                        ),
+                        const SizedBox(height: 20),
+                      ],
                     ),
-                    const SizedBox(height: 20),
-              
-                    _title("Payment"),
-                    const SizedBox(height: 10),
-                    _radioOption("Direct bank transfer"),
-                    _radioOption("Cash on delivery"),
-                    const SizedBox(height: 10),
-                    Text(
-                      "Your personal data will be used to support your experience...",
-                      style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () async {
-                        final authController = Get.find<AuthController>();
-                        final cartService = Get.find<CartService>();
-                        final checkoutService = Get.find<CheckoutService>();
-                        final userEmail = authController.getUserEmail() ?? '';
-                        final addressController = Get.find<AddressController>();
-              
-                        if (addressController.selectedAddressUser.value == null) {
-                          Get.snackbar("Error", "Please select an address first.");
-                          return;
-                        }
-              
-                        final order = OrderHistoryItem(
-                          timestamp: DateTime.now(),
-                          items: List<CartItem>.from(cartService.cartItems),
-                          infoUser: [addressController.selectedAddressUser.value!],
-                          paymentMethod: controller.selectedPayment.value, id: '',
-                        );
-              
-                        cartService.orderHistory.add(order);
-                        await checkoutService.saveOrderToSupabase(order, controller.selectedPayment.value);
-                        await Get.find<CartService>().clearCartFromSupabase(userEmail);
-                        cartService.clearCart();
-              
-                        Get.toNamed(ProductInfoPage.TAG);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 248, 243, 243),
-                        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-                      ),
-                      child: Text("Place Order", style: GoogleFonts.poppins(fontSize: 16)),
-                    )
-                  ],
                 ),
               ),
             ],
@@ -208,13 +299,83 @@ Widget build(BuildContext context) {
         );
       }),
     ),
-  );
+    bottomNavigationBar: Container(
+      padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomPadding),
+      decoration: BoxDecoration(
+        color: Color.fromARGB(255, 243, 229, 242).withOpacity(0.9),
+        border: Border(top: BorderSide(color: Colors.grey.shade300)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Text('Total',
+            style: TextStyle(
+              fontWeight: FontWeight.w400, 
+              fontSize: 16, 
+              color: Colors.black,
+              )),
+          const SizedBox(width: 5,),
+          Text('Rp ${_rupiah(totalPrice)}',
+            style: TextStyle(
+              fontWeight: FontWeight.w900, 
+              fontSize: 16, 
+              color: Colors.purple[800],
+              )),
+          const SizedBox(width: 20,),
+          ElevatedButton(
+            onPressed: () async {
+              final authController = Get.find<AuthController>();
+              final cartService = Get.find<CartService>();
+              final checkoutService = Get.find<CheckoutService>();
+              final userEmail = authController.getUserEmail() ?? '';
+              final addressController = Get.find<AddressController>();
+              final itemsToCheckout = singleItem != null ? [singleItem!] : cartService.cartItems;
+
+              print('🟠 itemsToCheckout length: ${itemsToCheckout.length}');
+              itemsToCheckout.forEach((item) => print('🛒 ${item.name} x ${item.quantity}'));
+
+              if (addressController.selectedAddressUser.value == null) {
+                Get.snackbar("Error", "Please select an address first.");
+                return;
+              }
+
+              final order = OrderHistoryItem(
+                timestamp: DateTime.now(),
+                items: List<CartItem>.from(itemsToCheckout),
+                infoUser: [addressController.selectedAddressUser.value!],
+                paymentMethod: controller.selectedPayment.value,
+                id: '', 
+                cargoCategory: controller.selectedCategory.value,
+                cargoName: controller.selectedCargoName.value,
+                );
+
+              cartService.orderHistory.add(order);
+
+              await checkoutService.saveOrderToSupabase(
+                order, 
+                controller.selectedPayment.value, 
+                cargoController.selectedCargo.value!
+              );
+
+              if (singleItem == null) {
+                await cartService.clearCartFromSupabase(userEmail);
+                cartService.clearCart();
+              }
+
+              Get.toNamed(ProductInfoPage.TAG);
+            },
+            child: Text("Place Order", style: GoogleFonts.poppins(fontSize: 16)),
+          ),
+        ],
+      ),
+    ),
+    );
 }
 
 
   Widget _title(String text) => Text(
         text,
-        style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w600),
+        style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600),
       );
 
   // Widget _formInput(String label, {TextEditingController? controller, bool readOnly = false}) => Column(
@@ -242,19 +403,39 @@ Widget build(BuildContext context) {
   //       ],
   //     );
 
-  Widget _orderRow(String label, String value, {bool isBold = false, Color? color}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
+  Widget _orderRow(String label, String value, String value1, {bool isBold = false, Color? color}) {
+    return Container(
+      height: 60,
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        // mainAxisSize: MainAxisSize.min,
+        // crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(label, style: GoogleFonts.poppins(fontWeight: isBold ? FontWeight.bold : FontWeight.w400)),
-          Text(
-            value,
-            style: GoogleFonts.poppins(
-              fontWeight: isBold ? FontWeight.bold : FontWeight.w400,
-              color: color,
-            ),
+          Text(label, style: GoogleFonts.poppins(
+            fontWeight: isBold ? FontWeight.bold : FontWeight.w400,
+            fontSize: 15,
+            )),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                value,
+                style: GoogleFonts.poppins(
+                  fontWeight: isBold ? FontWeight.bold : FontWeight.w400,
+                  color: color,
+                  fontSize: 14,
+                ),
+              ),
+              Text(
+                value1,
+                style: GoogleFonts.poppins(
+                  fontWeight: isBold ? FontWeight.bold : FontWeight.w400,
+                  color: color,
+                  fontSize: 14,
+                ),
+              ),
+            ],
           ),
         ],
       ),

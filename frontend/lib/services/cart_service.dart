@@ -228,6 +228,7 @@ void decreaseQuantity(String id) async {
         price: (item['price'] as num).toDouble(),
         imageUrl: item['image_url'],
         quantity: item['quantity'],
+        seller: item['seller'] ?? 'Toko Tidak Diketahui',
       );
       cartItems.add(cartItem);
     }
@@ -246,6 +247,7 @@ void decreaseQuantity(String id) async {
           .eq('user_id', userEmail)
           .eq('product_id', item.id)
           .eq('is_active', true)
+          .eq('seller', item.seller)
           .maybeSingle();
 
       print('🔍 Existing item: $existing');
@@ -269,6 +271,7 @@ void decreaseQuantity(String id) async {
           'quantity': item.quantity,
           'is_active': true,
           'timestamp': DateTime.now().toIso8601String(),
+          'seller': item.seller,
         }, onConflict: 'user_id, product_id')
         .then((value) => print('✅ Inserted ${item.name}'))
         .catchError((e) => print('❌ Insert failed: $e'));

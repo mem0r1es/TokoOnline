@@ -427,7 +427,9 @@ class FavoritePage extends StatelessWidget {
       id: productId,
       name: product.title,
       price: product.price.toDouble(),
-      imageUrl: product.imagePath,)
+      imageUrl: product.imagePath,
+      seller: product.storeName ?? 'Toko Tidak Diketahui',
+      )
     );
   }
 

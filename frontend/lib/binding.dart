@@ -1,12 +1,14 @@
 
 import 'package:flutter_web/controllers/address_controller.dart';
 import 'package:flutter_web/controllers/auth_controller.dart';
+import 'package:flutter_web/controllers/cargo_controller.dart';
 import 'package:flutter_web/controllers/cart_controller.dart';
 import 'package:flutter_web/controllers/checkout_controller.dart';
 import 'package:flutter_web/controllers/product_controller.dart';
 import 'package:flutter_web/controllers/scroll_controller.dart';
 import 'package:flutter_web/controllers/search_controller.dart';
 import 'package:flutter_web/controllers/shops_scroll.dart';
+import 'package:flutter_web/services/cargo_service.dart';
 import 'package:flutter_web/services/scroll_controller_manager.dart';
 import 'package:flutter_web/services/cart_service.dart';
 import 'package:flutter_web/services/checkout_service.dart';
@@ -33,5 +35,7 @@ class InitialScreenBindings implements Bindings {
     final CustomScrollController customScrollController = Get.put(CustomScrollController());
     final ShopsScrollController shopsScrollController =Get.put(ShopsScrollController());
     final SearchController searchController = Get.put(SearchController());
+    final CargoService cargoService = Get.put(CargoService());
+    final CargoController cargoController = Get.put(CargoController());
   }
 }

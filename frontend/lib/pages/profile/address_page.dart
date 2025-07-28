@@ -62,21 +62,16 @@ class AddressPage extends GetView<AddressController> {
               // final addressId = address.id ?? index.toString();
               if (address.id == null) return SizedBox.shrink();
               final addressId = address.id!;
-              
-
-
-              
               return Card(
                 margin: const EdgeInsets.symmetric(vertical: 8),
                 child: ListTile(
-                  tileColor: Color(0xFFFFF3E3).withOpacity(0.9),
+                  tileColor: Color.fromARGB(255, 243, 229, 242).withOpacity(0.9),
                   leading: Obx(() => Radio<String>(
                     value: address.id!, // tambahkan ! di sini
                     groupValue: controller.selectedAddressId.value,
                     onChanged: (value) {
-  if (value != null) controller.setDefaultAddress(value);
-},
-
+                      if (value != null) controller.setDefaultAddress(value);
+                    },
                   )),
                   title: Column(
                     children: [
