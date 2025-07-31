@@ -2,32 +2,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_web/controllers/address_controller.dart';
 import 'package:flutter_web/controllers/scroll_controller.dart';
-import 'package:flutter_web/models/cart_item.dart';
 import 'package:flutter_web/models/info_user.dart';
 // import 'package:flutter_web/controller/cart_controller.dart';
 // import 'package:flutter_web/controllers/cart_controller.dart';
 import 'package:flutter_web/models/order_history_item.dart';
-import 'package:flutter_web/models/product_model.dart';
-import 'package:flutter_web/services/cart_service.dart';
 import 'package:flutter_web/services/checkout_service.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 
-import 'package:flutter/material.dart';
-import 'package:flutter_web/controllers/scroll_controller.dart';
-import 'package:flutter_web/models/order_history_item.dart';
-import 'package:flutter_web/services/checkout_service.dart';
-import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 
 class ProductInfoPage extends StatefulWidget {
   static const TAG = '/productinfo';
 
-  ProductInfoPage({super.key});
+  const ProductInfoPage({super.key});
 
   @override
   State<ProductInfoPage> createState() => _ProductInfoPageState();
@@ -200,7 +190,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
               ],
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }
@@ -242,6 +232,20 @@ class OrderDetailPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Ordered at $formattedTime', style: GoogleFonts.poppins(fontSize: 14)),
+              if (order.estimatedArrival != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4.0),
+                  child: Text(
+                    'Estimasi Tiba: ${DateFormat('dd MMM yyyy • HH:mm').format(order.estimatedArrival!)}',
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      fontStyle: FontStyle.italic,
+                      color: Colors.blueGrey,
+                    ),
+                  ),
+                ),
+
+
               const SizedBox(height: 16),
 
               Column(
@@ -283,6 +287,25 @@ class OrderDetailPage extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 10),
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 6),
+                padding: const EdgeInsets.all(12),
+                color: Colors.orange[100],
+                child: Text('Status Pengiriman: ${order.status}',
+                  style: GoogleFonts.poppins(fontSize: 14)),
+              ),
+
+              if (order.estimatedArrival != null)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 6),
+                  padding: const EdgeInsets.all(12),
+                  color: Colors.blue[100],
+                  child: Text(
+                    'Estimasi Tiba: ${DateFormat('dd MMM yyyy, HH:mm').format(order.estimatedArrival!)}',
+                    style: GoogleFonts.poppins(fontSize: 14),
+                  ),
+                ),
+
 
               ListTile(
                 shape: RoundedRectangleBorder(
@@ -346,7 +369,9 @@ class OrderDetailPage extends StatelessWidget {
                     "Total Price:",
                     style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
-                  Text("Rp ${_rupiah(order.items.fold(0.0, (sum, item) => sum + item.totalPrice))}")
+                    Text("Rp ${_rupiah(
+                      order.items.fold(0.0, (sum, item) => sum + (item.price * item.quantity))
+                    )}")
                 ],
               ),
               const SizedBox(height: 10),
@@ -438,7 +463,7 @@ class OrderDetailPage extends StatelessWidget {
               ],
             ),
           );
-        }).toList(),
+        }),
       ],
     ),
   );
@@ -515,7 +540,7 @@ class OrderDetailPage extends StatelessWidget {
 class OrderTile extends StatefulWidget {
   final OrderHistoryItem order;
 
-  const OrderTile({Key? key, required this.order}) : super(key: key);
+  const OrderTile({super.key, required this.order});
 
   @override
   State<OrderTile> createState() => _OrderTileState();
@@ -545,7 +570,7 @@ class _OrderTileState extends State<OrderTile> {
                   children: [
           Text(
             // 'Order at $formattedTime',
-            '${itemsToDisplay.first.seller}',
+            itemsToDisplay.first.seller,
             style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w500),
           ),
           ],)
@@ -614,6 +639,19 @@ class _OrderTileState extends State<OrderTile> {
                         )
                       ],
                     ),
+                    if (order.estimatedArrival != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          'Estimasi Tiba: ${DateFormat('dd MMM yyyy').format(order.estimatedArrival!)}',
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            fontStyle: FontStyle.italic,
+                            color: Colors.blueGrey,
+                          ),
+                        ),
+                      ),
+
           if (order.items.length > 1 && !_showAll)
             Center(
               child: TextButton(
@@ -641,10 +679,13 @@ class _OrderTileState extends State<OrderTile> {
     // Divider(height: 50),
   }
 
-  String _rupiah(double price) {
-    return price.toStringAsFixed(0).replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (match) => '${match[1]}.',
-    );
-  }
+ String _rupiah(double price) {
+  return price
+      .toStringAsFixed(0)
+      .replaceAllMapped(
+        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+        (m) => '${m[1]}.',
+      );
+}
+
 }

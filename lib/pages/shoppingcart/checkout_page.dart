@@ -5,7 +5,6 @@ import 'package:flutter_web/controllers/auth_controller.dart';
 import 'package:flutter_web/controllers/cargo_controller.dart';
 import 'package:flutter_web/controllers/checkout_controller.dart';
 import 'package:flutter_web/extensions/extension.dart';
-import 'package:flutter_web/models/cargo_model.dart';
 import 'package:flutter_web/models/cart_item.dart';
 // import 'package:flutter_web/controller/cart_controller.dart';
 // import 'package:flutter_web/controllers/cart_controller.dart';
@@ -18,123 +17,134 @@ import 'package:flutter_web/services/checkout_service.dart';
 import 'package:flutter_web/pages/history/history.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 // import '../../controller/page_controller.dart'; 
 // import '../../controller/cart_controller.dart';
 
 class CheckoutPage extends GetView<CheckoutController> {
   final CartItem? singleItem;
 
-  CheckoutPage({this.singleItem});
+  CheckoutPage({super.key, this.singleItem});
   // CheckoutPage({super.key});
 
   // final CartController cartController = Get.find<CartController>();
   final CartService cartService = Get.find<CartService>();
   final CheckoutController checkoutController = Get.find();
   final addressController = Get.find<AddressController>();
-
-  // final _firstNameController = TextEditingController();
-  // final _lastNameController = TextEditingController();
-  // final _emailController = TextEditingController();
-  // final _phoneController = TextEditingController();
-  // final _addressController = TextEditingController();
-  // final authController = Get.find<AuthController>();
-  // final userId = AuthService.getUserId();
-
-
-  // String? _selectedAddressId;
-  // InfoUser? _selectedAddressUser;
-  // String? _selectedPayment = 'Direct bank transfer';
-
-//   @override
-//   void initState() {
-//   super.initState();
-//   // final userEmail = authController.getUserEmail()?? '';
-//   _emailController.text = authController.getUserEmail() ?? '';
-// }
-
-  @override
-Widget build(BuildContext context) {
-  final double bottomPadding = MediaQuery.of(context).padding.bottom;
-  final itemsToCheckout = singleItem != null
-    ? [singleItem!]  // Kalau dari "Beli Sekarang", 1 produk aja
-    : cartService.cartItems;  // Kalau dari keranjang, ambil semua
-
-  final totalPrice = itemsToCheckout.fold<double>(
-  0,
-    (sum, item) => sum + item.totalPrice,
-  );
-  final groupedItems = <String, List<CartItem>>{};
-  for (final item in itemsToCheckout) {
-    final seller = item.seller ?? 'Toko Tidak Diketahui';
-    groupedItems.putIfAbsent(seller, () => []).add(item);
-  };
-
   final cargoController = Get.find<CargoController>();
 
+  @override
+  Widget build(BuildContext context) {
+    final double bottomPadding = MediaQuery.of(context).padding.bottom;
+    final itemsToCheckout = singleItem != null
+        ? [singleItem!] // Kalau dari "Beli Sekarang", 1 produk aja
+        : cartService.cartItems; // Kalau dari keranjang, ambil semua
 
-  return Scaffold(
-    backgroundColor: Colors.white,
-    appBar: AppBar(
-      backgroundColor: Color.fromARGB(255, 243, 229, 242).withOpacity(0.9),
-      title: Text("Checkout Page", style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600)),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.history),
-          onPressed: () {
-            Get.toNamed(ProductInfoPage.TAG);
-          },
-        ),
-      ],
-    ),
-    body: Padding(
-      padding: const EdgeInsets.all(20),
-      child: Obx(() {
-        final address = addressController.selectedAddressUser.value;
+    final totalPrice = itemsToCheckout.fold<double>(
+      0,
+      (sum, item) => sum + item.totalPrice,
+    );
+    final groupedItems = <String, List<CartItem>>{};
+    for (final item in itemsToCheckout) {
+      final seller = item.seller ?? 'Toko Tidak Diketahui';
+      groupedItems.putIfAbsent(seller, () => []).add(item);
+    }
 
-        return SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ListTile(
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _title("Shipping Address"),
-                    // const SizedBox(width: 10),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 243, 229, 242).withOpacity(0.9),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    // Fungsi untuk menghitung estimasi tiba berdasarkan kategori cargo
+DateTime calculateEstimasiTiba(String kategoriCargo) {
+  final key = kategoriCargo.trim().toLowerCase();
+
+  switch (key) {
+    case 'same day':
+      return DateTime.now().add(Duration(hours: 6));
+    case 'express':
+      return DateTime.now().add(Duration(days: 1));
+    case 'reguler':
+      return DateTime.now().add(Duration(days: 3));
+    case 'cargo berat':
+      return DateTime.now().add(Duration(days: 5));
+    default:
+      print('⚠️ Kategori cargo tidak dikenali: $kategoriCargo');
+      return DateTime.now().add(Duration(days: 4));
+  }
+}
+
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Color.fromARGB(255, 243, 229, 242).withOpacity(0.9),
+        title: Text("Checkout Page",
+            style: GoogleFonts.poppins(
+                fontSize: 16, fontWeight: FontWeight.w600)),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history),
+            onPressed: () {
+              Get.toNamed(ProductInfoPage.TAG);
+            },
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Obx(() {
+          final address = addressController.selectedAddressUser.value;
+          final ongkir = cargoController.selectedCargo.value?.harga ?? 0;
+          final totalBayar = totalPrice + ongkir;
+
+          return SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ListTile(
+                  title: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: _title("Shipping Address"),
                       ),
-                      onPressed: () {
-                        Get.toNamed(AddressPage.TAG);
-                      },
-                      child: Text(
-                        "Manage Addresses",
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                        color: Colors.purple[20],
-                        fontWeight: FontWeight.bold
-                        )
+                      Expanded(
+                        flex: 1,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color.fromARGB(255, 243, 229, 242)
+                                .withOpacity(0.9),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 4, vertical: 8),
+                            alignment: Alignment.centerRight,
+                          ),
+                          onPressed: () {
+                            Get.toNamed(AddressPage.TAG);
+                          },
+                          child: Text(
+                            "Manage Addresses",
+                            style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                color: Colors.purple[20],
+                                fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.right,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadiusGeometry.circular(20)
-                ),
-                tileColor: Colors.purple[50],
-                subtitle: address != null
-                  ? Container(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: RichText(
-                                  text: TextSpan(
-                                    children: [
+                    ],
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  tileColor: Colors.purple[50],
+                  subtitle: address != null
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: RichText(
+                                    text: TextSpan(children: [
                                       WidgetSpan(
                                         alignment: PlaceholderAlignment.middle,
                                         child: Icon(Icons.location_on, size: 18, color: Colors.purple),
@@ -152,24 +162,23 @@ Widget build(BuildContext context) {
                                         color: Colors.grey.shade600,
                                         ), 
                                       )
-                                    ]
-                                  )
-                                  )
-                              )
-                            ],
-                          ),
-                          Text('${address.address ?? ''}, '
-                          '${address.kecamatan ??''}, ${address.kota??''}, '
-                          '${address.provinsi?? ''}, ${address.kodepos ?? ''}'),
-                        ],
-                      ),
-                    )
-                  : Text(
-                      "No address selected",
-                      style: GoogleFonts.poppins(fontSize: 14, color: Colors.red),
-                    ),
-              ),
-              const SizedBox(height: 10),
+                                    ]),
+                                  ),
+                                )
+                              ],
+                            ),
+                            Text(
+                                '${address.address ?? ''}, ${address.kecamatan ?? ''}, ${address.kota ?? ''}, ${address.provinsi ?? ''}, ${address.kodepos ?? ''}'),
+                          ],
+                        )
+                      : Text(
+                          "No address selected",
+                          style: GoogleFonts.poppins(
+                              fontSize: 14, color: Colors.red),
+                        ),
+                ),
+                const SizedBox(height: 10),
+              
 
               // ✅ RINGKASAN PRODUK + TOTAL
               ...groupedItems.entries.map((entry) {
@@ -187,7 +196,7 @@ Widget build(BuildContext context) {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _title("$seller"),
+                        _title(seller),
                         const SizedBox(height: 10),
                         ...sellerItems.map((item) {
                           return Padding(
@@ -255,17 +264,48 @@ Widget build(BuildContext context) {
                 ),
                 tileColor: Colors.purple[50],
                 title: _title('Opsi Pengiriman'),
-                subtitle: Text(
-                  (cargoController.selectedCategory.value?.isNotEmpty == true && cargoController.selectedCargoName.value?.isNotEmpty == true)
-                    ? '${cargoController.selectedCategory.value} (${cargoController.selectedCargoName.value})'
-                    : '',
-                ),
+                  subtitle : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (cargoController.selectedCategory.value.isNotEmpty == true)
+                        Text(
+                          'Estimasi tiba: ${DateFormat('dd MMM yyyy').format(
+                            calculateEstimasiTiba(cargoController.selectedCategory.value)
+                          )}',
+                          style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+                        ),
+                      if (cargoController.selectedCargoName.value.isNotEmpty == true)
+                        Text(
+                          '${cargoController.selectedCategory.value} (${cargoController.selectedCargoName.value})',
+                          style: GoogleFonts.poppins(fontSize: 14),
+                        ),
+                    ],
+                  ),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
                 onTap: () {
                   Get.toNamed(CargoPage.TAG);
                 },
               ),
               const SizedBox(height: 10),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Harga Produk: Rp ${_rupiah(totalPrice)}',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16, 
+                        fontWeight: FontWeight.bold,
+                        color: Colors.purple[800],
+                      )),
+                    if (cargoController.selectedCargo.value != null)
+                      Text('Ongkos Kirim: Rp ${_rupiah(ongkir as double)}'),
+                    const Divider(),
+                     Text(
+                       'Total Harga: Rp ${_rupiah(totalBayar)}',
+                       style: GoogleFonts.poppins(
+                           fontSize: 18, fontWeight: FontWeight.bold),
+                     ),
+                  ],
+                ),
 
               //Payment
               Container(
@@ -290,14 +330,20 @@ Widget build(BuildContext context) {
                         const SizedBox(height: 20),
                       ],
                     ),
-                ),
+                 ),
               ),
             ],
           ),
         );
-      }),
+      }
+  ),
     ),
-    bottomNavigationBar: Container(
+  bottomNavigationBar: Obx(() {
+  final ongkir = cargoController.selectedCargo.value?.harga ?? 0;
+  final totalBayar = totalPrice + ongkir;
+    
+    
+    return Container(
       padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomPadding),
       decoration: BoxDecoration(
         color: Color.fromARGB(255, 243, 229, 242).withOpacity(0.9),
@@ -313,7 +359,7 @@ Widget build(BuildContext context) {
               color: Colors.black,
               )),
           const SizedBox(width: 5,),
-          Text('Rp ${_rupiah(totalPrice)}',
+          Text('Rp ${_rupiah(totalPrice + ongkir)}',
             style: TextStyle(
               fontWeight: FontWeight.w900, 
               fontSize: 16, 
@@ -330,7 +376,9 @@ Widget build(BuildContext context) {
               final itemsToCheckout = singleItem != null ? [singleItem!] : cartService.cartItems;
 
               print('🟠 itemsToCheckout length: ${itemsToCheckout.length}');
-              itemsToCheckout.forEach((item) => print('🛒 ${item.name} x ${item.quantity}'));
+              for (var item in itemsToCheckout) {
+                print('🛒 ${item.name} x ${item.quantity}');
+              }
 
               if (addressController.selectedAddressUser.value == null) {
                 Get.snackbar("Error", "Please select an address first.");
@@ -344,7 +392,10 @@ Widget build(BuildContext context) {
                 paymentMethod: controller.selectedPayment.value,
                 id: '', 
                 cargoCategory: controller.selectedCategory.value,
-                cargoName: controller.selectedCargoName.value,
+                cargoName: controller.selectedCargoName.value, status: '',
+                estimatedArrival: calculateEstimasiTiba(
+                  controller.selectedCategory.value,
+                )
                 );
 
               cartService.orderHistory.add(order);
@@ -366,8 +417,9 @@ Widget build(BuildContext context) {
           ),
         ],
       ),
-    ),
     );
+  }
+));
 }
 
 
@@ -402,7 +454,7 @@ Widget build(BuildContext context) {
   //     );
 
   Widget _orderRow(String label, String value, String value1, {bool isBold = false, Color? color}) {
-    return Container(
+    return SizedBox(
       height: 60,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -410,10 +462,11 @@ Widget build(BuildContext context) {
         // mainAxisSize: MainAxisSize.min,
         // crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(label, style: GoogleFonts.poppins(
-            fontWeight: isBold ? FontWeight.bold : FontWeight.w400,
-            fontSize: 15,
-            )),
+          Text(label,
+              style: GoogleFonts.poppins(
+                fontWeight: isBold ? FontWeight.bold : FontWeight.w400,
+                fontSize: 15,
+              )),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

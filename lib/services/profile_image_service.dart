@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -10,12 +9,10 @@ class ProfileImageService {
     if (userId == null) throw Exception('Pengguna belum login');
 
     try {
-      // Hapus file lama (opsional)
       await _supabase.storage
           .from('profile-image')
           .remove(['$userId/$filename']);
 
-      // Upload file baru
       await _supabase.storage
           .from('profile-image')
           .uploadBinary(

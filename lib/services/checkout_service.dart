@@ -34,6 +34,12 @@ class CheckoutService extends GetxService {
     // final cargoCategory = order.cargoCategory;
     // final cargoName = order.cargoName;
 
+    // Hitung total produk + total bayar
+    final totalProduk = order.items.fold<int>(
+        0, (sum, item) => sum + item.totalPrice.toInt());
+    final ongkir = cargo.harga;
+    final totalBayar = totalProduk + ongkir;
+
     // Simpan setiap item sebagai 1 row
     for (final item in order.items) {
       print('🟢 Inserting order: ${{
@@ -48,13 +54,19 @@ class CheckoutService extends GetxService {
         'total_price': item.totalPrice,
         'imageUrl': item.imageUrl,  // pastikan imageUrl bukan null
         'seller': item.seller,
-        'cargo_name':cargo.name,
-        'cargo_category':cargo.kategori,
+        'cargo_name': cargo.name,
+        'cargo_category': cargo.kategoriId,
+        'cargo_id': cargo.id,  // new
+        'total_produk': totalProduk,  // new
+        'ongkir': ongkir,  // new
+        'total_bayar': totalBayar,  // new
+        'status': 'menunggu konfirmasi',  // default awal
+        'updated_at': DateTime.now().toIso8601String(),
+        'estimated_arrival': order.estimatedArrival?.toIso8601String(),
       }}');
 
       print('📦 cargo.name = ${cargo.name}');
-print('📦 cargo.kategori = ${cargo.kategori}');
-
+      print('📦 cargo.kategori = ${cargo.kategoriId}');
 
       await supabase.from('order_history').insert({
         'timestamp': timestamp,
@@ -68,8 +80,16 @@ print('📦 cargo.kategori = ${cargo.kategori}');
         'total_price': item.totalPrice, // total untuk item ini aja
         'imageUrl': item.imageUrl,
         'seller': item.seller,
-        'cargo_name':cargo.name,
-        'cargo_category':cargo.kategori,
+        'cargo_name': order.cargoName,
+        'cargo_category': order.cargoCategory,  // Ini sekarang string seperti "Hemat Kargo"        
+        'cargo_id': cargo.id, // new
+        'total_produk': totalProduk, // new
+        'ongkir': ongkir, // new
+        'total_bayar': totalBayar, // new
+        // ✅ Tracking produk otomatis
+        'status': 'menunggu konfirmasi',  // default awal
+        'updated_at': DateTime.now().toIso8601String(),
+        'estimated_arrival': order.estimatedArrival?.toIso8601String(),
       });
 
       // Kurangi stok produk
@@ -94,6 +114,7 @@ print('📦 cargo.kategori = ${cargo.kategori}');
     print('❌ Error saving order: $e');
   }
 }
+
 
 
   // Future<void> clearCartFromSupabase(String userEmail) async {
@@ -198,6 +219,13 @@ Future<void> loadOrderHistoryFromSupabase(String email) async {
           id: '', 
           cargoCategory: entry.value.first['cargo_category'], 
           cargoName: entry.value.first['cargo_name'], 
+          status: entry.value.first['status'] ?? 'menunggu konfirmasi',
+          estimatedArrival: entry.value.first['estimated_arrival'] != null
+              ? DateTime.tryParse(entry.value.first['estimated_arrival'])
+              : null,
+          updatedAt: entry.value.first['updated_at'] != null
+              ? DateTime.tryParse(entry.value.first['updated_at'])
+              : null,
         ));
       }
     }

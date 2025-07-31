@@ -9,12 +9,14 @@ import 'package:flutter_web/controllers/scroll_controller.dart';
 import 'package:flutter_web/controllers/search_controller.dart';
 import 'package:flutter_web/controllers/shops_scroll.dart';
 import 'package:flutter_web/services/cargo_service.dart';
+import 'package:flutter_web/services/order_tracking_service.dart';
 import 'package:flutter_web/services/scroll_controller_manager.dart';
 import 'package:flutter_web/services/cart_service.dart';
 import 'package:flutter_web/services/checkout_service.dart';
 import 'package:flutter_web/services/general_service.dart';
 import 'package:flutter_web/services/product_service.dart';
 import 'package:get/get.dart';
+
 
 class InitialScreenBindings implements Bindings {
 
@@ -35,5 +37,8 @@ class InitialScreenBindings implements Bindings {
     Get.put(CustomScrollController());
     Get.put(ShopsScrollController());
     Get.put(SearchController());
+    Get.put(CargoController());
+    Get.put(OrderTrackingService());
+    Get.put(CargoService());
   }
 }

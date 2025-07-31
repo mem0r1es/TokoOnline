@@ -10,8 +10,9 @@ class CargoController extends GetxController {
   void selectCargo(CargoModel cargo) {
     selectedCargo.value = cargo;
     selectedCargoName.value = cargo.name;
-    selectedCategory.value = cargo.kategori;
+    selectedCategory.value = cargo.kategoriName;
   }
+    int get selectedCargoPrice => selectedCargo.value?.harga ?? 0;
 
 
   // void selectCargo(String name, String category) {

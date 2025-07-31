@@ -1,4 +1,3 @@
-import 'package:flutter_web/models/cargo_model.dart';
 
 import 'cart_item.dart';
 import 'info_user.dart';
@@ -11,6 +10,10 @@ class OrderHistoryItem {
   final String? cargoCategory;
   final String? cargoName;
   final String paymentMethod;
+  final String status;
+  final DateTime? estimatedArrival;
+  final DateTime? updatedAt;
+
 
   OrderHistoryItem({
     required this.id,
@@ -20,6 +23,9 @@ class OrderHistoryItem {
     required this.cargoCategory,
     required this.cargoName,
     required this.paymentMethod,
+    required this.status,
+    this.estimatedArrival,
+    this.updatedAt,
   });
 
   factory OrderHistoryItem.fromJson(Map<String, dynamic> json) {
@@ -34,7 +40,7 @@ class OrderHistoryItem {
           .map((item) => CartItem.fromJson(item))
           .toList(), 
       cargoCategory: json['cargo_category'],
-      cargoName: json['cargo_name'],
+      cargoName: json['cargo_name'], status: '',
     );
   }
   

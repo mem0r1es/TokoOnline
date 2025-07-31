@@ -1,26 +1,21 @@
-import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web/controllers/auth_controller.dart';
-import 'package:flutter_web/controllers/cart_controller.dart';
 import 'package:flutter_web/controllers/favorite_controller.dart';
 import 'package:flutter_web/controllers/profile_image_controller.dart';
-import 'package:flutter_web/models/order_history_item.dart';
 import 'package:flutter_web/pages/auth/auth_dialog.dart';
 import 'package:flutter_web/pages/favorite/favorite_page.dart';
 import 'package:flutter_web/pages/history/history.dart';
 import 'package:flutter_web/pages/profile/address_page.dart';
+import 'package:flutter_web/pages/profile/edit_profile_option.dart';
 import 'package:flutter_web/pages/shop/shops.dart';
 import 'package:flutter_web/pages/shoppingcart/cart.dart';
-import 'package:flutter_web/pages/shoppingcart/shopping_cart.dart';
 import 'package:flutter_web/services/cart_service.dart';
 import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_web/services/profile_image_service.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ProfilePage extends GetView<AuthController> {
@@ -130,6 +125,38 @@ class ProfilePage extends GetView<AuthController> {
                               ),
                             ),
                             const SizedBox(height: 10),
+                            if (controller.userProfile.value?.phone?.isNotEmpty == true)
+                              Text(
+                                'Nomor HP: ${controller.userProfile.value!.phone!}',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 14,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+
+
+                             ElevatedButton.icon(
+                              onPressed: () {
+                                showEditProfileOptions(
+                                  context: context,
+                                  onNameChange: (value) => controller.updateName(value),
+                                  onEmailChange: (value) => controller.updateEmail(value),
+                                  onPhoneChange: (value) {
+                                    Get.snackbar('Coming Soon', 'Fitur ganti nomor HP akan tersedia di versi selanjutnya');
+                                  },
+                                );
+                              },
+                              icon: const Icon(Icons.edit, size: 18),
+                              label: Text('Edit Profil', style: GoogleFonts.poppins()),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.purple[100],
+                                foregroundColor: Colors.black,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              ),
+                            ),
                             // Tambahkan detail profil lain di sini jika ada (nama lengkap, nomor telepon, dll.)
                             // Misalnya:
                             // Text('Nama Lengkap: ${controller.userProfile.fullName}', style: GoogleFonts.poppins()),
