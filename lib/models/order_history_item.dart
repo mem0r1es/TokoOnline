@@ -13,7 +13,9 @@ class OrderHistoryItem {
   final String status;
   final DateTime? estimatedArrival;
   final DateTime? updatedAt;
-
+  final String? kategoriId; // Tambahkan ini jika perlu
+  final double? ongkir;
+  final int? totalBayar;
 
   OrderHistoryItem({
     required this.id,
@@ -26,6 +28,9 @@ class OrderHistoryItem {
     required this.status,
     this.estimatedArrival,
     this.updatedAt,
+    this.kategoriId,
+    this.ongkir,
+    this.totalBayar,
   });
 
   factory OrderHistoryItem.fromJson(Map<String, dynamic> json) {
@@ -41,6 +46,16 @@ class OrderHistoryItem {
           .toList(), 
       cargoCategory: json['cargo_category'],
       cargoName: json['cargo_name'], status: '',
+      kategoriId: json['cargo_id']?.toString(),
+      ongkir: (json['ongkir'] as num?)?.toDouble(),
+      totalBayar: json['total_bayar'] as int?,
+      estimatedArrival: json['estimated_arrival'] != null
+          ? DateTime.parse(json['estimated_arrival'])
+          : null,
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
+          : null,
+
     );
   }
   

@@ -34,11 +34,20 @@ class CheckoutService extends GetxService {
     // final cargoCategory = order.cargoCategory;
     // final cargoName = order.cargoName;
 
-    // Hitung total produk + total bayar
-    final totalProduk = order.items.fold<int>(
-        0, (sum, item) => sum + item.totalPrice.toInt());
-    final ongkir = cargo.harga;
-    final totalBayar = totalProduk + ongkir;
+      // Hitung total produk + total bayar
+      final totalProduk = order.items.fold<int>(0, (sum, item) => sum + item.totalPrice.toInt());
+      final ongkir = cargo.harga.toInt(); 
+      final totalBayar = totalProduk + ongkir;
+
+      final cargoExist = await supabase
+          .from('cargo_options')
+          .select()
+          .eq('id', cargo.id)
+          .maybeSingle();
+
+      if (cargoExist == null) {
+        throw Exception('🚨 Cargo ID ${cargo.id} tidak ditemukan di database!');
+      }
 
     // Simpan setiap item sebagai 1 row
     for (final item in order.items) {
@@ -226,6 +235,8 @@ Future<void> loadOrderHistoryFromSupabase(String email) async {
           updatedAt: entry.value.first['updated_at'] != null
               ? DateTime.tryParse(entry.value.first['updated_at'])
               : null,
+            ongkir: (entry.value.first['ongkir'] ?? 0).toDouble(), // ditambahkan
+            totalBayar: entry.value.first['total_bayar'], // ditambahkan
         ));
       }
     }

@@ -51,20 +51,20 @@ class CheckoutPage extends GetView<CheckoutController> {
     }
 
     // Fungsi untuk menghitung estimasi tiba berdasarkan kategori cargo
-DateTime calculateEstimasiTiba(String kategoriCargo) {
-  final key = kategoriCargo.trim().toLowerCase();
+DateTime calculateEstimasiTiba(String kategori) {
+  final key = kategori.trim();
 
   switch (key) {
-    case 'same day':
+    case 'Same Day':
       return DateTime.now().add(Duration(hours: 6));
-    case 'express':
+    case 'Instant':
       return DateTime.now().add(Duration(days: 1));
-    case 'reguler':
+    case 'Reguler':
       return DateTime.now().add(Duration(days: 3));
-    case 'cargo berat':
+    case 'Hemat Kargo':
       return DateTime.now().add(Duration(days: 5));
     default:
-      print('⚠️ Kategori cargo tidak dikenali: $kategoriCargo');
+      print('⚠️ Kategori cargo tidak dikenali: $kategori');
       return DateTime.now().add(Duration(days: 4));
   }
 }
@@ -386,17 +386,21 @@ DateTime calculateEstimasiTiba(String kategoriCargo) {
               }
 
               final order = OrderHistoryItem(
+                id: '',
                 timestamp: DateTime.now(),
                 items: List<CartItem>.from(itemsToCheckout),
                 infoUser: [addressController.selectedAddressUser.value!],
                 paymentMethod: controller.selectedPayment.value,
-                id: '', 
-                cargoCategory: controller.selectedCategory.value,
-                cargoName: controller.selectedCargoName.value, status: '',
-                estimatedArrival: calculateEstimasiTiba(
-                  controller.selectedCategory.value,
-                )
-                );
+                cargoCategory: cargoController.selectedCargo.value!.kategoriId.toString(),
+                cargoName: cargoController.selectedCargo.value!.name,
+                estimatedArrival: calculateEstimasiTiba(controller.selectedCategory.value),
+                status: 'Pesanan Diterima',
+                ongkir: (cargoController.selectedCargo.value?.harga ?? 0).toDouble(),
+                totalBayar: ((itemsToCheckout.fold(0.0, (sum, item) => sum + item.totalPrice)) +
+                            (cargoController.selectedCargo.value?.harga ?? 0))
+                    .toInt(),
+              );
+
 
               cartService.orderHistory.add(order);
 

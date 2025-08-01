@@ -362,18 +362,36 @@ class OrderDetailPage extends StatelessWidget {
               _orderSummarySection(),
               const SizedBox(height: 10),
               const Divider(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Total Price:",
-                    style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
-                    Text("Rp ${_rupiah(
-                      order.items.fold(0.0, (sum, item) => sum + (item.price * item.quantity))
-                    )}")
-                ],
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Harga Produk:", style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+                    Text("Rp ${_rupiah(order.items.fold(0.0, (sum, item) => sum + item.totalPrice))}")
+                  ],
+                ),
+                const SizedBox(height: 5),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Ongkos Kirim:", style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+                    Text('Rp ${_rupiah((order.ongkir ?? 0).toDouble())}')
+                  ],
+                ),
+                const Divider(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Total Bayar:", style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+                    Text('Rp ${_rupiah((order.totalBayar ?? 0).toDouble())}', 
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.bold))
+                  ],
+                ),
+              ],
+            ),
+
               const SizedBox(height: 10),
               Text(
                 'Payment Method: ${order.paymentMethod}',
@@ -547,6 +565,10 @@ class OrderTile extends StatefulWidget {
 }
 
 class _OrderTileState extends State<OrderTile> {
+  int _getTotalQuantity(OrderHistoryItem order) {
+  return order.items.fold<int>(0, (sum, item) => sum + (item.quantity));
+}
+
   bool _showAll = false;
 
   @override
@@ -624,30 +646,58 @@ class _OrderTileState extends State<OrderTile> {
                 ),
               )),
               const SizedBox(height:8),
-              Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          'Total ${order.items.length} produk: '
-                        ),
-                        Text(
-                          'Rp ${_rupiah(order.items.fold(0.0, (sum, item) => sum + item.totalPrice))}',
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.bold,
-                            // color: Colors.purple,
-                          ),
-                        )
-                      ],
+
+              Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch, 
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Cargo: ${order.cargoName ?? '-'}',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black87,
+                      ),
                     ),
+                    Text(
+                      'Ongkir: Rp ${_rupiah((order.ongkir ?? 0).toDouble())}',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontStyle: FontStyle.italic,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      'Total ${_getTotalQuantity(order)} Harga: ',
+                      style: GoogleFonts.poppins(),
+                    ),
+                    Text(
+                      'Rp ${_rupiah(_getTotalWithOngkir(order))}',
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
                     if (order.estimatedArrival != null)
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0),
                         child: Text(
                           'Estimasi Tiba: ${DateFormat('dd MMM yyyy').format(order.estimatedArrival!)}',
-                          style: GoogleFonts.poppins(
-                            fontSize: 13,
+                          style: GoogleFonts.ibmPlexMono(
+                            fontSize: 15,
                             fontStyle: FontStyle.italic,
-                            color: Colors.blueGrey,
+                            color: Color(0xFF444444),
                           ),
                         ),
                       ),
@@ -686,6 +736,14 @@ class _OrderTileState extends State<OrderTile> {
         RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
         (m) => '${m[1]}.',
       );
+}
+
+double _getTotalWithOngkir(OrderHistoryItem order) {
+  final totalProduk = order.items.fold<double>(
+    0.0,
+    (sum, item) => sum + (item.totalPrice ?? 0),
+  );
+  return totalProduk + (order.ongkir ?? 0);
 }
 
 }
