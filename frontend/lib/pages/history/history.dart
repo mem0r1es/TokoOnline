@@ -8,6 +8,8 @@ import 'package:flutter_web/models/info_user.dart';
 // import 'package:flutter_web/controllers/cart_controller.dart';
 import 'package:flutter_web/models/order_history_item.dart';
 import 'package:flutter_web/models/product_model.dart';
+import 'package:flutter_web/pages/homepage/home_page.dart';
+import 'package:flutter_web/pages/profile/profile_page.dart';
 import 'package:flutter_web/services/cart_service.dart';
 import 'package:flutter_web/services/checkout_service.dart';
 import 'package:get/get.dart';
@@ -51,6 +53,12 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        leading: BackButton(
+          onPressed: () {
+            scrollController.selectedIndex.value = 2;
+            Get.offAllNamed(HomePage.TAG);
+          },
+        ),
         backgroundColor: Colors.white,
         title: Text(
           "Order History",

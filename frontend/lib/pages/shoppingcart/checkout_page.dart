@@ -335,9 +335,19 @@ Widget build(BuildContext context) {
               itemsToCheckout.forEach((item) => print('🛒 ${item.name} x ${item.quantity}'));
 
               if (addressController.selectedAddressUser.value == null) {
-                Get.snackbar("Error", "Please select an address first.");
+                Get.snackbar("Error", "Silakan dipilih alamat yang dituju");
                 return;
               }
+
+              if(cargoController.selectedCargo.value == null) {
+                Get.snackbar('Error', "Silakan dipilih opsi pengiriman.");
+                return;
+              }
+
+              // if(controller.selectedCategory.value == null) {
+              //   Get.snackbar('Error', "Please select the shipment first.");
+              //   return;
+              // }
 
               final order = OrderHistoryItem(
                 timestamp: DateTime.now(),
