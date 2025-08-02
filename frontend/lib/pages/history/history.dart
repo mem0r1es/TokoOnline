@@ -265,7 +265,8 @@ class OrderDetailPage extends StatelessWidget {
                     ),
                     tileColor: Colors.orange[100],
                     title: Text(
-                      'Pesanan Diterima'
+                      'Pesanan Diterima',
+                      style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
                     ),
                     // subtitle: Text(
                     //   '${order.cargoName}'
@@ -282,7 +283,8 @@ class OrderDetailPage extends StatelessWidget {
                     ),
                     tileColor: Colors.purple[50],
                     title: Text(
-                      'Info Pengiriman'
+                      'Info Pengiriman',
+                      style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
                     ),
                     subtitle: Text(
                       '${order.cargoName}'
@@ -298,7 +300,8 @@ class OrderDetailPage extends StatelessWidget {
                 ),
                 tileColor: Colors.purple[50],
                 title: Text(
-                  'Alamat Pengiriman'
+                  'Alamat Pengiriman',
+                  style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 subtitle: Row(
                   children: [
@@ -358,9 +361,17 @@ class OrderDetailPage extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 10),
-              Text(
-                'Payment Method: ${order.paymentMethod}',
-                style: GoogleFonts.poppins(fontSize: 14),
+              Row(
+                children: [
+                  Text(
+                    'Payment Method: ',
+                    style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                  Text(
+                    '${order.paymentMethod}',
+                    style: GoogleFonts.poppins(fontSize: 14),
+                  ),
+                ],
               ),
             ],
           ),
@@ -401,7 +412,7 @@ class OrderDetailPage extends StatelessWidget {
                   seller,
                   style: GoogleFonts.poppins(
                     fontSize: 16,
-                    fontWeight: FontWeight.bold),
+                    fontWeight: FontWeight.w600),
                 ),
               ))
           .toList(),

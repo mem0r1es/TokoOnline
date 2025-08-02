@@ -116,8 +116,11 @@ Widget build(BuildContext context) {
                         style: GoogleFonts.poppins(
                           fontSize: 12,
                         color: Colors.purple[20],
-                        fontWeight: FontWeight.bold
-                        )
+                        fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.right,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                       ),
                     ),
                   ],

@@ -398,9 +398,9 @@ class ProductDialogContent extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
+                // const SizedBox(height: 10),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 22),
+                  padding: const EdgeInsets.symmetric(vertical: 40),
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
