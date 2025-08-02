@@ -22,8 +22,8 @@ class AddressController extends GetxController {
   }
 
   Future<void> fetchAddresses() async {
-  final data = await supabase.from('addresses').select();
-  addresses.assignAll(data.map((e) => InfoUser.fromJson(e)));
+  final data = await _addressService.fetchAddresses(); // ✅ ini sudah terfilter
+  addresses.assignAll(data);
 
   // Set selectedAddressId ke yang default
   // Set selectedAddressId ke yang default

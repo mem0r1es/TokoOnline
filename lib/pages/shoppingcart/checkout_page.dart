@@ -99,35 +99,29 @@ DateTime calculateEstimasiTiba(String kategori) {
               children: [
                 ListTile(
                   title: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(
-                        flex: 2,
-                        child: _title("Shipping Address"),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color.fromARGB(255, 243, 229, 242)
-                                .withOpacity(0.9),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 4, vertical: 8),
-                            alignment: Alignment.centerRight,
-                          ),
-                          onPressed: () {
-                            Get.toNamed(AddressPage.TAG);
-                          },
-                          child: Text(
-                            "Manage Addresses",
-                            style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                color: Colors.purple[20],
-                                fontWeight: FontWeight.bold),
-                            textAlign: TextAlign.right,
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
+                      _title("Shipping Address"),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color.fromARGB(255, 243, 229, 242)
+                              .withOpacity(0.9),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 4, vertical: 8),
+                          alignment: Alignment.centerRight,
+                        ),
+                        onPressed: () {
+                          Get.toNamed(AddressPage.TAG);
+                        },
+                        child: Text(
+                          "Manage Addresses",
+                          style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: Colors.purple[20],
+                              fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.right,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
                       ),
                     ],
