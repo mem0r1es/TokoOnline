@@ -17,7 +17,6 @@ class AddressPage extends GetView<AddressController> {
   // final AddressController addressController = Get.put(AddressController());
   // final AddressController addressController = Get.find<AddressController>();
 
-  String? _selectedAddressId;
 
 //   @override
   @override
@@ -56,7 +55,6 @@ class AddressPage extends GetView<AddressController> {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemBuilder: (context, index){
-              final defaultAddressId = controller.addresses.firstWhereOrNull((a) => a.isDefault == true)?.id;
               final address = controller.addresses[index];
               // final addressId = address.id ?? index.toString();
               if (address.id == null) return SizedBox.shrink();

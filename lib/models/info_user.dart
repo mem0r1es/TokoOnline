@@ -84,4 +84,34 @@ class InfoUser {
         'timestamp': timestamp?.toIso8601String(),
         'is_active': true,
       };
+
+  InfoUser copyWith({
+    String? id,
+    String? fullName,
+    String? email,
+    String? phone,
+    String? address,
+    String? provinsi,
+    String? kota,
+    String? kecamatan,
+    String? kodepos,
+    String? detail,
+    DateTime? timestamp,
+    bool? isDefault,
+  }) {
+    return InfoUser(
+      id: id ?? this.id,
+      fullName: fullName ?? this.fullName,
+      email: email ?? this.email,
+      phone: phone ?? this.phone,
+      address: address ?? this.address,
+      provinsi: provinsi ?? this.provinsi,
+      kota: kota ?? this.kota,
+      kecamatan: kecamatan ?? this.kecamatan,
+      kodepos: kodepos ?? this.kodepos,
+      detail: detail ?? this.detail,
+      timestamp: timestamp ?? this.timestamp,
+      isDefault: isDefault ?? this.isDefault,
+    );
+  }
 }

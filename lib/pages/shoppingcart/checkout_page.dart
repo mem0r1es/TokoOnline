@@ -93,53 +93,52 @@ DateTime calculateEstimasiTiba(String kategori) {
           final ongkir = cargoController.selectedCargo.value?.harga ?? 0;
           final totalBayar = totalPrice + ongkir;
 
-        return SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ListTile(
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _title("Shipping Address"),
-                    // const SizedBox(width: 10),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 243, 229, 242).withOpacity(0.9),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      ),
-                      onPressed: () {
-                        Get.toNamed(AddressPage.TAG);
-                      },
-                      child: Text(
-                        "Manage Addresses",
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                        color: Colors.purple[20],
-                        fontWeight: FontWeight.bold,
+          return SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ListTile(
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _title("Shipping Address"),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color.fromARGB(255, 243, 229, 242)
+                              .withOpacity(0.9),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 4, vertical: 8),
+                          alignment: Alignment.centerRight,
                         ),
-                        textAlign: TextAlign.right,
+                        onPressed: () {
+                          Get.toNamed(AddressPage.TAG);
+                        },
+                        child: Text(
+                          "Manage Addresses",
+                          style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: Colors.purple[20],
+                              fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.right,
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadiusGeometry.circular(20)
-                ),
-                tileColor: Colors.purple[50],
-                subtitle: address != null
-                  ? Container(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: RichText(
-                                  text: TextSpan(
-                                    children: [
+                    ],
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  tileColor: Colors.purple[50],
+                  subtitle: address != null
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: RichText(
+                                    text: TextSpan(children: [
                                       WidgetSpan(
                                         alignment: PlaceholderAlignment.middle,
                                         child: Icon(Icons.location_on, size: 18, color: Colors.purple),
@@ -166,7 +165,7 @@ DateTime calculateEstimasiTiba(String kategori) {
                                 '${address.address ?? ''}, ${address.kecamatan ?? ''}, ${address.kota ?? ''}, ${address.provinsi ?? ''}, ${address.kodepos ?? ''}'),
                           ],
                         )
-                      ): Text(
+                      : Text(
                           "No address selected",
                           style: GoogleFonts.poppins(
                               fontSize: 14, color: Colors.red),
@@ -376,19 +375,9 @@ DateTime calculateEstimasiTiba(String kategori) {
               }
 
               if (addressController.selectedAddressUser.value == null) {
-                Get.snackbar("Error", "Silakan dipilih alamat yang dituju");
+                Get.snackbar("Error", "Please select an address first.");
                 return;
               }
-
-              if(cargoController.selectedCargo.value == null) {
-                Get.snackbar('Error', "Silakan dipilih opsi pengiriman.");
-                return;
-              }
-
-              // if(controller.selectedCategory.value == null) {
-              //   Get.snackbar('Error', "Please select the shipment first.");
-              //   return;
-              // }
 
               final order = OrderHistoryItem(
                 id: '',

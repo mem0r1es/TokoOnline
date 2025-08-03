@@ -48,7 +48,22 @@ class ProfileImageController extends GetxController {
     }
   }
 
-  Future<void> pickImageAndUpload() async {
+  Future<void> removeImage() async {
+    isLoading.value = true;
+    try {
+      await _service.deleteProfileImage();
+      profileImageUrl.value = '';
+      Get.snackbar('Berhasil', 'Foto profil dihapus',
+          duration: const Duration(seconds: 2));
+    } catch (e) {
+      Get.snackbar('Error', 'Gagal menghapus foto profil',
+          duration: const Duration(seconds: 2));
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> pickAndUpdateImage() async {
     Uint8List? imageBytes;
 
     if (kIsWeb) {
@@ -69,9 +84,15 @@ class ProfileImageController extends GetxController {
 
     if (imageBytes != null) {
       await updateProfileImage(imageBytes);
+      if (Get.isSnackbarOpen) {
+        await Future.delayed(const Duration(seconds: 2));
+      }
     } else {
-      Get.snackbar('Batal', 'Tidak ada gambar yang dipilih',
-          duration: const Duration(seconds: 2));
+      Get.snackbar(
+        'Batal',
+        'Tidak ada gambar yang dipilih',
+        duration: const Duration(seconds: 2),
+      );
     }
   }
 }

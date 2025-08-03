@@ -280,14 +280,11 @@ class OrderDetailPage extends StatelessWidget {
                   ),
                   ListTile(
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.only(
-                        // topLeft: Radius.circular(2),
-                        // topRight: Radius.circular(2),
-                        bottomLeft: Radius.circular(15),
-                        bottomRight: Radius.circular(15),
-                      )
+                      borderRadius: BorderRadius.zero
+                      
                     ),
                     tileColor: Colors.purple[50],
+                    
                     title: Text(
                       'Info Pengiriman',
                       style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
@@ -296,15 +293,23 @@ class OrderDetailPage extends StatelessWidget {
                       '${order.cargoName}'
                     ),
                   ),
+                  const SizedBox(height: 1,),
+                  
+                  ListTile(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero
+                    ),
+                    tileColor: Colors.purple[50],
+                    title: Text(
+                      'Status Pengiriman: ${order.status}',
+                      // style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
+                    ),
+                    // subtitle: Text(
+                    //   '${order.cargoName}'
+                    // ),
+                  ),
+                  const SizedBox(height: 1,),
                 ],
-              ),
-              const SizedBox(height: 10),
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 6),
-                padding: const EdgeInsets.all(12),
-                color: Colors.orange[100],
-                child: Text('Status Pengiriman: ${order.status}',
-                  style: GoogleFonts.poppins(fontSize: 14)),
               ),
 
               if (order.estimatedArrival != null)
@@ -321,7 +326,10 @@ class OrderDetailPage extends StatelessWidget {
 
               ListTile(
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadiusGeometry.circular(15)
+                  borderRadius: BorderRadiusGeometry.only(
+                    bottomLeft: Radius.circular(15),
+                    bottomRight: Radius.circular(15),
+                  )
                 ),
                 tileColor: Colors.purple[50],
                 title: Text(
