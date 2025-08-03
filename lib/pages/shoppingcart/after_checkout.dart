@@ -57,7 +57,7 @@ class AfterCheckout extends StatelessWidget {
                       borderRadius: BorderRadiusGeometry.circular(10)
                     )
                   ),
-                  onPressed:() => Get.toNamed(HomePage.TAG), 
+                  onPressed:() => Get.toNamed(ProductInfoPage.TAG), 
                   child: Text(
                     'Lihat Keranjang'
                   )
