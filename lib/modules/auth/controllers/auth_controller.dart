@@ -1,99 +1,305 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../data/services/supabase_service.dart';
+import '../../../routes/app_routes.dart';
 
 class AuthController extends GetxController {
-  final SupabaseClient supabase = Supabase.instance.client;
-  var isLoading = false.obs;
-
-  Future<void> signUp({
-    required String email,
-    required String password,
-    required String username,
-    required String firstName,
-    required String lastName,
-    required String contactNumber,
-    required String storeName,
-  }) async {
+  final SupabaseService _supabaseService = SupabaseService.to;
+  
+  // Form Controllers
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final fullNameController = TextEditingController();
+  final shopNameController = TextEditingController();
+  final phoneController = TextEditingController();
+  final shopDescriptionController = TextEditingController();
+  
+  // Observable states
+  final RxBool isLoading = false.obs;
+  final RxBool isPasswordVisible = false.obs;
+  final RxString errorMessage = ''.obs;
+  final RxBool isInitialized = false.obs;
+  
+  // Form keys
+  final loginFormKey = GlobalKey<FormState>();
+  final registerFormKey = GlobalKey<FormState>();
+  
+  @override
+  void onInit() {
+    super.onInit();
+    // Check auth status after build complete
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      isInitialized.value = true;
+      _checkAuthStatus();
+    });
+  }
+  
+  @override
+  void onClose() {
+    // Dispose controllers
+    emailController.dispose();
+    passwordController.dispose();
+    fullNameController.dispose();
+    shopNameController.dispose();
+    phoneController.dispose();
+    shopDescriptionController.dispose();
+    super.onClose();
+  }
+  
+  // ============= AUTH METHODS =============
+  
+  void _checkAuthStatus() {
+    if (!isInitialized.value) return;
+    
+    if (_supabaseService.isAuthenticated) {
+      // Redirect based on role
+      _redirectBasedOnRole();
+    }
+  }
+  
+  Future<void> login() async {
+    if (!loginFormKey.currentState!.validate()) return;
+    
     try {
       isLoading.value = true;
-
-      final response = await supabase.auth.signUp(
-        email: email,
-        password: password,
-        data: {
-          'role': 'seller',
-          'username': username,
-          'first_name': firstName,
-          'last_name': lastName,
-          'contact_number': contactNumber,
-          'store_name': storeName,
-        },
-      );
-
-      final user = response.user;
-      if (user != null) {
-        await supabase.from('users').insert({
-        'id': user.id, // foreign key ke auth.users
-        'email': email,
-        'username': username,
-        'first_name': firstName,
-        'last_name': lastName,
-        'contact_number': contactNumber,
-        'store_name': storeName,
-        'user_type': 'seller', // default
-        'created_at': DateTime.now().toIso8601String(),
-        'updated_at': DateTime.now().toIso8601String(),
-      });
+      errorMessage.value = '';
       
-        Get.snackbar("Success", "Registration successful");
+      final result = await _supabaseService.login(
+        email: emailController.text.trim(),
+        password: passwordController.text,
+      );
+      
+      if (result['success']) {
+        // Clear form
+        _clearLoginForm();
+        
+        // Show success message
+        Get.snackbar(
+          'Success',
+          'Login successful!',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.TOP,
+        );
+        
+        // Redirect based on role
+        _redirectBasedOnRole();
       } else {
-        Get.snackbar("Error", "User registration failed");
+        errorMessage.value = result['message'];
+        Get.snackbar(
+          'Login Failed',
+          result['message'],
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.TOP,
+        );
       }
-    } on AuthException catch (e) {
-      Get.snackbar("Auth Error", e.message);
     } catch (e) {
-      Get.snackbar("Error", "An unexpected error occurred");
+      errorMessage.value = e.toString();
+      Get.snackbar(
+        'Error',
+        'An unexpected error occurred',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
     } finally {
       isLoading.value = false;
     }
   }
-
-  Future<void> signIn({required String email, required String password}) async {
+  
+  Future<void> register() async {
+    if (!registerFormKey.currentState!.validate()) return;
+    
     try {
       isLoading.value = true;
-
-      final response = await supabase.auth.signInWithPassword(
-        email: email,
-        password: password,
+      errorMessage.value = '';
+      
+      final result = await _supabaseService.register(
+        email: emailController.text.trim(),
+        password: passwordController.text,
+        fullName: fullNameController.text.trim(),
+        shopName: shopNameController.text.trim(),
+        phone: phoneController.text.trim().isEmpty ? null : phoneController.text.trim(),
+        shopDescription: shopDescriptionController.text.trim().isEmpty 
+            ? null 
+            : shopDescriptionController.text.trim(),
       );
-
-      final user = response.user;
-      if (user != null) {
-        Get.snackbar("Success", "Login berhasil!");
-        final data = await Supabase.instance.client
-          .from('users')
-          .select('user_type')
-          .eq('id', response.user!.id)
-          .single();
-
-      final userType = data['user_type'];
-
-      // Arahkan ke dashboard sesuai role
-      if (userType == 'seller') {
-        Get.offAllNamed('/seller-dashboard');
+      
+      if (result['success']) {
+        // Clear form
+        _clearRegisterForm();
+        
+        // Show success message
+        Get.snackbar(
+          'Success',
+          'Registration successful! Welcome to our platform.',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.TOP,
+          duration: const Duration(seconds: 3),
+        );
+        
+        // Redirect to seller dashboard
+        Get.offAllNamed(AppRoutes.sellerDashboard);
       } else {
-        Get.offAllNamed('/admin-dashboard');
+        errorMessage.value = result['message'];
+        Get.snackbar(
+          'Registration Failed',
+          result['message'],
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.TOP,
+        );
       }
-        // Tambahkan redirect atau logika lain sesuai kebutuhan
-      } else {
-        Get.snackbar("Login Gagal", "Email atau password salah");
-      }
-    } on AuthException catch (e) {
-      Get.snackbar("Auth Error", e.message);
     } catch (e) {
-      Get.snackbar("Error", "Terjadi kesalahan saat login");
+      errorMessage.value = e.toString();
+      Get.snackbar(
+        'Error',
+        'An unexpected error occurred',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
     } finally {
       isLoading.value = false;
     }
   }
+  
+  Future<void> logout() async {
+    try {
+      await _supabaseService.logout();
+      
+      // Clear all forms
+      _clearLoginForm();
+      _clearRegisterForm();
+      
+      // Navigate to login
+      Get.offAllNamed(AppRoutes.login);
+      
+      Get.snackbar(
+        'Success',
+        'Logged out successfully',
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed to logout',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
+    }
+  }
+  
+  // ============= NAVIGATION METHODS =============
+  
+  void _redirectBasedOnRole() {
+    // Delay dialog to avoid build context issues
+    Future.delayed(Duration.zero, () {
+      if (_supabaseService.isAdmin) {
+        Get.offAllNamed(AppRoutes.adminDashboard);
+      } else if (_supabaseService.isSeller) {
+        Get.offAllNamed(AppRoutes.sellerDashboard);
+      } else {
+        // Buyer only - show upgrade option
+        Get.defaultDialog(
+          title: 'Access Restricted',
+          middleText: 'This platform is for sellers and admins only. Would you like to register as a seller?',
+          textConfirm: 'Yes, Register',
+          textCancel: 'No, Logout',
+          onConfirm: () {
+            Get.back();
+            Get.toNamed(AppRoutes.register);
+          },
+          onCancel: () {
+            Get.back();
+            logout();
+          },
+        );
+      }
+    });
+  }
+  
+  void navigateToRegister() {
+    _clearLoginForm();
+    Get.toNamed(AppRoutes.register);
+  }
+  
+  void navigateToLogin() {
+    _clearRegisterForm();
+    Get.toNamed(AppRoutes.login);
+  }
+  
+  // ============= FORM VALIDATION =============
+  
+  String? validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Email is required';
+    }
+    if (!GetUtils.isEmail(value)) {
+      return 'Please enter a valid email';
+    }
+    return null;
+  }
+  
+  String? validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Password is required';
+    }
+    if (value.length < 6) {
+      return 'Password must be at least 6 characters';
+    }
+    return null;
+  }
+  
+  String? validateRequired(String? value, String fieldName) {
+    if (value == null || value.isEmpty) {
+      return '$fieldName is required';
+    }
+    return null;
+  }
+  
+  String? validatePhone(String? value) {
+    if (value != null && value.isNotEmpty) {
+      // Basic phone validation
+      if (!RegExp(r'^\+?[0-9]{10,15}$').hasMatch(value)) {
+        return 'Please enter a valid phone number';
+      }
+    }
+    return null;
+  }
+  
+  // ============= HELPER METHODS =============
+  
+  void togglePasswordVisibility() {
+    isPasswordVisible.value = !isPasswordVisible.value;
+  }
+  
+  void _clearLoginForm() {
+    emailController.clear();
+    passwordController.clear();
+    errorMessage.value = '';
+  }
+  
+  void _clearRegisterForm() {
+    emailController.clear();
+    passwordController.clear();
+    fullNameController.clear();
+    shopNameController.clear();
+    phoneController.clear();
+    shopDescriptionController.clear();
+    errorMessage.value = '';
+  }
+  
+  // ============= GETTERS =============
+  
+  bool get isAuthenticated => _supabaseService.isAuthenticated;
+  bool get isAdmin => _supabaseService.isAdmin;
+  bool get isSeller => _supabaseService.isSeller;
+  String? get userEmail => _supabaseService.userEmail;
+  String? get userId => _supabaseService.userId;
 }

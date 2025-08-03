@@ -28,7 +28,7 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  supabase_flutter: ^1.10.21
+  supabase_flutter: ^2.9.1
   get: ^4.6.6
 
   flutter:
