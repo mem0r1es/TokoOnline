@@ -11,6 +11,7 @@ import 'package:flutter_web/models/cart_item.dart';
 import 'package:flutter_web/models/order_history_item.dart';
 import 'package:flutter_web/pages/pengiriman/cargo.dart';
 import 'package:flutter_web/pages/profile/address_page.dart';
+import 'package:flutter_web/pages/shoppingcart/after_checkout.dart';
 import 'package:flutter_web/services/cart_service.dart';
 import 'package:flutter_web/services/checkout_service.dart';
 // import 'package:flutter_web/widgets/header_bar.dart';
@@ -172,140 +173,139 @@ DateTime calculateEstimasiTiba(String kategori) {
                         ),
                 ),
                 const SizedBox(height: 10),
-              
 
               // ✅ RINGKASAN PRODUK + TOTAL
               ...groupedItems.entries.map((entry) {
                 final seller = entry.key;
                 final sellerItems = entry.value;
 
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: ListTile(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                return ListTile(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(15),
+                      topRight: Radius.circular(15),
+                    )
+                  ),
+                  tileColor: Colors.purple[50],
+                  title: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _title(seller),
+                      const SizedBox(height: 10),
+                      ...sellerItems.map((item) {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, right: 8.0),
+                          child: Row(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(6),
+                                child: Image.network(
+                                  item.imageUrl,
+                                  width: 60,
+                                  height: 60,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      width: 60,
+                                      height: 60,
+                                      color: Colors.grey[300],
+                                      child: const Icon(Icons.broken_image, color: Colors.grey),
+                                    );
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: _orderRow(
+                                  '${item.name}  × ${item.quantity}',
+                                  'Rp ${_rupiah(item.price)}',
+                                  'Rp ${_rupiah(item.totalPrice)}',
+                                  // '× ${item.quantity}'
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
                     ),
-                    tileColor: Colors.purple[50],
-                    title: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _title(seller),
-                        const SizedBox(height: 10),
-                        ...sellerItems.map((item) {
-                          return Padding(
-                            padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, right: 8.0),
-                            child: Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(6),
-                                  child: Image.network(
-                                    item.imageUrl,
-                                    width: 60,
-                                    height: 60,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Container(
-                                        width: 60,
-                                        height: 60,
-                                        color: Colors.grey[300],
-                                        child: const Icon(Icons.broken_image, color: Colors.grey),
-                                      );
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: _orderRow(
-                                    '${item.name}  × ${item.quantity}',
-                                    'Rp ${_rupiah(item.price)}',
-                                    'Rp ${_rupiah(item.totalPrice)}',
-                                    // '× ${item.quantity}'
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }),
-                        const Divider(),
+                    ],
+                  ),
+                );
+              }),
+              const SizedBox(height:1),
+              ListTile(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.zero,
+                ),
+                tileColor: Colors.purple[50],
+                title: _title('Opsi Pengiriman'),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                  onTap: () {
+                    Get.toNamed(CargoPage.TAG);
+                  },
+              ),
+              if (cargoController.selectedCategory.value.isNotEmpty == true)
+              ListTile(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.zero,
+                ),
+                tileColor: Colors.purple[50],
+                title: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (cargoController.selectedCargoName.value.isNotEmpty == true)
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Total',
-                              style: GoogleFonts.poppins(fontWeight: FontWeight.bold)
+                              '${cargoController.selectedCategory.value} (${cargoController.selectedCargoName.value})',
+                              style: GoogleFonts.poppins(fontSize: 14),
                             ),
                             Text(
-                              'Rp ${_rupiah(sellerItems.fold<double>(0, (sum,item) => sum + item.totalPrice))}',
-                              style: TextStyle(
-                            fontWeight: FontWeight.w900, 
-                            fontSize: 16, 
-                            color: Colors.purple[800],
-                            ),
+                              'Rp${_rupiah((ongkir ?? 0).toDouble())}',
                             ),
                           ],
-                        )
-                      ],
-                    ),
-                  ),
-                );
-              }),
-              // const SizedBox(height: 10),
-
-              ListTile(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                tileColor: Colors.purple[50],
-                title: _title('Opsi Pengiriman'),
-                  subtitle : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (cargoController.selectedCategory.value.isNotEmpty == true)
+                        ),
+                        if (cargoController.selectedCategory.value.isNotEmpty == true)
                         Text(
                           'Estimasi tiba: ${DateFormat('dd MMM yyyy').format(
                             calculateEstimasiTiba(cargoController.selectedCategory.value)
                           )}',
                           style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
                         ),
-                      if (cargoController.selectedCargoName.value.isNotEmpty == true)
-                        Text(
-                          '${cargoController.selectedCategory.value} (${cargoController.selectedCargoName.value})',
-                          style: GoogleFonts.poppins(fontSize: 14),
-                        ),
                     ],
                   ),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-                onTap: () {
-                  Get.toNamed(CargoPage.TAG);
-                },
               ),
-              const SizedBox(height: 10),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              const SizedBox(height: 1),
+              ListTile(
+                tileColor: Colors.purple[50],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadiusGeometry.only(
+                    bottomLeft: Radius.circular(15),
+                    bottomRight: Radius.circular(15),
+                  )
+                ),
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Harga Produk: Rp ${_rupiah(totalPrice)}',
-                      style: GoogleFonts.poppins(
-                        fontSize: 16, 
-                        fontWeight: FontWeight.bold,
-                        color: Colors.purple[800],
-                      )),
-                    if (cargoController.selectedCargo.value != null)
-                      Text('Ongkos Kirim: Rp ${_rupiah(ongkir as double)}'),
-                    const Divider(),
-                     Text(
-                       'Total Harga: Rp ${_rupiah(totalBayar)}',
-                       style: GoogleFonts.poppins(
-                           fontSize: 18, fontWeight: FontWeight.bold),
-                     ),
+                    Text(
+                      'Total ${itemsToCheckout.length} Produk:',
+                      style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600),
+                    ),
+                    Text(
+                      '${_rupiah(totalBayar)}',
+                      style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold),
+                    ),
                   ],
                 ),
-
+              ),
+              const SizedBox(height: 10,),
               //Payment
               Container(
                 child: ListTile(
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadiusGeometry.circular(20),
+                    borderRadius: BorderRadiusGeometry.circular(15),
                   ),
                   tileColor: Colors.purple[50],
                   title: 
@@ -325,6 +325,52 @@ DateTime calculateEstimasiTiba(String kategori) {
                       ],
                     ),
                  ),
+              ),
+              const SizedBox(height: 10),
+              ListTile(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadiusGeometry.circular(15),
+                ),
+                tileColor: Colors.purple[50],
+                title: Text(
+                  'Rincian Pembayaran',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                subtitle: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Subtotal Pesanan',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                          ),
+                        ),
+                        Text(
+                          'Rp${_rupiah(totalPrice)}'
+                        )
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Subtotal Pengiriman',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                          ),
+                        ),
+                        Text(
+                          'Rp${_rupiah((ongkir ?? 0).toDouble())}',
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -379,6 +425,11 @@ DateTime calculateEstimasiTiba(String kategori) {
                 return;
               }
 
+              if(cargoController.selectedCargo.value == null) {
+                Get.snackbar('Error', "Silakan dipilih opsi pengiriman.");
+                return;
+              }
+
               final order = OrderHistoryItem(
                 id: '',
                 timestamp: DateTime.now(),
@@ -409,7 +460,10 @@ DateTime calculateEstimasiTiba(String kategori) {
                 cartService.clearCart();
               }
 
-              Get.toNamed(ProductInfoPage.TAG);
+              // Get.toNamed(ProductInfoPage.TAG);
+              Get.toNamed(AfterCheckout.TAG, arguments: {
+                'totalBayar' : totalBayar,
+              });
             },
             child: Text("Place Order", style: GoogleFonts.poppins(fontSize: 16)),
           ),
@@ -425,31 +479,6 @@ DateTime calculateEstimasiTiba(String kategori) {
         text,
         style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600),
       );
-
-  // Widget _formInput(String label, {TextEditingController? controller, bool readOnly = false}) => Column(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         Text(label, style: GoogleFonts.poppins(fontSize: 14)),
-  //         const SizedBox(height: 8),
-  //         TextFormField(
-  //           controller: controller,
-  //           readOnly: readOnly,
-  //           decoration: InputDecoration(
-  //             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-  //             fillColor: readOnly ? Colors.grey[200] : Colors.white,
-  //             filled: true,
-  //           ),
-  //         ),
-  //       ],
-  //     );
-
-  // Widget _formRow(String leftLabel, String rightLabel) => Row(
-  //       children: [
-  //         Expanded(child: _formInput(leftLabel, controller: _firstNameController)),
-  //         const SizedBox(width: 16),
-  //         Expanded(child: _formInput(rightLabel, controller: _lastNameController)),
-  //       ],
-  //     );
 
   Widget _orderRow(String label, String value, String value1, {bool isBold = false, Color? color}) {
     return SizedBox(

@@ -58,12 +58,14 @@ class OrderHistoryItem {
 
     );
   }
-  String get normalizedStatus => status.toLowerCase().trim();
   String get capitalizedStatus {
   if (status.isEmpty) return '';
-  return status[0].toUpperCase() + status.substring(1).toLowerCase();
+  return status[0].toUpperCase() + status.substring(1);
 }
 
+String get normalizedStatus => status.toLowerCase().trim();
 
+
+  
 }
 

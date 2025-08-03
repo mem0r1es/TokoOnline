@@ -10,8 +10,6 @@ import 'pages/homepage/home_page.dart';
 import 'package:url_strategy/url_strategy.dart';  
 
 void main() async {
-  Get.put(ScrollControllerManager()); 
-  Get.put(CustomScrollController());
   WidgetsFlutterBinding.ensureInitialized();
 
   setPathUrlStrategy();

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_web/controllers/scroll_controller.dart';
 import 'package:flutter_web/pages/profile/profile_page.dart';
 import 'package:flutter_web/pages/shop/shops.dart';
+import 'package:flutter_web/pages/shoppingcart/after_checkout.dart';
 import 'package:get/get.dart';
 // import 'package:flutter_web/services/product_service.dart';
 // import 'package:flutter_web/widgets/billing.dart';
@@ -21,7 +22,8 @@ class HomePage extends GetView<CustomScrollController> {
 
   final List <Widget> _pages = const [
     _HomeContent(),
-    ShopsPage(),
+    AfterCheckout(),
+    // ShopsPage(),
     ProfilePage(),
   ];
 

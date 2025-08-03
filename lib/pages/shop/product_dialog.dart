@@ -5,6 +5,8 @@ import 'package:flutter_web/controllers/product_controller.dart';
 import 'package:flutter_web/models/cart_item.dart';
 import 'package:flutter_web/models/product_model.dart';
 import 'package:flutter_web/pages/auth/auth_dialog.dart';
+import 'package:flutter_web/pages/profile/add_address.dart';
+import 'package:flutter_web/pages/shoppingcart/cart.dart';
 import 'package:flutter_web/pages/shoppingcart/checkout_page.dart';
 import 'package:flutter_web/services/cart_service.dart';
 import 'package:get/get.dart';

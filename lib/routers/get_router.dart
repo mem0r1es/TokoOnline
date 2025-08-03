@@ -1,9 +1,11 @@
 import 'package:flutter_web/binding.dart';
 import 'package:flutter_web/pages/favorite/favorite_page.dart';
 import 'package:flutter_web/pages/history/history.dart';
+import 'package:flutter_web/pages/history/order_detail.dart';
 import 'package:flutter_web/pages/pengiriman/cargo.dart';
 import 'package:flutter_web/pages/profile/edit_profil_page.dart';
 import 'package:flutter_web/pages/search/search_page.dart';
+import 'package:flutter_web/pages/shoppingcart/after_checkout.dart';
 import 'package:flutter_web/pages/shoppingcart/cart.dart';
 import 'package:get/get.dart';
 import 'package:get/get_navigation/src/routes/get_route.dart';
@@ -33,5 +35,6 @@ List<GetPage> _routes = [
   GetPage(name: FavoritePage.TAG, page: () => FavoritePage(), binding: InitialScreenBindings()),
   GetPage(name: CartPages.TAG, page: () => CartPages(), binding: InitialScreenBindings()), //'/shoppingcart'
   GetPage(name: CargoPage.TAG, page: () => CargoPage(), binding: InitialScreenBindings()),
-  
+  // GetPage(name: OrderDetailPage.TAG, page: () => OrderDetailPage(order: order,), binding: InitialScreenBindings()),
+  GetPage(name: AfterCheckout.TAG, page: () => AfterCheckout(), binding: InitialScreenBindings()),
 ];
