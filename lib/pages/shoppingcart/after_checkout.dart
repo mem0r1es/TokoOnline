@@ -17,18 +17,27 @@ class AfterCheckout extends StatelessWidget {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Icon(
               Icons.celebration,
               size: 100),
-            ListTile(
-              leading: Icon(Icons.check_circle),
-              title: Text(
+            const SizedBox(height: 10,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.check_circle),
+                SizedBox(width: 5,),
+                Text(
+                  // 'Kamu membayar Rp ',
                 'Kamu membayar Rp ${_rupiah(totalBayar)}',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
+                ),
+              ],
             ),
+            const SizedBox(height: 10,),
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -41,6 +50,7 @@ class AfterCheckout extends StatelessWidget {
                     'Lanjut Berbelanja'
                   )
                 ),
+                const SizedBox(width: 10,),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(

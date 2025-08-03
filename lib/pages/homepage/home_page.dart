@@ -22,8 +22,8 @@ class HomePage extends GetView<CustomScrollController> {
 
   final List <Widget> _pages = const [
     _HomeContent(),
-    AfterCheckout(),
-    // ShopsPage(),
+    // AfterCheckout(),
+    ShopsPage(),
     ProfilePage(),
   ];
 
