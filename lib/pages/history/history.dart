@@ -4,13 +4,6 @@ import 'package:flutter_web/controllers/scroll_controller.dart';
 import 'package:flutter_web/models/order_history_item.dart';
 import 'package:flutter_web/pages/history/order_tile.dart';
 import 'package:flutter_web/pages/homepage/home_page.dart';
-<<<<<<< Updated upstream
-import 'package:flutter_web/models/product_model.dart';
-import 'package:flutter_web/pages/homepage/home_page.dart';
-import 'package:flutter_web/pages/profile/profile_page.dart';
-import 'package:flutter_web/services/cart_service.dart';
-=======
->>>>>>> Stashed changes
 import 'package:flutter_web/services/checkout_service.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
