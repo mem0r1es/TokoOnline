@@ -22,8 +22,13 @@ class HomePage extends GetView<CustomScrollController> {
 
   final List <Widget> _pages = const [
     _HomeContent(),
+<<<<<<< Updated upstream
     // AfterCheckout(),
     ShopsPage(),
+=======
+    AfterCheckout(),
+    // ShopsPage(),
+>>>>>>> Stashed changes
     ProfilePage(),
   ];
 
