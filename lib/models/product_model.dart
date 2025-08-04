@@ -31,33 +31,55 @@ class Product {
   });
 
   // Factory constructor untuk data dari database
-  factory Product.fromDatabase(Map<String, dynamic> data) {
-    print('RAW PRODUCT DATA: $data');
+  // factory Product.fromDatabase(Map<String, dynamic> data) {
+  //   print('RAW PRODUCT DATA: $data');
 
-    print('DEBUG seller_id: ${data['seller_id']} (${data['seller_id'].runtimeType})');
-    return Product(
-      id: data['id']?.toString(),
-      title: data['name'] ?? '',
-      imagePath: data['image_url'] ?? 'assets/placeholder.png',
-      description: data['description'] ?? '',
-      price: (data['price'] as num?)?.toInt() ?? 0,
-      category: data['category'],
-      stock: data['stock_quantity'],
-      isActive: data['is_active'],
-      createdAt: data['created_at'] != null
-          ? DateTime.parse(data['created_at'])
-          : null,
-      sellerId: data['seller_id'] is Map
-          ? data['seller_id']['id']?.toString()
-          : data['seller_id']?.toString(),
-      storeName: data['seller_id'] is Map
-          ? data['seller_id']['store_name']
-          : null,
-      quantity: 1,
+  //   print('DEBUG seller_id: ${data['seller_id']} (${data['seller_id'].runtimeType})');
+  //   return Product(
+  //     id: data['id']?.toString(),
+  //     title: data['name'] ?? '',
+  //     imagePath: data['image_url'] ?? 'assets/placeholder.png',
+  //     description: data['description'] ?? '',
+  //     price: (data['price'] as num?)?.toInt() ?? 0,
+  //     category: data['category'],
+  //     stock: data['stock_quantity'],
+  //     isActive: data['is_active'],
+  //     createdAt: data['created_at'] != null
+  //         ? DateTime.parse(data['created_at'])
+  //         : null,
+  //     sellerId: data['seller_id'] is Map
+  //         ? data['seller_id']['id']?.toString()
+  //         : data['seller_id']?.toString(),
+  //     storeName: data['seller_id'] is Map
+  //         ? data['seller_id']['store_name']
+  //         : null,
+  //     quantity: 1,
       
-    );
+  //   );
     
-  }
+  // }
+
+  factory Product.fromDatabase(Map<String, dynamic> data) {
+  print('RAW PRODUCT DATA: $data');
+
+  return Product(
+    id: data['id']?.toString(),
+    title: data['name'] ?? '',
+    imagePath: data['image_url'] ?? 'assets/placeholder.png',
+    description: data['description'] ?? '',
+    price: (data['price'] as num?)?.toInt() ?? 0,
+    category: data['category'],
+    stock: data['stock_quantity'],
+    isActive: data['is_active'],
+    createdAt: data['created_at'] != null
+        ? DateTime.parse(data['created_at'])
+        : null,
+    sellerId: data['seller_id']?.toString(),
+    storeName: data['seller_store_name'], // ini ambil dari VIEW
+    quantity: 1,
+  );
+}
+
 
   // Convert to JSON for database
   Map<String, dynamic> toDatabase() {
@@ -123,8 +145,8 @@ class Product {
       stock: stock ?? this.stock,
       isActive: isActive ?? this.isActive,
       createdAt: createdAt,
-      sellerId: sellerId ?? sellerId,
-      storeName: storeName ?? storeName,
+      sellerId: sellerId ?? this.sellerId,
+      storeName: storeName ?? this.storeName,
       quantity: quantity ?? this.quantity,
     );
   }

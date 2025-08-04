@@ -239,7 +239,13 @@ DateTime calculateEstimasiTiba(String kategori) {
                   borderRadius: BorderRadius.zero,
                 ),
                 tileColor: Colors.purple[50],
-                title: _title('Opsi Pengiriman'),
+                title: Text(
+                  'Opsi Pengiriman',
+                  style: GoogleFonts.poppins(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
                   onTap: () {
                     Get.toNamed(CargoPage.TAG);
@@ -263,7 +269,8 @@ DateTime calculateEstimasiTiba(String kategori) {
                               style: GoogleFonts.poppins(fontSize: 14),
                             ),
                             Text(
-                              'Rp${_rupiah((ongkir ?? 0).toDouble())}',
+                              'Rp ${_rupiah((ongkir ?? 0).toDouble())}',
+                              style: context.labelLarge,
                             ),
                           ],
                         ),
@@ -294,7 +301,7 @@ DateTime calculateEstimasiTiba(String kategori) {
                       style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600),
                     ),
                     Text(
-                      '${_rupiah(totalBayar)}',
+                      'Rp ${_rupiah(totalBayar)}',
                       style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold),
                     ),
                   ],

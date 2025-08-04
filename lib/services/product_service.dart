@@ -52,18 +52,27 @@ class ProductService {
   final supabase = Supabase.instance.client;
 
   Future<List<Product>> fetchProducts() async {
-    final response = await supabase
-        .from('products')
-        .select('*, seller_id (id, store_name)')
-        .eq('is_active', true)
-        .order('created_at', ascending: false);
+    // final response = await supabase
+    //     .from('products')
+    //     .select('*, seller_id (id, store_name)')
+    //     .eq('is_active', true)
+    //     .order('created_at', ascending: false);
 
-    return response.map((data) => Product.fromDatabase(data)).toList();
+    // return response.map((data) => Product.fromDatabase(data)).toList();
+    final response = await supabase
+    .from('product_with_seller')
+    .select()
+    .eq('is_active', true)
+    .order('created_at', ascending: false);
+
+return response.map((data) => Product.fromDatabase(data)).toList();
+// return products
+
   }
 
   Future<List<Product>> searchProducts(String query) async {
     final response = await supabase
-        .from('products')
+        .from('product_with_seller')
         .select('*, seller_id (id, store_name)')
         .eq('is_active', true)
         .or(

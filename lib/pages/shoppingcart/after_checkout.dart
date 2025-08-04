@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web/extensions/extension.dart';
 import 'package:flutter_web/pages/history/history.dart';
 import 'package:flutter_web/pages/homepage/home_page.dart';
 import 'package:get/get.dart';
@@ -12,7 +13,7 @@ class AfterCheckout extends StatelessWidget {
     final args = Get.arguments as Map<String, dynamic>;
     final totalBayar = args['totalBayar'] as double;
     return Scaffold(
-      appBar: AppBar(),
+      // appBar: AppBar(),
       backgroundColor: Colors.white,
       body: Center(
         child: Column(
@@ -30,7 +31,7 @@ class AfterCheckout extends StatelessWidget {
                 SizedBox(width: 5,),
                 Text(
                   // 'Kamu membayar Rp ',
-                'Kamu membayar Rp ${_rupiah(totalBayar)}',
+                'Kamu berhasil membayar Rp ${_rupiah(totalBayar)}',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               ],
@@ -47,7 +48,8 @@ class AfterCheckout extends StatelessWidget {
                   ),
                   onPressed:() => Get.toNamed(HomePage.TAG), 
                   child: Text(
-                    'Lanjut Berbelanja'
+                    'Lanjut Berbelanja',
+                    style: context.labelMedium,
                   )
                 ),
                 const SizedBox(width: 10,),
@@ -59,7 +61,8 @@ class AfterCheckout extends StatelessWidget {
                   ),
                   onPressed:() => Get.toNamed(ProductInfoPage.TAG), 
                   child: Text(
-                    'Lihat Keranjang'
+                    'Lihat Keranjang',
+                    style: context.labelMedium,
                   )
                 ),
               ],

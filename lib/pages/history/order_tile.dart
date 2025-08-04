@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web/extensions/extension.dart';
 import 'package:flutter_web/models/order_history_item.dart';
 import 'package:flutter_web/pages/history/order_detail.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class OrderTile extends StatefulWidget {
   final OrderHistoryItem order;
@@ -40,24 +40,21 @@ class _OrderTileState extends State<OrderTile> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                // 'Order at $formattedTime',
                 itemsToDisplay.first.seller,
-                style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold),
+                style: context.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               Text(
-                // 'Order at $formattedTime',
                 '${order.capitalizedStatus}',
-                style: GoogleFonts.poppins(
-                  fontSize: 14, 
+                style: context.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Colors.purple,
-                  ),
+                ),
               ),
             ],
           ),
-          
         ],
-      
       ),
     
       subtitle: Column(
@@ -91,12 +88,12 @@ class _OrderTileState extends State<OrderTile> {
                         Expanded(
                           child: Text(
                             '${item.name} × ${item.quantity}',
-                            style: GoogleFonts.poppins(fontSize: 14),
+                            style: context.bodyMedium,
                           ),
                         ),
                         Text(
                           'Rp ${_rupiah(item.totalPrice)}',
-                          style: GoogleFonts.poppins(fontSize: 14),
+                          style: context.bodyMedium,
                         ),
                       ],
                     ),
@@ -108,38 +105,16 @@ class _OrderTileState extends State<OrderTile> {
               Column(
               crossAxisAlignment: CrossAxisAlignment.stretch, 
               children: [
-                // Row(
-                //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //   children: [
-                //     Text(
-                //       'Cargo: ${order.cargoName ?? '-'}',
-                //       style: GoogleFonts.poppins(
-                //         fontSize: 14,
-                //         fontWeight: FontWeight.w500,
-                //         color: Colors.black87,
-                //       ),
-                //     ),
-                //     Text(
-                //       'Ongkir: Rp ${_rupiah((order.ongkir ?? 0).toDouble())}',
-                //       style: GoogleFonts.poppins(
-                //         fontSize: 14,
-                //         fontStyle: FontStyle.italic,
-                //         color: Colors.grey[600],
-                //       ),
-                //     ),
-                //   ],
-                // ),
-                // const SizedBox(height: 4),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
                       'Total ${_getTotalQuantity(order)} Harga: ',
-                      style: GoogleFonts.poppins(),
+                      style: context.bodyMedium,
                     ),
                     Text(
                       'Rp ${_rupiah(_getTotalWithOngkir(order))}',
-                      style: GoogleFonts.poppins(
+                      style: context.titleSmall!.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -157,7 +132,7 @@ class _OrderTileState extends State<OrderTile> {
                 },
                 child: Text(
                   'Lihat Semua ↓', 
-                  style: GoogleFonts.poppins(
+                  style: context.bodySmall!.copyWith(
                     fontWeight: FontWeight.w500,
                     color: Colors.grey[500]),
                   ),

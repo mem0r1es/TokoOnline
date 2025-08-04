@@ -48,11 +48,11 @@ class OrderDetailPage extends StatelessWidget {
                         // bottomLeft: Radius.circular(10),
                       )
                     ),
-                    tileColor: order.normalizedStatus == 'Pesanan Diterima'
+                    tileColor: order.status == 'Pesanan Diterima'
                         ? Colors.orange[100]
-                        : order.normalizedStatus == 'Dalam Pengiriman'
+                        : order.status == 'Dalam Pengiriman'
                             ? Colors.blue[100]
-                            : order.normalizedStatus == 'Selesai'
+                            : order.status == 'Pesanan Selesai'
                                 ? Colors.green[100]
                                 : Colors.red[200],
                     

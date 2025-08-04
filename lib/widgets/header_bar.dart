@@ -4,6 +4,7 @@ import 'package:flutter_web/controllers/auth_controller.dart';
 import 'package:flutter_web/controllers/cart_controller.dart';
 import 'package:flutter_web/controllers/checkout_controller.dart';
 import 'package:flutter_web/controllers/favorite_controller.dart';
+import 'package:flutter_web/extensions/extension.dart';
 import 'package:flutter_web/pages/shoppingcart/cart.dart';
 import 'package:flutter_web/services/scroll_controller_manager.dart';
 // Periksa nama kelas AboutPage
@@ -89,7 +90,9 @@ class HeaderPages extends GetView<ScrollControllerManager> { // Tetap gunakan Sc
                 controller: searchController.searchInputController, // Gunakan controller dari SearchController
                 decoration: InputDecoration(
                   hintText: 'Search products...',
-                  hintStyle: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[500]),
+                  hintStyle: context.labelLarge!.copyWith(
+                    color: Colors.grey[500]
+                  ),
                   prefixIcon: const Icon(Icons.search, color: Colors.grey),
                   border: InputBorder.none,
                   isCollapsed: true,
@@ -176,96 +179,96 @@ class HeaderPages extends GetView<ScrollControllerManager> { // Tetap gunakan Sc
     Get.dialog(AuthDialog());
   }
 
-  void _showUserMenu(AuthController authController) {
-    Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          'User Menu',
-          style: GoogleFonts.montserrat(fontWeight: FontWeight.w600),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Welcome!',
-              style: GoogleFonts.poppins(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            SizedBox(height: 4),
-            Text(
-              authController.getUserName() ?? 'User',
-              style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600]),
-            ),
-            SizedBox(height: 20),
-            _userMenuOption(
-              icon: Icons.person,
-              title: 'Profile',
-              onTap: () {
-                Get.toNamed(ProfilePage.TAG);
-              },
-            ),
-            _userMenuOption(
-              icon: Icons.shopping_bag,
-              title: 'My Orders',
-              onTap: () {
-                Get.toNamed(ProductInfoPage.TAG); // Pastikan ProductInfoPage.TAG ada
-              },
-            ),
-            SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Get.back();
-                  final cartService = Get.find<CartService>();
-                  cartService.clearCart();
-                  final favController = Get.find<FavoriteController>();
-                  favController.clearFavorites();
-                  authController.logout();
-                },
-                icon: Icon(Icons.logout, color: Colors.white),
-                label: Text(
-                  'Logout',
-                  style: GoogleFonts.poppins(color: Colors.white),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // void _showUserMenu(AuthController authController) {
+  //   Get.dialog(
+  //     AlertDialog(
+  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+  //       title: Text(
+  //         'User Menu',
+  //         style: GoogleFonts.montserrat(fontWeight: FontWeight.w600),
+  //       ),
+  //       content: Column(
+  //         mainAxisSize: MainAxisSize.min,
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           Text(
+  //             'Welcome!',
+  //             style: GoogleFonts.poppins(
+  //               fontSize: 16,
+  //               fontWeight: FontWeight.w500,
+  //             ),
+  //           ),
+  //           SizedBox(height: 4),
+  //           Text(
+  //             authController.getUserName() ?? 'User',
+  //             style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600]),
+  //           ),
+  //           SizedBox(height: 20),
+  //           _userMenuOption(
+  //             icon: Icons.person,
+  //             title: 'Profile',
+  //             onTap: () {
+  //               Get.toNamed(ProfilePage.TAG);
+  //             },
+  //           ),
+  //           _userMenuOption(
+  //             icon: Icons.shopping_bag,
+  //             title: 'My Orders',
+  //             onTap: () {
+  //               Get.toNamed(ProductInfoPage.TAG); // Pastikan ProductInfoPage.TAG ada
+  //             },
+  //           ),
+  //           SizedBox(height: 20),
+  //           SizedBox(
+  //             width: double.infinity,
+  //             child: ElevatedButton.icon(
+  //               onPressed: () {
+  //                 Get.back();
+  //                 final cartService = Get.find<CartService>();
+  //                 cartService.clearCart();
+  //                 final favController = Get.find<FavoriteController>();
+  //                 favController.clearFavorites();
+  //                 authController.logout();
+  //               },
+  //               icon: Icon(Icons.logout, color: Colors.white),
+  //               label: Text(
+  //                 'Logout',
+  //                 style: GoogleFonts.poppins(color: Colors.white),
+  //               ),
+  //               style: ElevatedButton.styleFrom(
+  //                 backgroundColor: Colors.red,
+  //                 shape: RoundedRectangleBorder(
+  //                   borderRadius: BorderRadius.circular(8),
+  //                 ),
+  //               ),
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
-  Widget _userMenuOption({
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: Colors.grey[600]),
-      title: Text(title, style: GoogleFonts.poppins(fontSize: 14)),
-      onTap: onTap,
-    );
-  }
+  // Widget _userMenuOption({
+  //   required IconData icon,
+  //   required String title,
+  //   required VoidCallback onTap,
+  // }) {
+  //   return ListTile(
+  //     contentPadding: EdgeInsets.zero,
+  //     leading: Icon(icon, color: Colors.grey[600]),
+  //     title: Text(title, style: GoogleFonts.poppins(fontSize: 14)),
+  //     onTap: onTap,
+  //   );
+  // }
 
-  void _userlogin (authService) {
-    if (authService.isLoggedIn.value){
-      _showUserMenu(authService);
-    } else {
-      _showAuthDialog();
-    }
-  }
+  // void _userlogin (authService) {
+  //   if (authService.isLoggedIn.value){
+  //     _showUserMenu(authService);
+  //   } else {
+  //     _showAuthDialog();
+  //   }
+  // }
 
   void _handleCartClick(authService, CartService cartService) {
     if (authService.isLoggedIn.value) {
