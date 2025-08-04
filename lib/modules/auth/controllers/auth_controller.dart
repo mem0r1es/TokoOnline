@@ -82,7 +82,7 @@ class AuthController extends GetxController {
           snackPosition: SnackPosition.TOP,
         );
         
-        // Redirect based on role
+        // Redirect based on role (roles already loaded in login method)
         _redirectBasedOnRole();
       } else {
         errorMessage.value = result['message'];

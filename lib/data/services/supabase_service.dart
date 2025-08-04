@@ -52,33 +52,108 @@ class SupabaseService extends GetxService {
       final response = await _client.auth.signUp(
         email: email,
         password: password,
+        data: {
+          'full_name': fullName,
+          'shop_name': shopName,
+          'shop_description': shopDescription,
+          'phone': phone,
+        }, // Pass all data as metadata
       );
       
+      // Check if email already exists
       if (response.user == null) {
+        // Try to login first to check if user exists
+        try {
+          final loginCheck = await _client.auth.signInWithPassword(
+            email: email,
+            password: password,
+          );
+          if (loginCheck.user != null) {
+            return {
+              'success': false,
+              'message': 'Email already registered. Please login instead.',
+            };
+          }
+        } catch (e) {
+          // Login failed, continue with original error
+        }
         throw Exception('Registration failed');
       }
       
-      // 2. Create profile dengan roles ['buyer', 'seller']
-      final profileData = {
-        'id': response.user!.id,
-        'email': email,
-        'full_name': fullName,
-        'shop_name': shopName,
-        'phone': phone,
-        'shop_description': shopDescription,
-        'roles': ['buyer', 'seller'], // Auto assign both roles
-        'status': 'active', // No approval needed
-        'created_at': DateTime.now().toIso8601String(),
-        'updated_at': DateTime.now().toIso8601String(),
-      };
+      // 2. Wait a bit for auth.users to be ready
+      await Future.delayed(const Duration(milliseconds: 500));
       
-      await _client.from('profiles').insert(profileData);
+      // 3. Try to create or update profile
+      try {
+        final profileData = {
+          'id': response.user!.id,
+          'email': email,
+          'full_name': fullName,
+          'shop_name': shopName,
+          'phone': phone,
+          'shop_description': shopDescription,
+          'roles': ['buyer', 'seller'], // Auto assign both roles
+          'status': 'active', // No approval needed
+          'created_at': DateTime.now().toIso8601String(),
+          'updated_at': DateTime.now().toIso8601String(),
+        };
+        
+        print('Attempting to upsert profile with data: $profileData');
+        
+        // Use upsert to handle existing profile and force update roles
+        await _client.from('profiles').upsert(
+          profileData,
+          onConflict: 'id',
+        );
+        
+        print('Profile upserted successfully');
+        
+        // Verify the profile was created with correct roles
+        final verifyProfile = await _client
+            .from('profiles')
+            .select('id, email, roles')
+            .eq('id', response.user!.id)
+            .maybeSingle();
+            
+        print('Profile after upsert: $verifyProfile');
+        
+      } catch (e) {
+        print('Profile creation error: $e');
+        // If upsert fails, try update only to ensure roles are set
+        try {
+          await _client.from('profiles').update({
+            'full_name': fullName,
+            'shop_name': shopName,
+            'phone': phone,
+            'shop_description': shopDescription,
+            'roles': ['buyer', 'seller'], // Ensure seller role
+            'updated_at': DateTime.now().toIso8601String(),
+          }).eq('id', response.user!.id);
+          
+          print('Profile updated via fallback');
+        } catch (updateError) {
+          print('Profile update error: $updateError');
+        }
+      }
       
-      // 3. Auto login after registration
+      // 4. Auto login after registration
       await _client.auth.signInWithPassword(
         email: email,
         password: password,
       );
+      
+      // 5. Force update roles after login (in case trigger overrode them)
+      await Future.delayed(const Duration(milliseconds: 1000));
+      try {
+        await _client.from('profiles').update({
+          'roles': ['buyer', 'seller'],
+          'updated_at': DateTime.now().toIso8601String(),
+        }).eq('id', response.user!.id);
+        
+        print('Roles updated after login');
+      } catch (e) {
+        print('Failed to update roles after login: $e');
+      }
       
       return {
         'success': true,
@@ -86,6 +161,14 @@ class SupabaseService extends GetxService {
         'user': response.user,
       };
     } catch (e) {
+      // Handle specific Supabase auth errors
+      if (e.toString().contains('User already registered')) {
+        return {
+          'success': false,
+          'message': 'Email already registered. Please login instead.',
+        };
+      }
+      
       return {
         'success': false,
         'message': e.toString(),
@@ -111,8 +194,14 @@ class SupabaseService extends GetxService {
         throw Exception('Login failed');
       }
       
-      // Load user profile to get roles
-      await _loadUserProfile();
+      // Set current user
+      currentUser.value = response.user;
+      
+      // Load user profile to get roles - wait until complete
+      await loadUserProfile();
+      
+      // Add small delay to ensure roles are properly set
+      await Future.delayed(const Duration(milliseconds: 200));
       
       return {
         'success': true,
@@ -142,7 +231,8 @@ class SupabaseService extends GetxService {
   
   // ============= PROFILE METHODS =============
   
-  Future<void> _loadUserProfile() async {
+  // Make this public so it can be called from auth controller
+  Future<void> loadUserProfile() async {
     try {
       final userId = currentUser.value?.id;
       if (userId == null) return;
@@ -151,14 +241,51 @@ class SupabaseService extends GetxService {
           .from('profiles')
           .select()
           .eq('id', userId)
-          .single();
+          .maybeSingle();
       
-      final roles = List<String>.from(response['roles'] ?? ['buyer']);
-      userRoles.value = roles;
+      if (response != null) {
+        final roles = List<String>.from(response['roles'] ?? ['buyer']);
+        userRoles.value = roles;
+      } else {
+        // Profile doesn't exist, create one with default buyer role
+        print('Profile not found for user $userId, creating default profile...');
+        
+        try {
+          await _client.from('profiles').upsert({
+            'id': userId,
+            'email': currentUser.value?.email,
+            'roles': ['buyer'],
+            'status': 'active',
+            'created_at': DateTime.now().toIso8601String(),
+            'updated_at': DateTime.now().toIso8601String(),
+          }, onConflict: 'id'); // Use upsert to prevent duplicate error
+          
+          userRoles.value = ['buyer'];
+        } catch (e) {
+          print('Error creating default profile: $e');
+          // Try to load again in case it was created by another process
+          final retryResponse = await _client
+              .from('profiles')
+              .select()
+              .eq('id', userId)
+              .maybeSingle();
+              
+          if (retryResponse != null) {
+            final roles = List<String>.from(retryResponse['roles'] ?? ['buyer']);
+            userRoles.value = roles;
+          } else {
+            userRoles.value = ['buyer']; // Default to buyer role
+          }
+        }
+      }
     } catch (e) {
       print('Error loading profile: $e');
+      userRoles.value = ['buyer']; // Default to buyer role on error
     }
   }
+  
+  // Keep the private one for internal use
+  Future<void> _loadUserProfile() => loadUserProfile();
   
   Future<Map<String, dynamic>?> getProfile(String userId) async {
     try {
@@ -166,7 +293,7 @@ class SupabaseService extends GetxService {
           .from('profiles')
           .select()
           .eq('id', userId)
-          .single();
+          .maybeSingle(); // Use maybeSingle() instead of single()
       
       return response;
     } catch (e) {
