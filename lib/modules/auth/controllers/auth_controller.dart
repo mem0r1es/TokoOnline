@@ -210,7 +210,7 @@ class AuthController extends GetxController {
           title: 'Access Restricted',
           middleText: 'This platform is for sellers and admins only. Would you like to register as a seller?',
           textConfirm: 'Yes, Register',
-          textCancel: 'No, Logout',
+          textCancel: 'No',
           onConfirm: () {
             Get.back();
             Get.toNamed(AppRoutes.register);
