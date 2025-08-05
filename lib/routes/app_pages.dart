@@ -11,6 +11,9 @@ import '../modules/seller/views/dashboard_view.dart';
 // import '../modules/admin/views/dashboard_view.dart';
 
 import 'app_routes.dart';
+import 'middlewares/auth_guard.dart';
+import 'middlewares/role_guard.dart';
+import 'middlewares/guest_guard.dart';
 
 class AppPages {
   AppPages._();
@@ -24,12 +27,18 @@ class AppPages {
       page: () => const LoginView(),
       binding: AuthBinding(),
       transition: Transition.fadeIn,
+      middlewares: [
+        GuestGuard(), // Redirect to dashboard if already logged in
+      ],
     ),
     GetPage(
       name: AppRoutes.register,
       page: () => const RegisterView(),
       binding: AuthBinding(),
       transition: Transition.rightToLeft,
+      middlewares: [
+        GuestGuard(), // Redirect to dashboard if already logged in
+      ],
     ),
     
     // ===== SELLER ROUTES =====
@@ -38,7 +47,10 @@ class AppPages {
       page: () => const SellerDashboardView(),
       binding: SellerBinding(),
       transition: Transition.fadeIn,
-      // Nanti akan ditambah middleware di sini
+      middlewares: [
+        AuthGuard(),     // Check if logged in
+        SellerGuard(),   // Check if has seller role
+      ],
     ),
     
     // ===== ADMIN ROUTES =====
@@ -47,7 +59,10 @@ class AppPages {
     //   page: () => const AdminDashboardView(),
     //   binding: AdminBinding(),
     //   transition: Transition.fadeIn,
-    //   // Nanti akan ditambah middleware di sini
+    //   middlewares: [
+    //     AuthGuard(),    // Check if logged in
+    //     AdminGuard(),   // Check if has admin role
+    //   ],
     // ),
     
     // ===== SELLER FEATURE ROUTES (COMING SOON) =====
@@ -55,11 +70,19 @@ class AppPages {
     //   name: AppRoutes.sellerProducts,
     //   page: () => const SellerProductsView(),
     //   binding: SellerProductsBinding(),
+    //   middlewares: [
+    //     AuthGuard(),
+    //     SellerGuard(),
+    //   ],
     // ),
     // GetPage(
     //   name: AppRoutes.sellerOrders,
     //   page: () => const SellerOrdersView(),
     //   binding: SellerOrdersBinding(),
+    //   middlewares: [
+    //     AuthGuard(),
+    //     SellerGuard(),
+    //   ],
     // ),
     
     // ===== ADMIN FEATURE ROUTES (COMING SOON) =====
@@ -67,6 +90,10 @@ class AppPages {
     //   name: AppRoutes.adminUsers,
     //   page: () => const AdminUsersView(),
     //   binding: AdminUsersBinding(),
+    //   middlewares: [
+    //     AuthGuard(),
+    //     AdminGuard(),
+    //   ],
     // ),
   ];
 }
