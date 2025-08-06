@@ -1,92 +1,244 @@
-import 'package:get/get.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'dart:typed_data';
-import '../models/profile_model.dart';
-import '../services/profile_service.dart';
+import 'package:get/get.dart';
+import 'package:flutter_web/controllers/profile_image_controller.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter_web/controllers/auth_controller.dart';
 
 class EditProfileController extends GetxController {
-  final ProfileService _profileService = ProfileService();
-  
+  final isChanged = false.obs;
   final isEditingName = false.obs;
   final isEditingEmail = false.obs;
   final isEditingPhone = false.obs;
-  final isChanged = false.obs;
-  
+
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final phoneController = TextEditingController();
-  
-  var currentName = ''.obs;
-  var currentEmail = ''.obs;
-  var currentPhone = ''.obs;
-  
-  String? phoneError;
+
+  late RxString currentName;
+  late RxString currentEmail;
+  late RxString currentPhone;
+
+  late String initialName;
+  late String initialEmail;
+  late String initialPhone;
+
+  final RxnString phoneError = RxnString();
+
   Uint8List? tempImageBytes;
-  bool removeImage = false;
-  
-  @override
-  void onInit() {
-    super.onInit();
-    // Initialize with passed values
-    final args = Get.arguments as Map<String, dynamic>?;
-    if (args != null) {
-      currentName.value = args['initialName'] ?? '';
-      currentEmail.value = args['initialEmail'] ?? '';
-      currentPhone.value = args['initialPhone'] ?? '';
+  bool removeImageFlag = false;
+
+  // 🔒 Tambahan untuk ubah password
+  final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+  final RxnString passwordError = RxnString();
+
+  void initialize(String name, String email, String phone) {
+    initialName = name;
+    initialEmail = email;
+    initialPhone = phone;
+
+    currentName = name.obs;
+    currentEmail = email.obs;
+    currentPhone = phone.obs;
+  }
+
+  void startEditingName() {
+    isEditingName.value = true;
+    nameController.text = currentName.value;
+  }
+
+  void cancelEditingName() {
+    isEditingName.value = false;
+    nameController.clear();
+  }
+
+  void saveEditedName() {
+    final value = nameController.text.trim();
+    if (value.isNotEmpty) {
+      currentName.value = value;
+      isEditingName.value = false;
+      nameController.clear();
+      isChanged.value = true;
+    } else {
+      Get.snackbar("Error", "Nama tidak boleh kosong");
+    }
+  }
+
+  void startEditingEmail() {
+    isEditingEmail.value = true;
+    emailController.text = currentEmail.value;
+  }
+
+  void cancelEditingEmail() {
+    isEditingEmail.value = false;
+    emailController.clear();
+  }
+
+  void saveEditedEmail() {
+    final value = emailController.text.trim();
+    if (value.isNotEmpty) {
+      currentEmail.value = value;
+      isEditingEmail.value = false;
+      emailController.clear();
+      isChanged.value = true;
+    } else {
+      Get.snackbar("Error", "Email tidak boleh kosong");
+    }
+  }
+
+  void startEditingPhone() {
+    isEditingPhone.value = true;
+    phoneController.text = currentPhone.value;
+  }
+
+  void cancelEditingPhone() {
+    isEditingPhone.value = false;
+    phoneController.clear();
+    phoneError.value = null;
+  }
+
+  bool validatePhoneNumber(String value) {
+    final trimmed = value.trim();
+    final pattern = r'^(\+62|08)[0-9]{9,13}$';
+    final regex = RegExp(pattern);
+    return regex.hasMatch(trimmed);
+  }
+
+  void saveEditedPhone() async {
+    final value = phoneController.text.trim();
+
+    if (!validatePhoneNumber(value)) {
+      phoneError.value = "Nomor HP tidak valid. Gunakan format 08 atau +62, 12–15 digit.";
+      return;
+    }
+
+    try {
+      phoneError.value = null;
+      final authController = Get.find<AuthController>();
+      await authController.updatePhone(value);
+
+      currentPhone.value = value;
+      isEditingPhone.value = false;
+      phoneController.clear();
+      isChanged.value = true;
+    } catch (e) {
+      Get.snackbar("Error", "Gagal memperbarui nomor HP");
     }
   }
 
   Future<void> pickImageTemporarily() async {
-    final imageBytes = await _profileService.pickImage();
+    Uint8List? imageBytes;
+
+    if (kIsWeb) {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+        withData: true,
+      );
+      if (result != null && result.files.first.bytes != null) {
+        imageBytes = result.files.first.bytes;
+      }
+    } else {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        imageBytes = await pickedFile.readAsBytes();
+      }
+    }
+
     if (imageBytes != null) {
       tempImageBytes = imageBytes;
-      removeImage = false;
+      removeImageFlag = false;
       isChanged.value = true;
     } else {
-      Get.snackbar('Batal', 'Tidak ada gambar yang dipilih', 
-          duration: const Duration(seconds: 2));
-    }
-  }
-
-  void validatePhone(String value) {
-    final cleaned = value.replaceAll(RegExp(r'\s+'), '');
-    if (cleaned.length < 12) {
-      phoneError = 'Nomor minimal 12 digit';
-    } else if (!_profileService.validatePhoneNumber(cleaned)) {
-      phoneError = 'Masukkan angka yang benar';
-    } else {
-      phoneError = null;
-    }
-  }
-
-  Future<bool> onWillPop() async {
-    if (isChanged.value) {
-      bool? result = await Get.dialog(
-        AlertDialog(
-          title: const Text("Keluar tanpa menyimpan?"),
-          content: const Text("Perubahan yang belum disimpan akan hilang."),
-          actions: [
-            TextButton(
-              onPressed: () => Get.back(result: false), 
-              child: const Text("Lanjut Edit")
-            ),
-            TextButton(
-              onPressed: () => Get.back(result: true), 
-              child: const Text("Keluar")
-            ),
-          ],
-        ),
+      Get.snackbar(
+        'Batal',
+        'Tidak ada gambar yang dipilih',
+        duration: const Duration(seconds: 2),
       );
-      return result ?? false;
     }
-    return true;
   }
 
-  @override
-  void onClose() {
-    nameController.dispose();
-    emailController.dispose();
-    phoneController.dispose();
-    super.onClose();
+  void removeImage() {
+    tempImageBytes = null;
+    removeImageFlag = true;
+    final imageController = Get.find<ProfileImageController>();
+    imageController.profileImageUrl.value = '';
+    isChanged.value = true;
+  }
+
+  Future<List<String>> applyChanges(
+    void Function(String) onNameChange,
+    void Function(String) onEmailChange,
+    void Function(String) onPhoneChange,
+  ) async {
+    final imageController = Get.find<ProfileImageController>();
+    final changes = <String>[];
+
+    if (currentName.value != initialName) {
+      onNameChange(currentName.value);
+      changes.add("nama");
+    }
+
+    if (currentEmail.value != initialEmail) {
+      onEmailChange(currentEmail.value);
+      changes.add("email");
+    }
+
+    if (currentPhone.value != initialPhone) {
+      onPhoneChange(currentPhone.value);
+      changes.add("nomor HP");
+    }
+
+    if (tempImageBytes != null) {
+      await imageController.updateProfileImage(tempImageBytes!);
+      changes.add("foto profil");
+    } else if (removeImageFlag) {
+      await imageController.removeImage();
+      changes.add("foto profil");
+    }
+
+    // ✅ Reset flag
+    initialName = currentName.value;
+    initialEmail = currentEmail.value;
+    initialPhone = currentPhone.value;
+    tempImageBytes = null;
+    removeImageFlag = false;
+    isChanged.value = false;
+
+    return changes;
+  }
+
+  // 🔒 Fungsi untuk mengganti kata sandi
+  Future<void> changePassword() async {
+    final password = passwordController.text.trim();
+    final confirm = confirmPasswordController.text.trim();
+
+    if (password.isEmpty || confirm.isEmpty) {
+      passwordError.value = "Password tidak boleh kosong.";
+      return;
+    }
+
+    if (password.length < 6) {
+      passwordError.value = "Password minimal 6 karakter.";
+      return;
+    }
+
+    if (password != confirm) {
+      passwordError.value = "Konfirmasi password tidak cocok.";
+      return;
+    }
+
+    try {
+      passwordError.value = null;
+      final authController = Get.find<AuthController>();
+      await authController.updatePassword(password);
+      Get.snackbar("Berhasil", "Kata sandi berhasil diperbarui");
+      passwordController.clear();
+      confirmPasswordController.clear();
+    } catch (e) {
+      Get.snackbar("Error", "Gagal mengganti kata sandi");
+    }
   }
 }

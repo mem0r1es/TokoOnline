@@ -1,4 +1,5 @@
-import 'package:flutter_web/models/info_user.dart';
+// File: controllers/auth_controller.dart
+import 'package:flutter_web/models/profile_model.dart';
 import 'package:get/get.dart';
 import '../services/auth_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -8,7 +9,7 @@ class AuthController extends GetxController {
 
   var isLoggedIn = false.obs;
   var currentUser = Rxn<User>();
-  final Rxn<InfoUser> userProfile = Rxn<InfoUser>();
+  final Rxn<ProfilModel> userProfile = Rxn<ProfilModel>();
 
   @override
   void onInit() {
@@ -20,10 +21,10 @@ class AuthController extends GetxController {
 
       isLoggedIn.value = user != null;
       currentUser.value = user;
-      
+
       if (user != null) {
-        await _ensureUserProfileExists();
-        await fetchUserProfile();
+        await _ensureUserProfileExists(); // ← Buat profil jika belum ada
+        await fetchUserProfile();         // ← Ambil data terbaru
       } else {
         userProfile.value = null;
       }
@@ -37,6 +38,31 @@ class AuthController extends GetxController {
       currentUser.value = session.user;
     }
   }
+
+  Future<void> changePassword(String oldPassword, String newPassword) async {
+  try {
+    final currentEmail = Supabase.instance.client.auth.currentUser?.email;
+    if (currentEmail == null) throw Exception("User tidak ditemukan");
+
+    // Login ulang untuk verifikasi password lama
+    final session = await Supabase.instance.client.auth.signInWithPassword(
+      email: currentEmail,
+      password: oldPassword,
+    );
+
+    if (session.user == null) throw Exception("Password lama salah");
+
+    // Ganti password
+    await Supabase.instance.client.auth.updateUser(
+      UserAttributes(password: newPassword),
+    );
+
+    Get.snackbar("Berhasil", "Password berhasil diubah");
+  } catch (e) {
+    _showError(e);
+  }
+}
+
 
   Future<void> register(String email, String password, String fullName) async {
     try {
@@ -104,6 +130,15 @@ class AuthController extends GetxController {
       );
 
       currentUser.value = response.user;
+
+      // Update juga ke tabel profiles
+      await Supabase.instance.client
+          .from('profiles')
+          .update({'full_name': newName})
+          .eq('id', user.id);
+
+      await fetchUserProfile();
+
       Get.snackbar('Berhasil', 'Nama berhasil diperbarui');
     } catch (e) {
       _showError(e);
@@ -120,28 +155,53 @@ class AuthController extends GetxController {
       );
 
       currentUser.value = response.user;
+
+      await Supabase.instance.client
+          .from('profiles')
+          .update({'email': newEmail})
+          .eq('id', user.id);
+
+      await fetchUserProfile();
+
       Get.snackbar('Berhasil', 'Email berhasil diperbarui. Verifikasi mungkin diperlukan.');
     } catch (e) {
       _showError(e);
     }
   }
 
-  Future<void> updatePhone(String newPhone) async {
-    try {
-      final userId = Supabase.instance.client.auth.currentUser?.id;
-      if (userId == null) throw Exception("User tidak ditemukan");
+  Future<void> updatePassword(String newPassword) async {
+  try {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) throw Exception("User tidak ditemukan");
 
-      await Supabase.instance.client
-          .from('profiles')
-          .update({'phone': newPhone})
-          .eq('id', userId);
+    await Supabase.instance.client.auth.updateUser(
+      UserAttributes(password: newPassword),
+    );
 
-      await fetchUserProfile();
-      Get.snackbar('Berhasil', 'Nomor HP berhasil diperbarui');
-    } catch (e) {
-      _showError(e);
-    }
+    Get.snackbar('Berhasil', 'Kata sandi berhasil diperbarui');
+  } catch (e) {
+    _showError(e);
   }
+}
+
+
+Future<void> updatePhone(String newPhone) async {
+  try {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) throw Exception("User tidak ditemukan");
+
+    await Supabase.instance.client
+        .from('profiles')
+        .update({'phone': newPhone}) // pastikan field ini 'phone'
+        .eq('id', userId);
+
+    await fetchUserProfile();
+    print('Nomor HP berhasil diupdate ke Supabase: $newPhone');
+    Get.snackbar('Berhasil', 'Nomor HP berhasil diperbarui');
+  } catch (e) {
+    _showError(e);
+  }
+}
 
   Future<void> fetchUserProfile() async {
     try {
@@ -155,7 +215,7 @@ class AuthController extends GetxController {
           .maybeSingle();
 
       if (data != null) {
-        userProfile.value = InfoUser.fromJson(data);
+        userProfile.value = ProfilModel.fromMap(data);
       }
     } catch (e) {
       Get.snackbar('Error', 'Gagal memuat data profil');
@@ -174,12 +234,17 @@ class AuthController extends GetxController {
           .maybeSingle();
 
       if (exists == null) {
+        final fullName = user.userMetadata?['full_name'] ?? '';
+        final email = user.email ?? '';
+
         await Supabase.instance.client.from('profiles').insert({
           'id': user.id,
-          'username': user.userMetadata?['full_name'] ?? user.email?.split('@')[0],
-          'avatar_url': null,
-          'phone': '',
+          'email': email,
+          'full_name': fullName,
+          'phone': null,
         });
+
+        print('Profil baru dibuat untuk user ${user.id}');
       }
     } catch (e) {
       print('Gagal memastikan data profil: $e');

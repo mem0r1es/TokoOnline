@@ -1,34 +1,33 @@
-import 'dart:typed_data';
-import 'package:file_picker/file_picker.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+// File: services/profile_service.dart
+import 'package:flutter_web/models/profile_model.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:get/get.dart';
+import 'package:flutter_web/controllers/auth_controller.dart';
 
 class ProfileService {
-  Future<Uint8List?> pickImage() async {
-    Uint8List? imageBytes;
+  final supabase = Supabase.instance.client;
 
-    if (kIsWeb) {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.image,
-        withData: true,
-      );
-      if (result != null && result.files.first.bytes != null) {
-        imageBytes = result.files.first.bytes!;
-      }
-    } else {
-      final picker = ImagePicker();
-      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-      if (pickedFile != null) {
-        imageBytes = await pickedFile.readAsBytes();
-      }
+  Future<void> updateUserProfile({String? name, String? email, String? phone}) async {
+    final user = supabase.auth.currentUser;
+    if (user == null) throw Exception("User belum login");
+
+    final updates = <String, dynamic>{};
+    if (name != null) updates['full_name'] = name; // gunakan full_name
+    if (email != null) updates['email'] = email;
+    if (phone != null) updates['phone'] = phone;
+
+    if (updates.isNotEmpty) {
+      await supabase.from('profiles').update(updates).eq('id', user.id);
+      await _refreshProfile();
     }
-
-    return imageBytes;
   }
 
-  bool validatePhoneNumber(String value) {
-    final cleaned = value.replaceAll(RegExp(r'\s+'), '');
-    final regex = RegExp(r'^(?:\+628|08)[0-9]{8,13}$');
-    return regex.hasMatch(cleaned);
+  Future<void> _refreshProfile() async {
+    final authController = Get.find<AuthController>();
+    final user = supabase.auth.currentUser;
+    if (user == null) return;
+
+    final result = await supabase.from('profiles').select().eq('id', user.id).single();
+    authController.userProfile.value = ProfilModel.fromMap(result);
   }
 }

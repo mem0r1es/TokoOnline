@@ -7,10 +7,10 @@ class AuthService extends GetxService {
 
   final Rxn<User> currentUser = Rxn<User>();
 
-   @override
+  @override
   void onInit() {
     super.onInit();
-    refreshUser();  // Panggil sekali saat service dimuat
+    refreshUser(); // Panggil sekali saat service dimuat
   }
 
   void refreshUser() {
@@ -41,56 +41,58 @@ class AuthService extends GetxService {
   }
 
   Future<bool> signInWithGoogle() async {
-  try {
-    print('Attempting Google Sign-In...');
+    try {
+      print('Attempting Google Sign-In...');
 
-    final response = await supabase.auth.signInWithOAuth(
-      OAuthProvider.google,
-      redirectTo: 'http://localhost:3000',
-      authScreenLaunchMode: LaunchMode.platformDefault,
-    );
-
-    // Kembalikan true kalau berhasil memulai proses login Google
-    if (response) {
-      print('Google OAuth initiated successfully');
-      Get.snackbar(
-        'Info',
-        'Mengarahkan ke Google untuk login...',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.blue,
-        colorText: Colors.white,
+      final response = await supabase.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: 'http://localhost:3000',
+        authScreenLaunchMode: LaunchMode.platformDefault,
       );
-      return true;
-    } else {
-      print('Google OAuth failed to initiate');
+
+      if (response) {
+        print('Google OAuth initiated successfully');
+        Get.snackbar(
+          'Info',
+          'Mengarahkan ke Google untuk login...',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.blue,
+          colorText: Colors.white,
+        );
+        return true;
+      } else {
+        print('Google OAuth failed to initiate');
+        Get.snackbar(
+          'Error',
+          'Gagal memulai login Google',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return false;
+      }
+    } catch (e) {
+      print('Google Sign-In error: $e');
       Get.snackbar(
         'Error',
-        'Gagal memulai login Google',
+        'Login Google gagal: ${e.toString()}',
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
       return false;
     }
-  } catch (e) {
-    print('Google Sign-In error: $e');
-    Get.snackbar(
-      'Error',
-      'Login Google gagal: ${e.toString()}',
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: Colors.red,
-      colorText: Colors.white,
-    );
-    return false;
   }
-}
 
   Future<void> signOut() async {
     await supabase.auth.signOut();
   }
 
   Future<void> resetPassword(String email) async {
-    await supabase.auth.resetPasswordForEmail(email, redirectTo: 'http://localhost:3000/reset-password');
+    await supabase.auth.resetPasswordForEmail(
+      email,
+      redirectTo: 'http://localhost:3000/reset-password',
+    );
   }
 
   Future<bool> register(String email, String password, String fullName) async {
@@ -105,7 +107,6 @@ class AuthService extends GetxService {
           'role': 'buyer',
         },
       );
-
 
       if (response.user != null) {
         print('Registration successful: ${response.user!.email}');
@@ -149,8 +150,9 @@ class AuthService extends GetxService {
         email: email,
         password: password,
       );
+
       await Future.delayed(Duration(milliseconds: 1000));
-      refreshUser();  // Update current user state after login
+      refreshUser(); // Update current user state
 
       if (response.user != null) {
         print('Login successful: ${response.user!.email}');
@@ -160,7 +162,7 @@ class AuthService extends GetxService {
           snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.green,
           colorText: Colors.white,
-        );  // Update current user state
+        );
         return true;
       } else {
         print('Login failed: No user returned');
@@ -197,6 +199,4 @@ class AuthService extends GetxService {
   }
 
   Session? get currentSession => supabase.auth.currentSession;
-  // User? get currentUser => supabase.auth.currentUser;
-  
 }
