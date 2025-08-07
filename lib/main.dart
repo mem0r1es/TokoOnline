@@ -1,8 +1,8 @@
-// lib/main.dart
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:toko_online_getx/bindings/app_binding.dart';
+import 'package:toko_online_getx/routes/app_routes.dart';
 
 import 'data/services/supabase_service.dart';
 import 'routes/app_pages.dart';
@@ -16,8 +16,8 @@ void main() async {
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jY2R3Y3p1ZWtldHBxbGJvYnl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyOTEwMTcsImV4cCI6MjA2Njg2NzAxN30.LAQPMZgZvIUtRVjzkLFh-wXO_RiP9IuwZ3kgSpYghqE',
   );
   
-  // Initialize Supabase Service
-  Get.put(SupabaseService());
+Get.put(SupabaseService());
+  // Remove AuthController from here - let AuthBinding handle it
   
   runApp(const MyApp());
 }
@@ -27,6 +27,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Check initial route based on auth status
+    final supabaseService = Get.find<SupabaseService>();
+    String initialRoute = AppPages.initial;
+    
+    if (supabaseService.isAuthenticated) {
+      if (supabaseService.isAdmin) {
+        initialRoute = AppRoutes.adminDashboard;
+      } else if (supabaseService.isSeller) {
+        initialRoute = AppRoutes.sellerDashboard;
+      }
+    }
+    
     return GetMaterialApp(
       title: 'Seller Portal',
       debugShowCheckedModeBanner: false,
@@ -34,8 +46,9 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      initialRoute: AppPages.initial,
+      initialRoute: initialRoute,
       getPages: AppPages.routes,
+      initialBinding: AppBinding(),
       // Optional: Unknown route handler
       unknownRoute: GetPage(
         name: '/not-found',

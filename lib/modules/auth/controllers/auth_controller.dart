@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../data/services/supabase_service.dart';
@@ -36,13 +38,17 @@ class AuthController extends GetxController {
   
   @override
   void onClose() {
-    // Dispose controllers
-    emailController.dispose();
-    passwordController.dispose();
-    fullNameController.dispose();
-    shopNameController.dispose();
-    phoneController.dispose();
-    shopDescriptionController.dispose();
+
+    try {
+      emailController.dispose();
+      passwordController.dispose();
+      fullNameController.dispose();
+      shopNameController.dispose();
+      phoneController.dispose();
+      shopDescriptionController.dispose();
+    } catch (e) {
+      print('Error disposing controllers: $e');
+    }
     super.onClose();
   }
   
@@ -133,15 +139,16 @@ class AuthController extends GetxController {
         // Show success message
         Get.snackbar(
           'Success',
-          'Registration successful! Welcome to our platform.',
+          result['message'],
           backgroundColor: Colors.green,
           colorText: Colors.white,
           snackPosition: SnackPosition.TOP,
-          duration: const Duration(seconds: 3),
+          duration: const Duration(seconds: 4),
         );
         
-        // Redirect to seller dashboard
-        Get.offAllNamed(AppRoutes.sellerDashboard);
+        // Redirect to login page
+        Get.offAllNamed(AppRoutes.login);
+        
       } else {
         errorMessage.value = result['message'];
         Get.snackbar(
@@ -210,7 +217,7 @@ class AuthController extends GetxController {
           title: 'Access Restricted',
           middleText: 'This platform is for sellers and admins only. Would you like to register as a seller?',
           textConfirm: 'Yes, Register',
-          textCancel: 'No',
+          textCancel: 'No, Logout',
           onConfirm: () {
             Get.back();
             Get.toNamed(AppRoutes.register);
@@ -226,12 +233,14 @@ class AuthController extends GetxController {
   
   void navigateToRegister() {
     _clearLoginForm();
-    Get.toNamed(AppRoutes.register);
+    // Force navigation even if authenticated
+    Get.offNamed(AppRoutes.register);
   }
   
   void navigateToLogin() {
     _clearRegisterForm();
-    Get.toNamed(AppRoutes.login);
+    // Force navigation
+    Get.offNamed(AppRoutes.login);
   }
   
   // ============= FORM VALIDATION =============

@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/auth_controller.dart';
 
-class RegisterView extends GetView<AuthController> {
+class RegisterView extends StatelessWidget {
   const RegisterView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final AuthController controller = Get.find<AuthController>();
+    
     return Scaffold(
       backgroundColor: Colors.grey[100],
       body: SafeArea(
@@ -73,7 +75,6 @@ class RegisterView extends GetView<AuthController> {
                               textInputAction: TextInputAction.next,
                               decoration: InputDecoration(
                                 labelText: 'Full Name',
-                                hintText: 'John Doe',
                                 prefixIcon: const Icon(Icons.person),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
@@ -93,7 +94,6 @@ class RegisterView extends GetView<AuthController> {
                               textInputAction: TextInputAction.next,
                               decoration: InputDecoration(
                                 labelText: 'Shop Name',
-                                hintText: 'My Awesome Store',
                                 prefixIcon: const Icon(Icons.store),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
@@ -159,7 +159,6 @@ class RegisterView extends GetView<AuthController> {
                               textInputAction: TextInputAction.next,
                               decoration: InputDecoration(
                                 labelText: 'Phone Number (Optional)',
-                                hintText: '+62 812 3456 7890',
                                 prefixIcon: const Icon(Icons.phone),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
@@ -179,7 +178,6 @@ class RegisterView extends GetView<AuthController> {
                               maxLines: 3,
                               decoration: InputDecoration(
                                 labelText: 'Shop Description (Optional)',
-                                hintText: 'Tell us about your shop...',
                                 prefixIcon: const Icon(Icons.description),
                                 alignLabelWithHint: true,
                                 border: OutlineInputBorder(
