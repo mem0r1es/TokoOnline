@@ -144,23 +144,3 @@ Product Management
 Order Management
 Category Management
 User Management (Admin only)
-
-
-current error:
-Attempting to upsert profile with data: {id: bdc5a947-552c-431f-ab80-479bc8a350c0, email: m.ihsanaldzikra08@gmail.com, full_name: tes, shop_name:
-aaaa, phone: 085263747052, shop_description: keren, roles: [buyer, seller], status: active, created_at: 2025-08-06T10:02:45.030, updated_at:
-2025-08-06T10:02:45.031}
-Profile creation error: PostgrestException(message: insert or update on table "profiles" violates foreign key constraint "profiles_id_fkey", code:
-23503, details: Key (id)=(bdc5a947-552c-431f-ab80-479bc8a350c0) is not present in table "users"., hint: null)
-Profile updated via fallback
-Roles updated after login
-Accessing protected page: /seller-dashboard
-AuthGuard - Route: /seller-dashboard, Authenticated: true
-RoleGuard - User roles: [buyer], Allowed: [seller, admin], Has permission: false
-
-terjadi error diatas saat register, apa solusinya?
-dan juga sebagai informasi sebaiknya kita buat logika register ini seperti:
-jika dia terdeteksi sudah punya id atau email, mungkin update atau tambahakan yang perlu saja seperti role dll yang dia isi di form register,
-tetapi kalau memang benar benr mau buat akun baru yang belum ada supabase, mungkin kita akan buatkan baru juga di supabase sesuai form register itu tetapi dengan role seller saja,
-sampai disini coba kmau pikirkan dulu jalan logika nya apakah cocok? untuk tahap tahap pengembangan kedepannya
-dan tambahan, maunya saat setelah register berhasil, dikembalikan saja ke login jangan langsung masuk
