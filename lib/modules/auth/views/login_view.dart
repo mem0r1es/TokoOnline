@@ -3,7 +3,10 @@ import 'package:get/get.dart';
 import '../controllers/auth_controller.dart';
 
 class LoginView extends GetView<AuthController> {
-  const LoginView({Key? key}) : super(key: key);
+  static final String TAG = '/login';
+  // final AuthController controller = Get.find<AuthController>();
+  
+  LoginView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

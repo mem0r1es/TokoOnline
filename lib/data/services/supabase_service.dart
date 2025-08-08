@@ -2,6 +2,8 @@
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:get/get.dart';
+import 'package:toko_online_getx/routes/app_routes.dart';
+import 'package:toko_online_getx/service/add_productservice.dart';
 
 class SupabaseService extends GetxService {
   static SupabaseService get to => Get.find();
@@ -14,171 +16,119 @@ class SupabaseService extends GetxService {
   final RxList<String> userRoles = <String>[].obs;
   final RxBool isLoading = false.obs;
   
+  
   @override
   void onInit() {
     super.onInit();
     _client = Supabase.instance.client;
-    
-    // Listen to auth state changes
-    _client.auth.onAuthStateChange.listen((data) {
-      currentUser.value = data.session?.user;
-      if (data.session != null) {
-        _loadUserProfile();
-      } else {
-        userRoles.clear();
-      }
-    });
-    
-    // Check initial session
+    print('✅ SupabaseService initialized.');
+
+    _client.auth.onAuthStateChange.listen((data) async {
+      final AuthChangeEvent event = data.event;
+      final Session? session = data.session;
+
+      if (event == AuthChangeEvent.signedIn || event == AuthChangeEvent.initialSession) {
+        print('🔐 Auth state changed: signed in.');
+          currentUser.value = session?.user;
+          await loadUserProfile(); // Load profile immediately after sign-in
+          Get.offAllNamed(AppRoutes.sellerDashboard); // Navigate to home
+        } else if (event == AuthChangeEvent.signedOut) {
+          print('🔒 Auth state changed: signed out.');
+          currentUser.value = null;
+          userRoles.clear();
+          // Use `offAllNamed` to remove all previous routes
+          Get.offAllNamed(AppRoutes.login);
+        }
+      });
+
+    // Panggil loadUserProfile() secara langsung untuk sesi awal
     final session = _client.auth.currentSession;
     if (session != null) {
+      print('✅ Found existing session.');
       currentUser.value = session.user;
-      _loadUserProfile();
+      loadUserProfile();
+    }else {
+      print('❌ No existing session found.');
     }
   }
   
   // ============= AUTH METHODS =============
   
-  Future<Map<String, dynamic>> register({
-    required String email,
-    required String password,
-    required String fullName,
-    required String shopName,
-    String? phone,
-    String? shopDescription,
-  }) async {
-    try {
-      isLoading.value = true;
-      
-      // 1. Register user dengan Supabase Auth
-      final response = await _client.auth.signUp(
-        email: email,
-        password: password,
-        data: {
-          'full_name': fullName,
-          'shop_name': shopName,
-          'shop_description': shopDescription,
-          'phone': phone,
-        }, // Pass all data as metadata
-      );
-      
-      // Check if email already exists
-      if (response.user == null) {
-        // Try to login first to check if user exists
-        try {
-          final loginCheck = await _client.auth.signInWithPassword(
-            email: email,
-            password: password,
-          );
-          if (loginCheck.user != null) {
-            return {
-              'success': false,
-              'message': 'Email already registered. Please login instead.',
-            };
-          }
-        } catch (e) {
-          // Login failed, continue with original error
-        }
-        throw Exception('Registration failed');
-      }
-      
-      // 2. Wait a bit for auth.users to be ready
-      await Future.delayed(const Duration(milliseconds: 500));
-      
-      // 3. Try to create or update profile
-      try {
-        final profileData = {
-          'id': response.user!.id,
-          'email': email,
-          'full_name': fullName,
-          'shop_name': shopName,
-          'phone': phone,
-          'shop_description': shopDescription,
-          'roles': ['buyer', 'seller'], // Auto assign both roles
-          'status': 'active', // No approval needed
-          'created_at': DateTime.now().toIso8601String(),
-          'updated_at': DateTime.now().toIso8601String(),
-        };
-        
-        print('Attempting to upsert profile with data: $profileData');
-        
-        // Use upsert to handle existing profile and force update roles
-        await _client.from('profiles').upsert(
-          profileData,
-          onConflict: 'id',
-        );
-        
-        print('Profile upserted successfully');
-        
-        // Verify the profile was created with correct roles
-        final verifyProfile = await _client
-            .from('profiles')
-            .select('id, email, roles')
-            .eq('id', response.user!.id)
-            .maybeSingle();
-            
-        print('Profile after upsert: $verifyProfile');
-        
-      } catch (e) {
-        print('Profile creation error: $e');
-        // If upsert fails, try update only to ensure roles are set
-        try {
-          await _client.from('profiles').update({
-            'full_name': fullName,
-            'shop_name': shopName,
-            'phone': phone,
-            'shop_description': shopDescription,
-            'roles': ['buyer', 'seller'], // Ensure seller role
-            'updated_at': DateTime.now().toIso8601String(),
-          }).eq('id', response.user!.id);
-          
-          print('Profile updated via fallback');
-        } catch (updateError) {
-          print('Profile update error: $updateError');
-        }
-      }
-      
-      // 4. Auto login after registration
-      await _client.auth.signInWithPassword(
-        email: email,
-        password: password,
-      );
-      
-      // 5. Force update roles after login (in case trigger overrode them)
-      await Future.delayed(const Duration(milliseconds: 1000));
-      try {
-        await _client.from('profiles').update({
-          'roles': ['buyer', 'seller'],
-          'updated_at': DateTime.now().toIso8601String(),
-        }).eq('id', response.user!.id);
-        
-        print('Roles updated after login');
-      } catch (e) {
-        print('Failed to update roles after login: $e');
-      }
-      
+  // SUPABASE SERVICE (PERBAIKAN)
+
+Future<Map<String, dynamic>> register({
+  required String email,
+  required String password,
+  required String fullName,
+  required String shopName,
+  String? phone,
+  String? shopDescription,
+}) async {
+  try {
+    isLoading.value = true;
+
+    // 1. Register user dengan Supabase Auth
+    final AuthResponse authResponse = await _client.auth.signUp(
+      email: email,
+      password: password,
+    );
+
+    final User? user = authResponse.user;
+
+    if (user == null) {
+      // Jika user null, Supabase sudah mengirim email konfirmasi
+      // Ini terjadi jika user sudah terdaftar tapi belum diverifikasi
       return {
         'success': true,
-        'message': 'Registration successful',
-        'user': response.user,
+        'message': 'Registration successful, please check your email for confirmation.',
       };
-    } catch (e) {
-      // Handle specific Supabase auth errors
-      if (e.toString().contains('User already registered')) {
-        return {
-          'success': false,
-          'message': 'Email already registered. Please login instead.',
-        };
-      }
-      
-      return {
-        'success': false,
-        'message': e.toString(),
-      };
-    } finally {
-      isLoading.value = false;
     }
+    
+    // 2. Insert user profile ke tabel 'profiles'
+    final profileData = {
+      'id': user.id,
+      'email': email,
+      'full_name': fullName,
+      'store_name': shopName,
+      'phone': phone,
+      'shop_description': shopDescription,
+      'roles': ['buyer', 'seller'], // Auto assign roles
+    };
+    
+    await _client.from('profiles').insert(profileData);
+    
+    return {
+      'success': true,
+      'message': 'Registration successful! Please verify your email and login.',
+    };
+
+  } on AuthException catch (e) {
+    String errorMessage;
+    if (e.message.contains('Email rate limit exceeded')) {
+      errorMessage = 'Please check your email. Too many requests have been made to this address.';
+    } else if (e.message.contains('User already registered')) {
+      errorMessage = 'Email already registered. Please login instead.';
+    } else {
+      errorMessage = e.message;
+    }
+    return {
+      'success': false,
+      'message': errorMessage,
+    };
+  } on PostgrestException catch (e) {
+    return {
+      'success': false,
+      'message': 'Error creating user profile: ${e.message}',
+    };
+  } catch (e) {
+    return {
+      'success': false,
+      'message': 'An unexpected error occurred: $e',
+    };
+  } finally {
+    isLoading.value = false;
   }
+}
   
   Future<Map<String, dynamic>> login({
     required String email,
@@ -195,6 +145,13 @@ class SupabaseService extends GetxService {
       if (response.user == null) {
         throw Exception('Login failed');
       }
+
+      // if (response.user!.emailConfirmedAt == null) {
+      //   return {
+      //     'success': false,
+      //     'message': 'Your email is not activated yet. Please check your inbox.',
+      //   };
+      // }
       
       // Set current user
       currentUser.value = response.user;
@@ -211,6 +168,24 @@ class SupabaseService extends GetxService {
         'user': response.user,
         'roles': userRoles,
       };
+    } on AuthApiException catch (e) {
+      // Map Supabase Auth Errors to user-friendly messages
+      if (e.statusCode == 400 && e.message.contains('Invalid login credentials')) {
+        return {
+          'success': false,
+          'message': 'Incorrect email or password.',
+        };
+      } else if (e.statusCode == 400 && e.message.contains('Your email is not activated yet. Please check your inbox.')) {
+        return {
+          'success': false,
+          'message': 'Your email is not activated yet. Please check your inbox.',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': e.message ?? 'Authentication failed. Please try again.',
+        };
+      }
     } catch (e) {
       return {
         'success': false,
@@ -236,12 +211,12 @@ class SupabaseService extends GetxService {
   // Make this public so it can be called from auth controller
   Future<void> loadUserProfile() async {
     try {
-      final userId = currentUser.value?.id;
+      final userId = _client.auth.currentUser?.id;
       if (userId == null) return;
       
       final response = await _client
           .from('profiles')
-          .select()
+          .select('roles') // <--- HANYA MENGAMBIL ROLES DI SINI
           .eq('id', userId)
           .maybeSingle();
       
@@ -249,40 +224,11 @@ class SupabaseService extends GetxService {
         final roles = List<String>.from(response['roles'] ?? ['buyer']);
         userRoles.value = roles;
       } else {
-        // Profile doesn't exist, create one with default buyer role
-        print('Profile not found for user $userId, creating default profile...');
-        
-        try {
-          await _client.from('profiles').upsert({
-            'id': userId,
-            'email': currentUser.value?.email,
-            'roles': ['buyer'],
-            'status': 'active',
-            'created_at': DateTime.now().toIso8601String(),
-            'updated_at': DateTime.now().toIso8601String(),
-          }, onConflict: 'id'); // Use upsert to prevent duplicate error
-          
-          userRoles.value = ['buyer'];
-        } catch (e) {
-          print('Error creating default profile: $e');
-          // Try to load again in case it was created by another process
-          final retryResponse = await _client
-              .from('profiles')
-              .select()
-              .eq('id', userId)
-              .maybeSingle();
-              
-          if (retryResponse != null) {
-            final roles = List<String>.from(retryResponse['roles'] ?? ['buyer']);
-            userRoles.value = roles;
-          } else {
-            userRoles.value = ['buyer']; // Default to buyer role
-          }
-        }
+        userRoles.value = ['buyer']; // Default to buyer role on error
       }
     } catch (e) {
       print('Error loading profile: $e');
-      userRoles.value = ['buyer']; // Default to buyer role on error
+      userRoles.value = ['buyer'];
     }
   }
   
@@ -300,6 +246,36 @@ class SupabaseService extends GetxService {
       return response;
     } catch (e) {
       print('Error getting profile: $e');
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> getProfileData() async {
+    try {
+      final userId = _client.auth.currentUser?.id;
+      if (userId == null) {
+        print('❌ getProfileData: User ID is null, cannot fetch profile.');
+        return null;
+      }
+
+      print('🚀 Fetching profile for user ID: $userId');
+
+      final response = await _client
+          .from('profiles')
+          .select('full_name, store_name') // <--- AMBIL SEMUA DATA YANG DIBUTUHKAN
+          .eq('id', userId)
+          .maybeSingle();
+
+      if (response != null) {
+        print('📦 Data received from Supabase: $response');
+      } else {
+        print('⚠️ Profile data not found for user ID: $userId');
+      }
+
+      return response;
+    } catch (e,stacktrace) {
+      print('Error getting profile data: $e');
+      print('Stacktrace:\n$stacktrace');
       return null;
     }
   }
@@ -327,9 +303,14 @@ class SupabaseService extends GetxService {
     int limit = 50,
     int offset = 0,
   }) async {
+    
     try {
-      if (sellerId != null) {
+      if (sellerId == null) {
         // Query dengan filter
+        print('sellerId null: tidak mengambil produk');
+        return[];
+      }
+        // Query tanpa filter
         final response = await _client
             .from('products')
             .select()
@@ -338,16 +319,7 @@ class SupabaseService extends GetxService {
             .range(offset, offset + limit - 1);
             
         return List<Map<String, dynamic>>.from(response);
-      } else {
-        // Query tanpa filter
-        final response = await _client
-            .from('products')
-            .select()
-            .order('created_at', ascending: false)
-            .range(offset, offset + limit - 1);
-            
-        return List<Map<String, dynamic>>.from(response);
-      }
+      
     } catch (e) {
       print('Error getting products: $e');
       return [];
@@ -541,7 +513,7 @@ class SupabaseService extends GetxService {
   
   bool hasRole(String role) => userRoles.contains(role);
   
-  String? get userId => currentUser.value?.id;
+  String? get userId => _client.auth.currentUser?.id;
   
-  String? get userEmail => currentUser.value?.email;
+  String? get userEmail => _client.auth.currentUser?.email;
 }

@@ -214,7 +214,7 @@ class SellerDashboardView extends GetView<SellerDashboardController> {
                                     'Add Product',
                                     Icons.add_box_outlined,
                                     () {
-                                      // TODO: Navigate to add product
+                                    Get.toNamed('/add-product');
                                     },
                                   ),
                                   const SizedBox(width: 16),

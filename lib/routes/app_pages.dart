@@ -24,7 +24,7 @@ class AppPages {
     // ===== AUTH ROUTES =====
     GetPage(
       name: AppRoutes.login,
-      page: () => const LoginView(),
+      page: () => LoginView(),
       binding: AuthBinding(),
       transition: Transition.fadeIn,
       middlewares: [

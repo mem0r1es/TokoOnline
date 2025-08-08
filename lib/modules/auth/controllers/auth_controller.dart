@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:toko_online_getx/service/add_productservice.dart';
 import '../../../data/services/supabase_service.dart';
 import '../../../routes/app_routes.dart';
 
 class AuthController extends GetxController {
   final SupabaseService _supabaseService = SupabaseService.to;
+  final Rxn<User> currentUser = Rxn<User>();
   
   // Form Controllers
   final emailController = TextEditingController();
@@ -27,11 +30,21 @@ class AuthController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // Check auth status after build complete
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      isInitialized.value = true;
-      _checkAuthStatus();
+
+    _supabaseService.client.auth.onAuthStateChange.listen((data) {
+      final AuthChangeEvent event = data.event;
+      final Session? session = data.session;
+
+      currentUser.value = session?.user;
+      if (event == AuthChangeEvent.signedIn) {
+        _redirectBasedOnRole();
+      } else if (event == AuthChangeEvent.signedOut) {
+        Get.offAllNamed(AppRoutes.login);
+      }
     });
+    if(_supabaseService.isAuthenticated) {
+      _redirectBasedOnRole();
+    } 
   }
   
   @override
@@ -48,14 +61,14 @@ class AuthController extends GetxController {
   
   // ============= AUTH METHODS =============
   
-  void _checkAuthStatus() {
-    if (!isInitialized.value) return;
+  // void _checkAuthStatus() {
+  //   if (!isInitialized.value) return;
     
-    if (_supabaseService.isAuthenticated) {
-      // Redirect based on role
-      _redirectBasedOnRole();
-    }
-  }
+  //   if (_supabaseService.isAuthenticated) {
+  //     // Redirect based on role
+  //     _redirectBasedOnRole();
+  //   }
+  // }
   
   Future<void> login() async {
     if (!loginFormKey.currentState!.validate()) return;
@@ -132,8 +145,8 @@ class AuthController extends GetxController {
         
         // Show success message
         Get.snackbar(
-          'Success',
-          'Registration successful! Welcome to our platform.',
+          'Registration successful',
+          'Please check your email to verify your account before logging in.',
           backgroundColor: Colors.green,
           colorText: Colors.white,
           snackPosition: SnackPosition.TOP,
@@ -141,7 +154,8 @@ class AuthController extends GetxController {
         );
         
         // Redirect to seller dashboard
-        Get.offAllNamed(AppRoutes.sellerDashboard);
+        // Get.offAllNamed(AppRoutes.sellerDashboard);
+        Get.offAllNamed(AppRoutes.login);
       } else {
         errorMessage.value = result['message'];
         Get.snackbar(
@@ -222,6 +236,12 @@ class AuthController extends GetxController {
         );
       }
     });
+    // if (_supabaseService.isSeller) {
+    //   Get.offAllNamed(AppRoutes.sellerDashboard);
+    // } else {
+    //   // Logika untuk buyer atau role lain
+    //   Get.offAllNamed(AppRoutes.login); // Contoh: mengalihkan buyer ke login
+    // }
   }
   
   void navigateToRegister() {
