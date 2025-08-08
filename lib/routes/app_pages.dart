@@ -1,14 +1,11 @@
 // lib/routes/app_pages.dart
 
 import 'package:get/get.dart';
-import 'package:toko_online_getx/bindings/auth_binding.dart';
-import 'package:toko_online_getx/bindings/seller_binding.dart';
+
 import '../modules/auth/views/login_view.dart';
 import '../modules/auth/views/register_view.dart';
 import '../modules/seller/views/dashboard_view.dart';
-// Import admin views & bindings when created
-// import '../modules/admin/bindings/admin_binding.dart';
-// import '../modules/admin/views/dashboard_view.dart';
+import '../modules/admin/views/dashboard_view.dart' as admin;
 
 import 'app_routes.dart';
 import 'middlewares/auth_guard.dart';
@@ -34,7 +31,6 @@ class AppPages {
     GetPage(
       name: AppRoutes.register,
       page: () => const RegisterView(),
-      binding: AuthBinding(),
       transition: Transition.rightToLeft,
       middlewares: [
         GuestGuard(), // Redirect to dashboard if already logged in
@@ -45,7 +41,6 @@ class AppPages {
     GetPage(
       name: AppRoutes.sellerDashboard,
       page: () => const SellerDashboardView(),
-      binding: SellerBinding(),
       transition: Transition.fadeIn,
       middlewares: [
         AuthGuard(),     // Check if logged in
@@ -54,16 +49,15 @@ class AppPages {
     ),
     
     // ===== ADMIN ROUTES =====
-    // GetPage(
-    //   name: AppRoutes.adminDashboard,
-    //   page: () => const AdminDashboardView(),
-    //   binding: AdminBinding(),
-    //   transition: Transition.fadeIn,
-    //   middlewares: [
-    //     AuthGuard(),    // Check if logged in
-    //     AdminGuard(),   // Check if has admin role
-    //   ],
-    // ),
+    GetPage(
+      name: AppRoutes.adminDashboard,
+      page: () => const admin.AdminDashboardView(),
+      transition: Transition.fadeIn,
+      middlewares: [
+        AuthGuard(),    // Check if logged in
+        AdminGuard(),   // Check if has admin role
+      ],
+    ),
     
     // ===== SELLER FEATURE ROUTES (COMING SOON) =====
     // GetPage(

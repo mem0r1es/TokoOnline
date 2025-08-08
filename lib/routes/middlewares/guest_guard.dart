@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../data/services/supabase_service.dart';
-import '../route_helper.dart';
+import '../app_routes.dart';
 
 class GuestGuard extends GetMiddleware {
   final SupabaseService _supabaseService = SupabaseService.to;
@@ -13,13 +13,18 @@ class GuestGuard extends GetMiddleware {
   
   @override
   RouteSettings? redirect(String? route) {
-    // If user is already authenticated, redirect to their dashboard
+
     if (_supabaseService.isAuthenticated) {
-      print('GuestGuard - User already authenticated, redirecting to dashboard');
-      
-      // Get appropriate dashboard based on role
-      final dashboard = RouteHelper.defaultDashboard;
-      return RouteSettings(name: dashboard);
+
+      if (Get.currentRoute == route) {
+        print('GuestGuard - User authenticated, redirecting from $route');
+        
+        if (_supabaseService.isAdmin) {
+          return const RouteSettings(name: AppRoutes.adminDashboard);
+        } else if (_supabaseService.isSeller) {
+          return const RouteSettings(name: AppRoutes.sellerDashboard);
+        }
+      }
     }
     
     // User is not authenticated, allow access to login/register

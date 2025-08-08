@@ -30,6 +30,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Check initial route based on auth status
+    final supabaseService = Get.find<SupabaseService>();
+    // String initialRoute = AppPages.initial;
+    
+    // if (supabaseService.isAuthenticated) {
+    //   if (supabaseService.isAdmin) {
+    //     initialRoute = AppRoutes.adminDashboard;
+    //   } else if (supabaseService.isSeller) {
+    //     initialRoute = AppRoutes.sellerDashboard;
+    //   }
+    // }
+    
     return GetMaterialApp(
       title: 'Seller Portal',
       debugShowCheckedModeBanner: false,
