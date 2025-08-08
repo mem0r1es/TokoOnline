@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_web/binding.dart';
-import 'package:flutter_web/controllers/scroll_controller.dart';
 import 'package:flutter_web/routers/get_router.dart';
-import 'package:flutter_web/services/scroll_controller_manager.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

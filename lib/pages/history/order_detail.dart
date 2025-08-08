@@ -48,13 +48,15 @@ class OrderDetailPage extends StatelessWidget {
                         // bottomLeft: Radius.circular(10),
                       )
                     ),
-                    tileColor: order.status == 'Pesanan Diterima'
-                        ? Colors.orange[100]
-                        : order.status == 'Dalam Pengiriman'
-                            ? Colors.blue[100]
-                            : order.status == 'Pesanan Selesai'
-                                ? Colors.green[100]
-                                : Colors.red[200],
+                    tileColor: order.status == 'menunggu konfirmasi'
+                        ? Colors.orange[400]
+                        :order.status == 'Pesanan Diterima'
+                            ? Colors.orange[100]
+                            : order.status == 'Dalam Pengiriman'
+                                ? Colors.blue[100]
+                                : order.status == 'Pesanan Selesai'
+                                    ? Colors.green[100]
+                                    : Colors.red[200],
                     
                     // tileColor: Colors.orange[100],
                     title: Text(

@@ -122,21 +122,21 @@ class _AddAddressState extends State<AddAddress> {
       );
 
   Widget _formInput(String label, {TextEditingController? controller, bool readOnly = false}) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: GoogleFonts.poppins(fontSize: 14)),
-          const SizedBox(height: 8),
-          TextFormField(
-            controller: controller,
-            readOnly: readOnly,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-              fillColor: readOnly ? Colors.grey[200] : Colors.white,
-              filled: true,
-            ),
-          ),
-        ],
-      );
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(label, style: GoogleFonts.poppins(fontSize: 14)),
+      const SizedBox(height: 8),
+      TextFormField(
+        controller: controller,
+        readOnly: readOnly,
+        decoration: InputDecoration(
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          fillColor: readOnly ? Colors.grey[200] : Colors.white,
+          filled: true,
+        ),
+      ),
+    ],
+  );
 
   // Widget _formRow(String leftLabel, String rightLabel) => Row(
   //       children: [
