@@ -1,5 +1,4 @@
 import 'edit_profil_page.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web/controllers/auth_controller.dart';
 import 'package:flutter_web/controllers/favorite_controller.dart';
@@ -12,7 +11,6 @@ import 'package:flutter_web/pages/shop/shops.dart';
 import 'package:flutter_web/pages/shoppingcart/cart.dart';
 import 'package:flutter_web/services/cart_service.dart';
 import 'package:get/get.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ProfilePage extends GetView<AuthController> {
@@ -104,7 +102,7 @@ class ProfilePage extends GetView<AuthController> {
                   const SizedBox(width: 30),
                   Expanded( // Gunakan Expanded agar mengambil sisa ruang horizontal
                     child: Obx(() { // Gunakan Obx untuk reaktif terhadap isLoggedIn
-                      if (controller.isLoggedIn.value) {
+                     if (controller.isLoggedIn.value) {
                         // Jika sudah login, tampilkan info pengguna
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,23 +119,23 @@ class ProfilePage extends GetView<AuthController> {
                                 color: Colors.black,
                               ),
                             ),
-                            const SizedBox(height: 10),
-                            if (controller.userProfile.value?.phone?.isNotEmpty == true)
-                              Text(
-                                'Nomor HP: ${controller.userProfile.value!.phone!}',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 14,
-                                  color: Colors.grey[700],
-                                ),
+                            const SizedBox(height: 8),
+                            //nomor hp
+                            Text(
+                              ' ${controller.userProfile.value?.phone ?? '-'}',
+                              style: GoogleFonts.poppins(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey[700],
                               ),
-
-
+                            ),
+                            const SizedBox(height: 12),
                             ElevatedButton.icon(
                               onPressed: () {
                                 print("Buka EditProfilePage");
                                 try {
                                   final userProfile = controller.userProfile.value;
-                                  final name = userProfile?.fullName ?? controller.userName ?? '';
+                                  final name = userProfile?.name ?? controller.userName ?? '';
                                   final email = userProfile?.email ?? controller.userEmail ?? '';
                                   final phone = userProfile?.phone ?? '';
 
@@ -148,8 +146,7 @@ class ProfilePage extends GetView<AuthController> {
                                     onNameChange: controller.updateName,
                                     onEmailChange: controller.updateEmail,
                                     onPhoneChange: controller.updatePhone,
-                                  )
-                                  );
+                                  ));
                                 } catch (e, stack) {
                                   print("ERROR BUKA EditProfilePage: $e");
                                   print(stack);

@@ -3,7 +3,6 @@ import 'package:flutter_web/pages/favorite/favorite_page.dart';
 import 'package:flutter_web/pages/history/history.dart';
 import 'package:flutter_web/pages/history/order_detail.dart';
 import 'package:flutter_web/pages/pengiriman/cargo.dart';
-import 'package:flutter_web/pages/profile/edit_profil_page.dart';
 import 'package:flutter_web/pages/search/search_page.dart';
 import 'package:flutter_web/pages/shoppingcart/after_checkout.dart';
 import 'package:flutter_web/pages/shoppingcart/cart.dart';
