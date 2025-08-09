@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:toko_online_getx/controller/add_productcontroller.dart';
 import 'package:toko_online_getx/data/services/supabase_service.dart';
 import 'package:toko_online_getx/modules/auth/views/login_view.dart';
 import 'package:url_strategy/url_strategy.dart';
@@ -22,6 +23,7 @@ void main() async {
   Get.put(SupabaseService());
 
   await GetStorage.init();
+  
   runApp(MyApp());
 }
 
@@ -32,6 +34,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // Check initial route based on auth status
     final supabaseService = Get.find<SupabaseService>();
+    // final AddProductController = Get.put(AddProductController());
     // String initialRoute = AppPages.initial;
     
     // if (supabaseService.isAuthenticated) {
@@ -43,10 +46,11 @@ class MyApp extends StatelessWidget {
     // }
     
     return GetMaterialApp(
+      home: LoginView(),
       title: 'Seller Portal',
       debugShowCheckedModeBanner: false,
       initialBinding: InitialScreenBindings(),
-      initialRoute: '/seller-dashboard', // atau '/' jika kamu mau pakai default
+      // initialRoute: '/seller-dashboard', // atau '/' jika kamu mau pakai default
       getPages: getRoutePages,       // pastikan ini list of GetPage
       unknownRoute: GetPage(
         name: '/notfound',

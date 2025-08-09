@@ -102,5 +102,31 @@ class AddProductService extends GetxService {
       print('❌ Gagal menambahkan produk: $e');
       print('📚 Stacktrace:\n$stacktrace');
     }
+    Get.back();
+    Get.snackbar('Success', 'Product added successfully!');
   }
-}
+
+  Future<void> updateProduct(AddProductmodel updatedProduct) async {
+      final Map<String, dynamic> data = updatedProduct.toDatabase(includeSellerId: false);
+      
+      // Hapus ID dari data yang akan diupdate, karena ID digunakan di .eq()
+      final String? productId = updatedProduct.id;
+      if (productId == null || productId.trim().isEmpty) {
+    throw Exception("Product ID is empty, cannot update.");
+  } 
+  data.remove('id');
+  print('🛠️ Updating product ID: $productId');
+  print('📦 Data to update: $data');
+      
+      try {
+        await supabase
+          .from('products')
+          .update(data)
+          .eq('id', productId);
+      } catch (e, st) {
+        print('❌ Failed to update product: $e');
+        print(st);
+        rethrow;
+      }
+    }
+  }

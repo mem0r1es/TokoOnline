@@ -16,6 +16,6 @@ class InitialScreenBindings implements Bindings {
     Get.put(SellerDashboardController());
     Get.put(SupabaseService());
     Get.put(AddProductService());
-    Get.put(AddProductController());
+    Get.lazyPut(() =>AddProductController());
   }
 }

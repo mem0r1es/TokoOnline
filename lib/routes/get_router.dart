@@ -1,10 +1,12 @@
 import 'package:get/get.dart';
 import 'package:get/get_navigation/src/routes/get_route.dart';
 import 'package:toko_online_getx/binding.dart';
+import 'package:toko_online_getx/controller/add_productcontroller.dart';
 import 'package:toko_online_getx/modules/auth/views/login_view.dart';
 import 'package:toko_online_getx/modules/auth/views/register_view.dart';
 import 'package:toko_online_getx/modules/seller/views/dashboard_view.dart';
 import 'package:toko_online_getx/pages/add_product.dart';
+import 'package:toko_online_getx/pages/product_view.dart';
 import 'package:toko_online_getx/routes/middlewares/auth_guard.dart';
 import 'package:toko_online_getx/routes/middlewares/guest_guard.dart';
 import 'package:toko_online_getx/routes/middlewares/role_guard.dart';
@@ -27,16 +29,24 @@ List<GetPage> _routes = [
     middlewares: [GuestGuard()],
   ),
   GetPage(
-    name: '/seller-dashboard',
+    name: SellerDashboardView.TAG,
     page: () => SellerDashboardView(),
     binding: InitialScreenBindings(),
     transition: Transition.fadeIn,
     middlewares: [AuthGuard(), SellerGuard()],
   ),
   GetPage(
-    name: '/add-product', 
+    name: AddProduct.TAG, 
     page: () => AddProduct(),
+    binding: BindingsBuilder((){
+      Get.lazyPut(() => AddProductController());
+    }),
+  ),
+  GetPage(
+    name: ProductView.TAG,
+    page: () => ProductView(),
     binding: InitialScreenBindings(),
+    middlewares: [AuthGuard()],
   ),
   // Add other routes here...
 ];

@@ -1,5 +1,8 @@
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:toko_online_getx/models/add_productmodel.dart';
+import 'package:toko_online_getx/modules/seller/views/dashboard_view.dart';
+import 'package:toko_online_getx/pages/product_view.dart';
 import '../../../data/services/supabase_service.dart';
 import '../../auth/controllers/auth_controller.dart';
 
@@ -14,6 +17,7 @@ class SellerDashboardController extends GetxController {
   final RxInt totalOrders = 0.obs;
   final RxDouble totalRevenue = 0.0.obs;
   final RxBool isLoading = false.obs;
+  var products = <AddProductmodel>[].obs;
   
   // Menu states
   final RxString selectedMenu = 'dashboard'.obs;
@@ -35,10 +39,37 @@ class SellerDashboardController extends GetxController {
         shopName.value = '';
       }
     });
-
-    // Panggil fetch awal jika user sudah ada (untuk kasus hot-reload)
     if (_supabaseService.currentUser.value != null) {
-      initializeDashboardData();
+    print('✅ Found existing session, initializing dashboard data...');
+    initializeDashboardData();
+  }
+  }
+
+  Future<void> updateProductStatus(String productId, bool isActive) async {
+    try {
+      isLoading.value = true;
+      print('🚀 Updating product status for ID: $productId to $isActive');
+      
+      // Panggil service untuk update ke database
+      final success = await _supabaseService.updateProductStatus(productId, isActive);
+      
+      if (success) {
+        // Perbarui status produk di daftar lokal
+        final index = products.indexWhere((p) => p.id == productId);
+        if (index != -1) {
+          products[index] = products[index].copyWith(isActive: isActive);
+          products.refresh(); // Memaksa Obx untuk rebuild
+          print('✅ Product status updated successfully in local list.');
+        }
+      } else {
+        print('❌ Failed to update product status in Supabase.');
+        Get.snackbar('Error', 'Failed to update product status.');
+      }
+    } catch (e) {
+      print('❌ Error updating product status: $e');
+      Get.snackbar('Error', 'An unexpected error occurred: ${e.toString()}');
+    } finally {
+      isLoading.value = false;
     }
   }
 
@@ -64,7 +95,7 @@ class SellerDashboardController extends GetxController {
 
   Future<void> fetchSellerProfile() async {
     try {
-      isLoading.value = true;
+      // isLoading.value = true;
       print('🚀 Fetching seller profile data...');
       final profileData = await _supabaseService.getProfileData();
       
@@ -77,15 +108,16 @@ class SellerDashboardController extends GetxController {
       }
     } catch (e) {
       print('Error fetching seller profile: $e');
-    } finally {
-      isLoading.value = false;
-      print('⏳ Loading state set to false.');
-    }
+    } 
+    // finally {
+    //   isLoading.value = false;
+    //   print('⏳ Loading state set to false.');
+    // }
   }
   
   Future<void> loadDashboardStats() async {
     try {
-      isLoading.value = true;
+      // isLoading.value = true;
       print('🚀 Fetching seller products length');
       final userId = _supabaseService.userId;
       if (userId == null) {
@@ -93,11 +125,14 @@ class SellerDashboardController extends GetxController {
         return;
       }
       // Load products count
-      final products = await _supabaseService.getProducts(
+      final productsData = await _supabaseService.getProducts(
         sellerId: userId,
       );
+
+      products.value = productsData.map((data) => AddProductmodel.fromDatabase(data)).toList();
+
       print('📦 Total produk milik seller $userId: ${products.length}');
-      for (var p in products) {
+      for (var p in productsData) {
         print('➡️ ${p['name']} - seller_id: ${p['seller_id']}');
       }
       totalProducts.value = products.length;
@@ -117,13 +152,50 @@ class SellerDashboardController extends GetxController {
       
     } catch (e) {
       print('Error loading dashboard stats: $e');
-    } finally {
-      isLoading.value = false;
+    } 
+    // finally {
+    //   isLoading.value = false;
+    // }
+  }
+
+  Future<void> showproducts() async {
+    try {
+      print('🚀 Navigating to ProductView...');
+      Get.toNamed(ProductView.TAG);
+    } catch (e) {
+      print('❌ Error navigating to ProductView: $e');
     }
   }
   
   void changeMenu(String menu) {
     selectedMenu.value = menu;
+  }
+
+  void navigateTo(String menuKey) {
+    selectedMenu.value = menuKey; // Mengubah status menu yang aktif
+    
+    switch (menuKey) {
+      case 'dashboard':
+        Get.offAllNamed(SellerDashboardView.TAG); // Atau biarkan di halaman ini
+        print('Navigating to dashboard...');
+        break;
+        
+      case 'products':
+        // Ganti dengan nama rute ke ProductView
+        Get.offAllNamed(ProductView.TAG); 
+        print('Navigating to products...');
+        break;
+        
+      // case 'orders':
+      //   // Ganti dengan nama rute ke OrdersView
+      //   Get.toNamed(AppRoutes.orders); 
+      //   print('Navigating to orders...');
+      //   break;
+        
+      // Tambahkan case untuk menu lainnya
+      default:
+        break;
+    }
   }
   
   Future<void> logout() async {
@@ -152,8 +224,23 @@ class SellerDashboardController extends GetxController {
     }
   }
   
-  void refreshDashboard() {
-    fetchSellerProfile();
-    loadDashboardStats();
+  void refreshDashboard() async {
+  try {
+    isLoading.value = true; // Mulai loading
+    print('🔄 Refreshing all dashboard data...');
+    
+    // Gunakan Future.wait untuk menjalankan keduanya secara paralel dan menunggu keduanya selesai
+    await Future.wait([
+      fetchSellerProfile(),
+      loadDashboardStats(),
+    ]);
+
+  } catch (e) {
+    print('❌ Error refreshing dashboard data: $e');
+    Get.snackbar('Error', 'Failed to refresh data: ${e.toString()}');
+  } finally {
+    isLoading.value = false; // Hentikan loading setelah semua selesai
+    print('✅ Dashboard refresh complete.');
   }
+}
 }

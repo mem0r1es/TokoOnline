@@ -26,28 +26,38 @@ class AuthController extends GetxController {
   final RxBool isInitialized = false.obs;
   
   // Form keys
+  // final _formKey = GlobalKey<FormState>();
   final loginFormKey = GlobalKey<FormState>();
   final registerFormKey = GlobalKey<FormState>();
   
   @override
-  void onInit() {
-    super.onInit();
+void onInit() {
+  super.onInit();
 
-    _supabaseService.client.auth.onAuthStateChange.listen((data) {
-      final AuthChangeEvent event = data.event;
-      final Session? session = data.session;
-
-      currentUser.value = session?.user;
-      if (event == AuthChangeEvent.signedIn) {
-        _redirectBasedOnRole();
-      } else if (event == AuthChangeEvent.signedOut) {
-        Get.offAllNamed(AppRoutes.login);
-      }
-    });
-    if(_supabaseService.isAuthenticated) {
+  // 1️⃣ Cek session dari supabase pas start
+  final session = _supabaseService.client.auth.currentSession;
+  if (session != null) {
+    currentUser.value = session.user;
+    loadUserProfile().then((_) {
       _redirectBasedOnRole();
-    } 
+    });
   }
+
+  // 2️⃣ Listen perubahan auth state
+  _supabaseService.client.auth.onAuthStateChange.listen((data) async {
+    final session = data.session;
+    currentUser.value = session?.user;
+
+    if (session != null) {
+  // currentUser.value = session.user;
+  await loadUserProfile(); // ini harus ada
+  _redirectBasedOnRole();
+} else {
+      Get.offAllNamed(AppRoutes.login);
+    }
+  });
+}
+
   
   @override
   void onClose() {
@@ -75,6 +85,29 @@ class AuthController extends GetxController {
   //     _redirectBasedOnRole();
   //   }
   // }
+
+  Future<void> loadUserProfile() async {
+  try {
+    final userId = currentUser.value?.id;
+    if (userId == null) return;
+
+    final response = await _supabaseService.client
+        .from('profiles')
+        .select('roles')
+        .eq('id', userId)
+        .maybeSingle();
+
+    if (response != null) {
+      final roles = List<String>.from(response['roles'] ?? ['buyer']);
+      _supabaseService.userRoles.value = roles; // Pastikan service punya method ini
+      print('📦 User roles loaded: $roles');
+    }
+  } catch (e) {
+    print('Error loading user profile: $e');
+    _supabaseService.userRoles.value = ['buyer'];
+  }
+}
+
   
   Future<void> login() async {
     if (!loginFormKey.currentState!.validate()) return;

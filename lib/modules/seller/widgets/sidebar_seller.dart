@@ -108,7 +108,7 @@ class SidebarSeller extends GetView<SellerDashboardController> {
           color: isSelected ? Colors.blue.withOpacity(0.1) : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           child: InkWell(
-            onTap: () => controller.changeMenu(key),
+            onTap: () => controller.navigateTo(key),
             borderRadius: BorderRadius.circular(8),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

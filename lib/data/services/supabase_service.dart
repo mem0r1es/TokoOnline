@@ -129,6 +129,21 @@ Future<Map<String, dynamic>> register({
     isLoading.value = false;
   }
 }
+
+Future<bool> updateProductStatus(String productId, bool isActive) async {
+  try {
+    await _client
+      .from('products')
+      .update({'is_active': isActive})
+      .eq('id', productId);
+    
+    print('✅ Supabase product status updated for ID: $productId');
+    return true;
+  } catch (e) {
+    print('❌ Error updating product status in Supabase: $e');
+    return false;
+  }
+}
   
   Future<Map<String, dynamic>> login({
     required String email,

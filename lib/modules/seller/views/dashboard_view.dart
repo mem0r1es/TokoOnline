@@ -1,13 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:toko_online_getx/data/services/supabase_service.dart';
+import 'package:toko_online_getx/pages/add_product.dart';
+import 'package:toko_online_getx/widgets/seller_top_bar.dart';
 import '../controllers/dashboard_controller.dart';
 import '../widgets/sidebar_seller.dart';
 
 class SellerDashboardView extends GetView<SellerDashboardController> {
-  const SellerDashboardView({Key? key}) : super(key: key);
+  final SupabaseService _supabaseService = Get.find<SupabaseService>();
+  static final String TAG = '/seller-dashboard';
+  SellerDashboardView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final user = _supabaseService.currentUser.value;
+    if (user == null) {
+      return const Center(child: Text('Please login first'));
+    }
+
     return Scaffold(
       body: Row(
         children: [
@@ -18,126 +28,7 @@ class SellerDashboardView extends GetView<SellerDashboardController> {
           Expanded(
             child: Column(
               children: [
-                // Top Bar
-                Container(
-                  height: 60,
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
-                        spreadRadius: 1,
-                        blurRadius: 5,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Welcome Message
-                      Obx(() => Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Welcome back, ${controller.userName.value}!',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            controller.shopName.value,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
-                      )),
-                      
-                      // User Menu
-                      Row(
-                        children: [
-                          // Notification Icon
-                          IconButton(
-                            icon: const Icon(Icons.notifications_outlined),
-                            onPressed: () {
-                              // TODO: Implement notifications
-                            },
-                          ),
-                          const SizedBox(width: 16),
-                          
-                          // User Avatar & Dropdown
-                          PopupMenuButton<String>(
-                            offset: const Offset(0, 40),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 18,
-                                  backgroundColor: Colors.blue,
-                                  child: Text(
-                                    controller.userName.value.isNotEmpty
-                                        ? controller.userName.value[0].toUpperCase()
-                                        : 'S',
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                const Icon(Icons.arrow_drop_down),
-                              ],
-                            ),
-                            itemBuilder: (context) => [
-                              PopupMenuItem(
-                                value: 'profile',
-                                child: Row(
-                                  children: const [
-                                    Icon(Icons.person_outline, size: 20),
-                                    SizedBox(width: 12),
-                                    Text('Profile'),
-                                  ],
-                                ),
-                              ),
-                              PopupMenuItem(
-                                value: 'settings',
-                                child: Row(
-                                  children: const [
-                                    Icon(Icons.settings_outlined, size: 20),
-                                    SizedBox(width: 12),
-                                    Text('Settings'),
-                                  ],
-                                ),
-                              ),
-                              const PopupMenuDivider(),
-                              PopupMenuItem(
-                                value: 'logout',
-                                child: Row(
-                                  children: const [
-                                    Icon(Icons.logout, size: 20, color: Colors.red),
-                                    SizedBox(width: 12),
-                                    Text('Logout', style: TextStyle(color: Colors.red)),
-                                  ],
-                                ),
-                              ),
-                            ],
-                            onSelected: (value) {
-                              if (value == 'logout') {
-                                controller.logout();
-                              }
-                              // TODO: Handle other menu items
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                
+                const SellerTopBar(),
                 // Dashboard Content
                 Expanded(
                   child: Container(
@@ -214,7 +105,7 @@ class SellerDashboardView extends GetView<SellerDashboardController> {
                                     'Add Product',
                                     Icons.add_box_outlined,
                                     () {
-                                    Get.toNamed('/add-product');
+                                    Get.toNamed(AddProduct.TAG);
                                     },
                                   ),
                                   const SizedBox(width: 16),
