@@ -141,22 +141,20 @@ class AdminDashboardController extends GetxController {
     loadDashboardStats();
   }
   
-  // Get recent activities (for dashboard feed)
-  Future<List<Map<String, dynamic>>> getRecentActivities() async {
-    try {
-      // Get recent orders
-      final recentOrders = await _supabaseService.client
-          .from('orders_order')
-          .select('*, profiles!user_id(full_name)')
-          .order('created_at', ascending: false)
-          .limit(5);
-      
-      // Get recent products
-      final recentProducts = await _supabaseService.client
-          .from('products')
-          .select('*, profiles!seller_id(shop_name)')
-          .order('created_at', ascending: false)
-          .limit(5);
+Future<List<Map<String, dynamic>>> getRecentActivities() async {
+  try {
+    // Fix: user_id dan seller_id harus reference yang benar
+    final recentOrders = await _supabaseService.client
+        .from('orders_order')
+        .select('*, profiles:user_id(full_name)')  // Fix foreign key reference
+        .order('created_at', ascending: false)
+        .limit(5);
+    
+    final recentProducts = await _supabaseService.client
+        .from('products')
+        .select('*, profiles:seller_id(store_name)')  // Use store_name, not shop_name
+        .order('created_at', ascending: false)
+        .limit(5);
       
       // Combine and sort by date
       List<Map<String, dynamic>> activities = [];

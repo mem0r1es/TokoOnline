@@ -46,35 +46,8 @@ Buyer saja → Tidak bisa akses web seller
 
 No approval system: Seller langsung aktif setelah register
 
-4. FLUTTER PROJECT STRUCTURE (✅ SUDAH DIBUAT):
-lib/
-├── main.dart                    # Entry point aplikasi
-├── app.dart                     # App configuration & setup
-├── modules/
-│   ├── auth/
-│   │   ├── controllers/auth_controller.dart
-│   │   ├── views/login_view.dart
-│   │   └── views/register_view.dart
-│   ├── admin/
-│   │   ├── controllers/dashboard_controller.dart
-│   │   ├── views/dashboard_view.dart
-│   │   └── widgets/sidebar_admin.dart
-│   └── seller/
-│       ├── controllers/dashboard_controller.dart
-│       ├── views/dashboard_view.dart
-│       └── widgets/sidebar_seller.dart
-├── data/
-│   ├── models/product_model.dart
-│   └── services/supabase_service.dart
-├── bindings/
-│   ├── auth_binding.dart
-│   ├── admin_binding.dart
-│   └── seller_binding.dart
-└── routes/
-    ├── app_routes.dart
-    └── app_pages.dart
 
-5. REGISTER FORM FIELDS:
+4. REGISTER FORM FIELDS:
 Untuk seller registration, form berisi:
 
 Full Name (required)
@@ -84,8 +57,6 @@ Password (required)
 Phone Number (optional)
 Shop Description (optional)
 
-PROGRESS TERAKHIR:
-Kita baru saja membahas konsep supabase_service.dart sebagai service layer untuk:
 
 Centralized Supabase operations
 Auth methods (login, register, logout)
