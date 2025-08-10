@@ -15,9 +15,9 @@ import 'package:get/get.dart';
 // import '../../controllers/page_controller.dart';
 import '../../models/product_model.dart';
 
-class OurProduct extends GetView<ProductController> {
+class OurProduct2 extends GetView<ProductController> {
   final int? productLimit;
-  OurProduct({super.key, this.productLimit});
+  OurProduct2({super.key, this.productLimit});
 
   final FavoriteController favC = Get.put(FavoriteController());
   final cartService = Get.find<CartService>();
@@ -46,14 +46,6 @@ class OurProduct extends GetView<ProductController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            'Our Products',
-            style: GoogleFonts.poppins(
-              fontSize: 40,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 10),
           Obx(() {
             if (controller.isLoading.value) {
               return SizedBox(
@@ -125,55 +117,45 @@ class OurProduct extends GetView<ProductController> {
               );
             }
 
-            final int displayedItemCount = productLimit != null && productLimit! < controller.products.length
-                  ? productLimit!
-                  : controller.products.length;
+              final int displayedItemCount = productLimit != null && productLimit! < controller.products.length
+                    ? productLimit!
+                    : controller.products.length;
 
-              // Tentukan jumlah total item di grid (termasuk tombol)
-              final int totalGridItems = productLimit != null && controller.products.length > productLimit!
-                  ? displayedItemCount + 1 // Tambah 1 untuk tombol "Lihat Lainnya"
-                  : displayedItemCount;
+                // Tentukan jumlah total item di grid (termasuk tombol)
+                final int totalGridItems = productLimit != null && controller.products.length > productLimit!
+                    ? displayedItemCount + 1 // Tambah 1 untuk tombol "Lihat Lainnya"
+                    : displayedItemCount;
 
-            return Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 20),
-                  child: Text(
-                    'Showing ${controller.products.length} products',
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color: Colors.grey[600],
+                return Column(
+                  children: [
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: totalGridItems,
+                      // itemCount: controller.products.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        crossAxisSpacing: 20,
+                        mainAxisSpacing: 20,
+                        childAspectRatio: childAspectRatio,
+                      ),
+                      itemBuilder: (context, index) {
+                        if (productLimit != null && index == totalGridItems - 1 && controller.products.length > productLimit!) {
+                            return _buildViewAllCard(); // Widget khusus untuk tombol "Lihat Lainnya"
+                          }
+                        final product = controller.products[index];
+                        return _productCard(product, cartService, authController);
+                      },
                     ),
-                  ),
-                ),
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: totalGridItems,
-                  // itemCount: controller.products.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: crossAxisCount,
-                    crossAxisSpacing: 20,
-                    mainAxisSpacing: 20,
-                    childAspectRatio: childAspectRatio,
-                  ),
-                  itemBuilder: (context, index) {
-                    if (productLimit != null && index == totalGridItems - 1 && controller.products.length > productLimit!) {
-                        return _buildViewAllCard(); // Widget khusus untuk tombol "Lihat Lainnya"
-                      }
-                    final product = controller.products[index];
-                    return _productCard(product, cartService, authController);
-                  },
-                ),
-                SizedBox.shrink(), // Jika tidak ada tombol, kembalikan widget kosong
-              ],
-            );
-          }),
-        ],
-      ),
+                    SizedBox.shrink(), // Jika tidak ada tombol, kembalikan widget kosong
+                  ],
+                );
+              }),
+            ],
+          ),
+        );
+      },
     );
-  },
-);
   }
 
   Widget _buildViewAllCard() {
@@ -355,72 +337,6 @@ class OurProduct extends GetView<ProductController> {
             style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[500]),
           ),
         ],
-      ),
-    );
-  }
-
-  void _showAuthDialog() {
-    Get.dialog(AuthDialog());
-  }
-
-  void _handleAddToCart(
-  Product product,
-  String productId,
-  CartService cartService,
-  AuthController authController,
-) async {
-  final currentUser = authController.currentUser.value;
-
-  if (currentUser == null || currentUser.email == null) {
-    _showAuthDialog();
-    Get.snackbar(
-      "Login Required",
-      "Please login first to add products to cart",
-      backgroundColor: Colors.orange,
-      colorText: Colors.white,
-      snackPosition: SnackPosition.BOTTOM,
-      icon: Icon(Icons.login, color: Colors.white),
-    );
-    return;
-  }
-
-  if (product.stock != null && product.stock! <= 0) {
-    Get.snackbar(
-      "Out of Stock",
-      "${product.title} is currently out of stock",
-      backgroundColor: Colors.red,
-      colorText: Colors.white,
-      snackPosition: SnackPosition.BOTTOM,
-      icon: Icon(Icons.inventory_2, color: Colors.white),
-    );
-    return;
-  }
-
-  // cartService.addItem(CartItem(
-  //   id: productId,
-  //   name: product.title,
-  //   price: product.price.toDouble(),
-  //   imageUrl: product.imagePath,
-  // ));
-
-  await cartService.saveCartToSupabase(currentUser.email!);
-}
-
-  void _handleFavorite(Product product) {
-    favC.toggleFavorite(product);
-
-    Get.snackbar(
-      "Favorites",
-      favC.isFavorite(product)
-          ? "${product.title} added to favorites"
-          : "${product.title} removed from favorites",
-      backgroundColor: favC.isFavorite(product) ? Colors.red : Colors.grey,
-      colorText: Colors.white,
-      snackPosition: SnackPosition.BOTTOM,
-      duration: Duration(seconds: 2),
-      icon: Icon(
-        favC.isFavorite(product) ? Icons.favorite : Icons.favorite_border,
-        color: Colors.white,
       ),
     );
   }
