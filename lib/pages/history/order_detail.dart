@@ -223,16 +223,35 @@ class OrderDetailPage extends StatelessWidget {
                   borderRadius: BorderRadiusGeometry.circular(15)
                   ),
                 tileColor: Colors.purple[50],
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                title: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Text(
-                      'Metode Pembayaran: ',
-                      style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Order ID: ', 
+                          style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold)
+                        ),
+                        Text(
+                          '${order.id}',
+                          style: GoogleFonts.poppins(fontSize: 12),
+                        ),
+                      ],
                     ),
-                    Text(
-                      '${order.paymentMethod}',
-                      style: GoogleFonts.poppins(fontSize: 14),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Metode Pembayaran: ',
+                          style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          '${order.paymentMethod}',
+                          style: GoogleFonts.poppins(fontSize: 14),
+                        ),
+                      ],
                     ),
                   ],
                 ),
