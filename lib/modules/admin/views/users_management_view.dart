@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../controllers/users_controller.dart';
+import 'package:toko_online_getx/modules/admin/controllers/users_controller.dart';
 
 class UsersManagementView extends StatelessWidget {
   UsersManagementView({Key? key}) : super(key: key);
@@ -34,12 +34,12 @@ class UsersManagementView extends StatelessWidget {
                 ElevatedButton.icon(
                   onPressed: () {
                     // TODO: Add user functionality
-                    Get.snackbar('Info', 'Add user feature coming soon');
+                    Get.snackbar('Info', 'Add user feature');
                   },
                   icon: const Icon(Icons.add),
                   label: const Text('Add User'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
+                    backgroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,
                       vertical: 12,
@@ -274,44 +274,56 @@ class UsersManagementView extends StatelessWidget {
     );
   }
   
-  Widget _buildRoleChips(List<dynamic> roles) {
-    return Wrap(
-      spacing: 4,
-      children: roles.map((role) {
-        Color color = Colors.grey;
-        if (role == 'admin') color = Colors.red;
-        else if (role == 'seller') color = Colors.blue;
-        else if (role == 'buyer') color = Colors.green;
-        
-        return Chip(
-          label: Text(
-            role.toString().toUpperCase(),
-            style: const TextStyle(fontSize: 11, color: Colors.white),
+Widget _buildRoleChips(List<dynamic> roles) {
+  return Wrap(
+    spacing: 4,
+    children: roles.map((role) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey[400]!),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Text(
+          role.toString(),
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey[700],
           ),
-          backgroundColor: color,
-          padding: EdgeInsets.zero,
-          visualDensity: VisualDensity.compact,
-        );
-      }).toList(),
-    );
+        ),
+      );
+    }).toList(),
+  );
+}
+  
+Widget _buildStatusChip(String status) {
+  // Simple design dengan border only
+  Color borderColor = Colors.grey[400]!;
+  Color textColor = Colors.grey[700]!;
+  
+  if (status == 'active') {
+    borderColor = Colors.green;
+    textColor = Colors.green[700]!;
+  } else if (status == 'inactive') {
+    borderColor = Colors.orange;
+    textColor = Colors.orange[700]!;
   }
   
-  Widget _buildStatusChip(String status) {
-    Color color = Colors.grey;
-    if (status == 'active') color = Colors.green;
-    else if (status == 'inactive') color = Colors.orange;
-    else if (status == 'pending') color = Colors.blue;
-    
-    return Chip(
-      label: Text(
-        status.toUpperCase(),
-        style: const TextStyle(fontSize: 11, color: Colors.white),
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+    decoration: BoxDecoration(
+      border: Border.all(color: borderColor),
+      borderRadius: BorderRadius.circular(4),
+    ),
+    child: Text(
+      status,
+      style: TextStyle(
+        fontSize: 12,
+        color: textColor,
       ),
-      backgroundColor: color,
-      padding: EdgeInsets.zero,
-      visualDensity: VisualDensity.compact,
-    );
-  }
+    ),
+  );
+}
   
   Widget _buildActionButtons(Map<String, dynamic> user) {
     return Row(

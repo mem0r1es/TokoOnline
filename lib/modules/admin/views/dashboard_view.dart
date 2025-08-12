@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/dashboard_controller.dart';
 import '../widgets/sidebar_admin.dart';
+import 'package:toko_online_getx/modules/admin/views/users_management_view.dart';
 
 class AdminDashboardView extends StatelessWidget {
   const AdminDashboardView({Key? key}) : super(key: key);
@@ -152,13 +153,7 @@ class AdminDashboardView extends StatelessWidget {
                         case 'dashboard':
                           return _buildDashboardContent(controller);
                         case 'users':
-                          // TODO: Return UsersManagementView() when created
-                          return Center(
-                            child: Text(
-                              'Users Management - Coming Soon',
-                              style: TextStyle(fontSize: 24, color: Colors.grey),
-                            ),
-                          );
+                          return UsersManagementView();
                         case 'sellers':
                           return Center(
                             child: Text(
