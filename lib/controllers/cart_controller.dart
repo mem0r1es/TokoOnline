@@ -2,8 +2,6 @@ import 'package:flutter_web/models/cart_historyitem.dart';
 import 'package:flutter_web/services/auth_service.dart';
 import 'package:flutter_web/services/cart_service.dart';
 import 'package:get/get.dart';
-// import '../models/info_user.dart';
-// import '../services/address_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CartController extends GetxController {

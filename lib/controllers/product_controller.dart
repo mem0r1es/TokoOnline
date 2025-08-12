@@ -1,6 +1,4 @@
 import 'package:get/get.dart';
-// import 'package:supabase_flutter/supabase_flutter.dart';
-// import 'package:flutter/material.dart';
 import '../models/product_model.dart';
 import '../services/product_service.dart';
 
@@ -19,8 +17,8 @@ class ProductController extends GetxController {
   }
 
   Product? getProductById(String id) {
-  return products.firstWhereOrNull((p) => p.id == id);
-}
+    return products.firstWhereOrNull((p) => p.id == id);
+  }
 
   void decreaseStock(String productId) {
     final index = products.indexWhere((p) => p.id == productId);
@@ -60,7 +58,7 @@ class ProductController extends GetxController {
   // Future<void> migrateProducts() => productService.migrateStaticProductsToDatabase();
 
   Future<void> refreshProducts() async {
-    print('🔄 Refreshing products...');
+    print('Refreshing products...');
     await fetchProducts();
   }
 }

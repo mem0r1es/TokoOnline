@@ -1,19 +1,18 @@
 import 'package:flutter_web/binding.dart';
-import 'package:flutter_web/pages/favorite/favorite_page.dart';
-import 'package:flutter_web/pages/history/history.dart';
+import 'package:flutter_web/pages/account/favorite/favorite_page.dart';
+import 'package:flutter_web/pages/account/history/history.dart';
 import 'package:flutter_web/pages/pengiriman/cargo.dart';
 import 'package:flutter_web/pages/search/search_page.dart';
 import 'package:flutter_web/pages/shoppingcart/after_checkout.dart';
 import 'package:flutter_web/pages/shoppingcart/cart.dart';
 import 'package:get/get.dart';
 import 'package:get/get_navigation/src/routes/get_route.dart';
-
 import 'package:flutter_web/pages/about/about.dart';
 import 'package:flutter_web/pages/contact/contact.dart';
 import 'package:flutter_web/pages/homepage/home_page.dart';
-import 'package:flutter_web/pages/profile/add_address.dart';
-import 'package:flutter_web/pages/profile/address_page.dart';
-import 'package:flutter_web/pages/profile/profile_page.dart';
+import 'package:flutter_web/pages/account/add_address.dart';
+import 'package:flutter_web/pages/account/address_page.dart';
+import 'package:flutter_web/pages/account/profile_page.dart';
 import 'package:flutter_web/pages/shop/product_dialog.dart';
 import 'package:flutter_web/pages/shop/shops.dart';
 

@@ -5,7 +5,6 @@ import '../../controllers/address_controller.dart';
 import '../../controllers/auth_controller.dart';
 import '../../models/info_user.dart';
 import '../../services/address_service.dart';
-import '../../services/address_service.dart';
 
 class AddAddress extends StatefulWidget {
   static final String TAG = '/add-address';
@@ -187,7 +186,10 @@ class _AddAddressState extends State<AddAddress> {
                       onPressed: _handleSaveOrUpdate,
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        backgroundColor: Colors.blue,
+                        backgroundColor: Colors.purple[200],
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                       child: Text(
                         isEditing ? "PERBARUI ALAMAT" : "SIMPAN ALAMAT",
@@ -340,6 +342,7 @@ class _AddAddressState extends State<AddAddress> {
       await addressController.fetchAddresses();
 
       Get.back();
+      
       Get.snackbar(
         "Success",
         isEditing ? "Alamat berhasil diperbarui" : "Alamat berhasil ditambahkan",
@@ -347,6 +350,7 @@ class _AddAddressState extends State<AddAddress> {
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
+
     } catch (e) {
       Get.snackbar(
         "Error",

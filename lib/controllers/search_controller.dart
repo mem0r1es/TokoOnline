@@ -26,7 +26,7 @@ class SearchController extends GetxController {
     }
 
     try {
-      print('🔍 SEARCH CONTROLLER: Starting search for "$query"');
+      print('SEARCH CONTROLLER: Starting search for "$query"');
 
       // Dapatkan ProductService. Pastikan sudah diinisialisasi di GetX binding.
       final ProductService productService = Get.find<ProductService>();
@@ -90,21 +90,6 @@ class SearchController extends GetxController {
     searchInputController.dispose();
     super.onClose();
   }
-
-
-  
-
-  // void setResults(String q, List<Product> r) {
-  //   query.value = q;
-  //   results.value = r;
-  // }
-
-  // void clear() {
-  //   query.value = '';
-  //   results.clear();
-  // }
-
-  
 }
 
 

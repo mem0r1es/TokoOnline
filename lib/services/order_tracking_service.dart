@@ -44,11 +44,11 @@ class OrderTrackingService extends GetxService {
             'updated_at': now.toIso8601String(),
           }).eq('id', id);
 
-          print('✅ Order $id status updated to "$newStatus"');
+          print('Order $id status updated to "$newStatus"');
         }
       }
     } catch (e) {
-      print('❌ Gagal update status order otomatis: $e');
+      print('Gagal update status order otomatis: $e');
     }
   }
 }

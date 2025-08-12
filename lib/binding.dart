@@ -9,7 +9,7 @@ import 'package:flutter_web/controllers/profile_image_controller.dart';
 import 'package:flutter_web/controllers/scroll_controller.dart';
 import 'package:flutter_web/controllers/search_controller.dart';
 import 'package:flutter_web/controllers/shops_scroll.dart';
-import 'package:flutter_web/pages/profile/edit_profil_page.dart';
+import 'package:flutter_web/pages/account/EditProfil/edit_profil_page.dart';
 import 'package:flutter_web/services/cargo_service.dart';
 import 'package:flutter_web/services/order_tracking_service.dart';
 import 'package:flutter_web/services/scroll_controller_manager.dart';

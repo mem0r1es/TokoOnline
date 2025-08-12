@@ -13,10 +13,4 @@ class CargoController extends GetxController {
     selectedCategory.value = cargo.kategoriName;
   }
     int get selectedCargoPrice => selectedCargo.value?.harga ?? 0;
-
-
-  // void selectCargo(String name, String category) {
-  //   selectedCargoName.value = name;
-  //   selectedCategory.value = category;
-  // }
 }

@@ -35,7 +35,7 @@ class OrderHistoryItem {
 
   factory OrderHistoryItem.fromJson(Map<String, dynamic> json) {
     return OrderHistoryItem(
-      id: json['id'], // dan ini
+      id: json['id'], 
       timestamp: DateTime.parse(json['timestamp']),
       infoUser: (json['info_user'] as List<dynamic>)
           .map((user) => InfoUser.fromJson(user))
@@ -55,17 +55,13 @@ class OrderHistoryItem {
       updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'])
           : null,
-
     );
   }
   String get capitalizedStatus {
-  if (status.isEmpty) return '';
-  return status[0].toUpperCase() + status.substring(1);
-}
+    if (status.isEmpty) return '';
+    return status[0].toUpperCase() + status.substring(1);
+  }
 
-String get normalizedStatus => status.toLowerCase().trim();
-
-
-  
+  String get normalizedStatus => status.toLowerCase().trim();
 }
 

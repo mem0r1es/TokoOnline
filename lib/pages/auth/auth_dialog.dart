@@ -269,7 +269,7 @@ class _AuthDialogState extends State<AuthDialog> {
           Get.find<CartService>().loadCartFromSupabase(email);
           await Get.find<CheckoutService>().loadOrderHistoryFromSupabase(email);
         }
-        Get.back();
+        Get.back(closeOverlays: true);
       }
     }
   }

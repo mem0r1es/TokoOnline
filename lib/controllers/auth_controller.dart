@@ -1,4 +1,3 @@
-// File: controllers/auth_controller.dart
 import 'package:flutter_web/models/profile_model.dart';
 import 'package:get/get.dart';
 import '../services/auth_service.dart';
@@ -40,29 +39,28 @@ class AuthController extends GetxController {
   }
 
   Future<void> changePassword(String oldPassword, String newPassword) async {
-  try {
-    final currentEmail = Supabase.instance.client.auth.currentUser?.email;
-    if (currentEmail == null) throw Exception("User tidak ditemukan");
+    try {
+      final currentEmail = Supabase.instance.client.auth.currentUser?.email;
+      if (currentEmail == null) throw Exception("User tidak ditemukan");
 
-    // Login ulang untuk verifikasi password lama
-    final session = await Supabase.instance.client.auth.signInWithPassword(
-      email: currentEmail,
-      password: oldPassword,
-    );
+      // Login ulang untuk verifikasi password lama
+      final session = await Supabase.instance.client.auth.signInWithPassword(
+        email: currentEmail,
+        password: oldPassword,
+      );
 
-    if (session.user == null) throw Exception("Password lama salah");
+      if (session.user == null) throw Exception("Password lama salah");
 
-    // Ganti password
-    await Supabase.instance.client.auth.updateUser(
-      UserAttributes(password: newPassword),
-    );
+      // Ganti password
+      await Supabase.instance.client.auth.updateUser(
+        UserAttributes(password: newPassword),
+      );
 
-    Get.snackbar("Berhasil", "Password berhasil diubah");
-  } catch (e) {
-    _showError(e);
+      Get.snackbar("Berhasil", "Password berhasil diubah");
+    } catch (e) {
+      _showError(e);
+    }
   }
-}
-
 
   Future<void> register(String email, String password, String fullName) async {
     try {

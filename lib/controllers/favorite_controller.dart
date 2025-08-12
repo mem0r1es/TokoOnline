@@ -33,7 +33,7 @@ class FavoriteController extends GetxController {
     final userEmail = authController.getUserEmail;
     final favJson = _favorites.map((e) => e.toJson()).toList();
     _storage.write('favorites_$userEmail', favJson);
-    }
+  }
 
   void loadFavoritesFromStorage() {
     final userEmail = authController.getUserEmail;
@@ -43,11 +43,11 @@ class FavoriteController extends GetxController {
         favJson.map((e) => Product.fromJson(Map<String, dynamic>.from(e))).toList(),
       );
     }
-    }
+  }
 
   void clearFavorites() {
     _favorites.clear();
     final userEmail = authController.getUserEmail;
     _storage.remove('favorites_$userEmail');
-    }
+  }
 }

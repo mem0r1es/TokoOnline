@@ -13,7 +13,7 @@ import 'package:flutter_web/services/cart_service.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 // import '../../controllers/page_controller.dart';
-import '../../models/product_model.dart';
+import '../../../models/product_model.dart';
 // import 'package:google_fonts/google_fonts.dart';
 
 class FavoritePage extends StatelessWidget {

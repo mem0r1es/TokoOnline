@@ -1,23 +1,17 @@
 import 'package:flutter/material.dart' hide SearchController;
-import 'package:flutter_web/controllers/address_controller.dart';
+// import 'package:flutter_web/controllers/address_controller.dart';
 import 'package:flutter_web/controllers/auth_controller.dart';
-import 'package:flutter_web/controllers/cart_controller.dart';
-import 'package:flutter_web/controllers/checkout_controller.dart';
+// import 'package:flutter_web/controllers/cart_controller.dart';
+// import 'package:flutter_web/controllers/checkout_controller.dart';
 import 'package:flutter_web/extensions/extension.dart';
 import 'package:flutter_web/pages/shoppingcart/cart.dart';
 import 'package:flutter_web/services/scroll_controller_manager.dart';
-// Periksa nama kelas AboutPage
-// Periksa nama kelas ContactPage
-// Ini ProductInfoPage?
-// Ini ProductInfoPage?
 import 'package:flutter_web/services/cart_service.dart';
-import 'package:flutter_web/services/checkout_service.dart';
+// import 'package:flutter_web/services/checkout_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import '../pages/shop/shops.dart';
 import '../pages/auth/auth_dialog.dart';
-
-// Tambahkan import untuk SearchController yang baru
 import 'package:flutter_web/controllers/search_controller.dart'; // Pastikan path ini benar
 
 
@@ -29,14 +23,11 @@ class HeaderPages extends GetView<ScrollControllerManager> { // Tetap gunakan Sc
     final AuthController authController = Get.find();
     final CartService cartService = Get.find();
     // final ProductService productService = Get.find(); // Tidak perlu lagi di sini, pindah ke SearchController
-    final AddressController addressController = Get.find();
-    final CheckoutService checkoutService = Get.find();
-    final CartController cartController = Get.find();
-    final CheckoutController checkoutController = Get.find();
-
-    // Dapatkan instance SearchController
+    // final AddressController addressController = Get.find();
+    // final CheckoutService checkoutService = Get.find();
+    // final CartController cartController = Get.find();
+    // final CheckoutController checkoutController = Get.find();
     final SearchController searchController = Get.find<SearchController>();
-
 
     return Container(
       width: double.infinity,
@@ -332,31 +323,31 @@ class HeaderPages extends GetView<ScrollControllerManager> { // Tetap gunakan Sc
     }
   }
 
-  Widget _iconBtn(IconData icon, [VoidCallback? onPressed]) {
-    return SizedBox(
-      width: 28,
-      height: 28,
-      child: IconButton(
-        icon: Icon(icon, color: Colors.black, size: 24),
-        onPressed: onPressed,
-        padding: EdgeInsets.zero,
-        constraints: BoxConstraints(),
-        splashRadius: 20,
-      ),
-    );
-  }
+  // Widget _iconBtn(IconData icon, [VoidCallback? onPressed]) {
+  //   return SizedBox(
+  //     width: 28,
+  //     height: 28,
+  //     child: IconButton(
+  //       icon: Icon(icon, color: Colors.black, size: 24),
+  //       onPressed: onPressed,
+  //       padding: EdgeInsets.zero,
+  //       constraints: BoxConstraints(),
+  //       splashRadius: 20,
+  //     ),
+  //   );
+  // }
 
-  Widget _navItem(String text, [VoidCallback? onTap]) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Text(
-        text,
-        style: GoogleFonts.poppins(
-          fontSize: 16,
-          color: const Color(0xFF000000),
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
+//   Widget _navItem(String text, [VoidCallback? onTap]) {
+//     return GestureDetector(
+//       onTap: onTap,
+//       child: Text(
+//         text,
+//         style: GoogleFonts.poppins(
+//           fontSize: 16,
+//           color: const Color(0xFF000000),
+//           fontWeight: FontWeight.w500,
+//         ),
+//       ),
+//     );
+//   }
 }

@@ -5,11 +5,11 @@ class InfoUser {
   final String? phone;
   final String? address;
   final String? provinsi;
-  final String? provinsiId; // Tambahkan field ini
+  final String? provinsiId;
   final String? kota;
-  final String? kotaId; // Tambahkan field ini
+  final String? kotaId; 
   final String? kecamatan;
-  final String? kecamatanId; // Tambahkan field ini
+  final String? kecamatanId; 
   final String? kodepos;
   final String? detail;
   final DateTime? timestamp;

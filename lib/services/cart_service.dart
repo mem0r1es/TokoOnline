@@ -1,16 +1,16 @@
 import 'package:flutter_web/models/info_user.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:get_storage/get_storage.dart';
+// import 'package:get_storage/get_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/cart_item.dart';
 import '../models/order_history_item.dart';
 import '../controllers/product_controller.dart';
 
 final supabase = Supabase.instance.client;
-final _localStorage = GetStorage();
+// final _localStorage = GetStorage();
 
-String _cartKey(String userEmail) => 'cart_$userEmail';
+// String _cartKey(String userEmail) => 'cart_$userEmail';
 
 
 class CartService extends GetxService {
@@ -24,11 +24,6 @@ class CartService extends GetxService {
   bool get isNotEmpty => cartItems.isNotEmpty;
 
   String? userId;
-
-  // void removeItem(String id) {
-  //   cartItems.removeWhere((item) => item.id == id);
-  //   cartItems.refresh();
-  // }
 
   bool hasItem(String id) {
     return cartItems.any((item) => item.id == id);
@@ -47,170 +42,130 @@ class CartService extends GetxService {
   }
   
   void addItem(CartItem item) {
-  int existingIndex = cartItems.indexWhere((i) => i.id == item.id);
-  final productController = Get.find<ProductController>();
+    int existingIndex = cartItems.indexWhere((i) => i.id == item.id);
+    final productController = Get.find<ProductController>();
 
-  if (existingIndex >= 0) {
-    cartItems[existingIndex].quantity += item.quantity;
-    productController.decreaseStock(item.id);
-  } else {
-    cartItems.add(item);
-    productController.decreaseStock(item.id);
-  }
-
-  cartItems.refresh();
-  // _saveCartToMemory();
-
-  Get.snackbar('Cart Updated', '${item.name} added to cart',
-    snackPosition: SnackPosition.BOTTOM,
-    backgroundColor: Colors.green,
-    colorText: Colors.white,
-    duration: Duration(seconds: 2),
-  );
-
-  // ❌ Hapus panggilan Supabase di sini
-}
-
-
-void increaseQuantity(String id) {
-  int index = cartItems.indexWhere((item) => item.id == id);
-  final productController = Get.find<ProductController>();
-
-  if (index >= 0) {
-    final product = productController.getProductById(id);
-    final availableStock = product?.stock ?? 0;
-
-    if (availableStock > 0) {
-      cartItems[index].quantity++;
-      productController.decreaseStock(id); // Kurangi stok produk
-      cartItems.refresh();
-      // _saveCartToMemory();
+    if (existingIndex >= 0) {
+      cartItems[existingIndex].quantity += item.quantity;
+      productController.decreaseStock(item.id);
     } else {
-      // Stok habis ➔ Tampilkan notifikasi
-      Get.snackbar(
-        "Out of Stock",
-        "${product?.title ?? 'This product'} is out of stock.",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        icon: Icon(Icons.error_outline, color: Colors.white),
-      );
+      cartItems.add(item);
+      productController.decreaseStock(item.id);
     }
-  }
-}
 
-var isUpdating = false.obs;
-
-void decreaseQuantity(String id) async {
-  if (isUpdating.value) return;  // Cegah spam klik
-
-  isUpdating.value = true;
-
-  int index = cartItems.indexWhere((item) => item.id == id);
-  final productController = Get.find<ProductController>();
-  final user = Supabase.instance.client.auth.currentUser;
-  final email = user?.email;
-
-  if (index >= 0) {
-    if (cartItems[index].quantity > 1) {
-      cartItems[index].quantity--;
-      productController.increaseStock(id);
-      cartItems.refresh();
-      
-
-      if (email != null) {
-        await supabase.from('cart_history').update({
-          'quantity': cartItems[index].quantity,
-          'timestamp': DateTime.now().toIso8601String(),
-        })
-        .eq('user_id', email)
-        .eq('product_id', id);
-      }
-    } else {
-      // Kalau quantity udah 1 ➔ remove
-      cartItems.removeAt(index);
-      productController.increaseStock(id);
-      cartItems.refresh();
-      
-
-      if (email != null) {
-        await supabase.from('cart_history').update({
-          'quantity': 0,
-          'is_active': false,
-          'timestamp': DateTime.now().toIso8601String(),
-        })
-        .eq('user_id', email)
-        .eq('product_id', id);
-      }
-    }
+    cartItems.refresh();
     // _saveCartToMemory();
+
+    Get.snackbar('Cart Updated', '${item.name} added to cart',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.green,
+      colorText: Colors.white,
+      duration: Duration(seconds: 2),
+    );
   }
 
-  isUpdating.value = false;
-}
+
+  void increaseQuantity(String id) {
+    int index = cartItems.indexWhere((item) => item.id == id);
+    final productController = Get.find<ProductController>();
+
+    if (index >= 0) {
+      final product = productController.getProductById(id);
+      final availableStock = product?.stock ?? 0;
+
+      if (availableStock > 0) {
+        cartItems[index].quantity++;
+        productController.decreaseStock(id); // Kurangi stok produk
+        cartItems.refresh();
+        // _saveCartToMemory();
+      } else {
+        // Stok habis ➔ Tampilkan notifikasi
+        Get.snackbar(
+          "Out of Stock",
+          "${product?.title ?? 'This product'} is out of stock.",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          icon: Icon(Icons.error_outline, color: Colors.white),
+        );
+      }
+    }
+  }
+
+  var isUpdating = false.obs;
+
+  void decreaseQuantity(String id) async {
+    if (isUpdating.value) return;  // Cegah spam klik
+
+    isUpdating.value = true;
+
+    int index = cartItems.indexWhere((item) => item.id == id);
+    final productController = Get.find<ProductController>();
+    final user = Supabase.instance.client.auth.currentUser;
+    final email = user?.email;
+
+    if (index >= 0) {
+      if (cartItems[index].quantity > 1) {
+        cartItems[index].quantity--;
+        productController.increaseStock(id);
+        cartItems.refresh();
+        
+
+        if (email != null) {
+          await supabase.from('cart_history').update({
+            'quantity': cartItems[index].quantity,
+            'timestamp': DateTime.now().toIso8601String(),
+          })
+          .eq('user_id', email)
+          .eq('product_id', id);
+        }
+      } else {
+        // Kalau quantity udah 1 ➔ remove
+        cartItems.removeAt(index);
+        productController.increaseStock(id);
+        cartItems.refresh();
+        
+
+        if (email != null) {
+          await supabase.from('cart_history').update({
+            'quantity': 0,
+            'is_active': false,
+            'timestamp': DateTime.now().toIso8601String(),
+          })
+          .eq('user_id', email)
+          .eq('product_id', id);
+        }
+      }
+      // _saveCartToMemory();
+    }
+
+    isUpdating.value = false;
+  }
 
 
   void removeItem(String id) async {
-  cartItems.removeWhere((item) => item.id == id);
-  final productController = Get.find<ProductController>();
-  final user = Supabase.instance.client.auth.currentUser;
-  final email = user?.email;
+    cartItems.removeWhere((item) => item.id == id);
+    final productController = Get.find<ProductController>();
+    final user = Supabase.instance.client.auth.currentUser;
+    final email = user?.email;
 
-  productController.increaseStock(id);
-  cartItems.refresh();
+    productController.increaseStock(id);
+    cartItems.refresh();
 
-  if (email != null) {
-    await supabase.from('cart_history').update({
-      'quantity': 0,
-      'is_active': false,
-      'timestamp': DateTime.now().toIso8601String(),
-    })
-    .eq('user_id', email)
-    .eq('product_id', id);
-    // _saveCartToMemory();
-  }
-}
-
-
-    // void _saveCartToMemory() {
-    //   print('Cart saved to memory');
-    // }
-
-    CartItem? getItem(String id) {
-      return cartItems.firstWhereOrNull((item) => item.id == id);
+    if (email != null) {
+      await supabase.from('cart_history').update({
+        'quantity': 0,
+        'is_active': false,
+        'timestamp': DateTime.now().toIso8601String(),
+      })
+      .eq('user_id', email)
+      .eq('product_id', id);
+      // _saveCartToMemory();
     }
-
-//   void _saveCartToMemory() {
-//     final user = Supabase.instance.client.auth.currentUser;
-//     final email = user?.email;
-
-//   if (email != null) {
-//     final cartJson = cartItems.map((item) => item.toJson()).toList();
-//     _localStorage.write(_cartKey(email), cartJson);
-//     print('Cart saved locally for $email');
-//   }
-// }
-
-// void loadCartFromLocalStorage(String userEmail) {
-//   final List? cartJson = _localStorage.read<List>(_cartKey(userEmail));
-
-//   if (cartJson != null) {
-//     cartItems.assignAll(cartJson.map((e) => CartItem.fromJson(Map<String, dynamic>.from(e))).toList());
-//     print('📦 Cart loaded from local storage for $userEmail');
-//   }
-// }
-
-
-
-  //   Future<List<CartHistoryItem>> loadCartFromSupabase(String email) async {
-  //   final response = await supabase.from('cart_history').select().eq('email', email);
-
-  //   final List<CartHistoryItem> items = (response as List)
-  //       .map((item) => CartHistoryItem.fromMap(item))
-  //       .toList();
-
-  //   return items;  // <- ini yang kurang
-  // }
+  }
+  CartItem? getItem(String id) {
+    return cartItems.firstWhereOrNull((item) => item.id == id);
+  }
 
   Future<void> loadCartFromSupabase(String userEmail) async {
     final response = await supabase

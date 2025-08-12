@@ -30,35 +30,6 @@ class Product {
     this.quantity = 1, // Default quantity
   });
 
-  // Factory constructor untuk data dari database
-  // factory Product.fromDatabase(Map<String, dynamic> data) {
-  //   print('RAW PRODUCT DATA: $data');
-
-  //   print('DEBUG seller_id: ${data['seller_id']} (${data['seller_id'].runtimeType})');
-  //   return Product(
-  //     id: data['id']?.toString(),
-  //     title: data['name'] ?? '',
-  //     imagePath: data['image_url'] ?? 'assets/placeholder.png',
-  //     description: data['description'] ?? '',
-  //     price: (data['price'] as num?)?.toInt() ?? 0,
-  //     category: data['category'],
-  //     stock: data['stock_quantity'],
-  //     isActive: data['is_active'],
-  //     createdAt: data['created_at'] != null
-  //         ? DateTime.parse(data['created_at'])
-  //         : null,
-  //     sellerId: data['seller_id'] is Map
-  //         ? data['seller_id']['id']?.toString()
-  //         : data['seller_id']?.toString(),
-  //     storeName: data['seller_id'] is Map
-  //         ? data['seller_id']['store_name']
-  //         : null,
-  //     quantity: 1,
-      
-  //   );
-    
-  // }
-
   factory Product.fromDatabase(Map<String, dynamic> data) {
   print('RAW PRODUCT DATA: $data');
 
@@ -75,7 +46,7 @@ class Product {
         ? DateTime.parse(data['created_at'])
         : null,
     sellerId: data['seller_id'],
-    storeName: data['seller_store_name'], // ini ambil dari VIEW
+    storeName: data['seller_store_name'],
     quantity: 1,
   );
 }

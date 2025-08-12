@@ -1,7 +1,7 @@
 // File: pages/edit_profile_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_web/controllers/edit_profile_controller.dart';
-import 'package:flutter_web/pages/profile/edit_profile_page_ui.dart';
+import 'package:flutter_web/pages/account/EditProfil/edit_profile_page_ui.dart';
 import 'package:get/get.dart';
 
 class EditProfilePage extends StatefulWidget {

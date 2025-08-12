@@ -19,8 +19,6 @@ class AddressService {
       'kode_pos': address.kodepos,
       'detail': address.detail,
       'is_active': true,
-      // Anda bisa tambahkan 'provinsi_id', 'kota_id', 'kecamatan_id' di sini
-      // untuk mempermudah saat edit
     };
 
     try {

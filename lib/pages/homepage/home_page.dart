@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_web/controllers/scroll_controller.dart';
-import 'package:flutter_web/pages/profile/profile_page.dart';
+import 'package:flutter_web/pages/account/profile_page.dart';
 import 'package:flutter_web/pages/shop/shops.dart';
 import 'package:get/get.dart';
 // import 'package:flutter_web/services/product_service.dart';

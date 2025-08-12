@@ -32,7 +32,7 @@ class EditProfileController extends GetxController {
   Uint8List? tempImageBytes;
   bool removeImageFlag = false;
 
-  // 🔒 Tambahan untuk ubah password
+  // Tambahan untuk ubah password
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
   final RxnString passwordError = RxnString();
@@ -202,7 +202,7 @@ class EditProfileController extends GetxController {
       changes.add("foto profil");
     }
 
-    // ✅ Reset flag
+    // Reset flag
     initialName = currentName.value;
     initialEmail = currentEmail.value;
     initialPhone = currentPhone.value;
@@ -213,65 +213,65 @@ class EditProfileController extends GetxController {
     return changes;
   }
 
-  // 🔒 Fungsi untuk mengganti kata sandi
-Future<bool> changePassword() async {
-  final oldPassword = passwordLamaController.text.trim();
-  final newPassword = passwordController.text.trim();
-  final confirm = confirmPasswordController.text.trim();
+  // Fungsi untuk mengganti kata sandi
+  Future<bool> changePassword() async {
+    final oldPassword = passwordLamaController.text.trim();
+    final newPassword = passwordController.text.trim();
+    final confirm = confirmPasswordController.text.trim();
 
-  passwordError.value = null;
+    passwordError.value = null;
 
-  if (oldPassword.isEmpty || newPassword.isEmpty || confirm.isEmpty) {
-    passwordError.value = "Semua kolom harus diisi.";
-    return false;
-  }
-
-  if (newPassword == oldPassword) {
-    passwordError.value = "Password baru tidak boleh sama dengan yang lama.";
-    return false;
-  }
-
-  if (newPassword.length < 6) {
-    passwordError.value = "Password baru minimal 6 karakter.";
-    return false;
-  }
-
-  if (newPassword != confirm) {
-    passwordError.value = "Konfirmasi password tidak cocok.";
-    return false;
-  }
-
-  try {
-    final authController = Get.find<AuthController>();
-    final user = authController.currentUser.value;
-
-    if (user == null || user.email == null) {
-      passwordError.value = "Sesi pengguna tidak ditemukan.";
+    if (oldPassword.isEmpty || newPassword.isEmpty || confirm.isEmpty) {
+      passwordError.value = "Semua kolom harus diisi.";
       return false;
     }
 
-    final response = await Supabase.instance.client.auth.signInWithPassword(
-      email: user.email!,
-      password: oldPassword,
-    );
-
-    if (response.user == null) {
-      passwordError.value = "Password lama salah.";
+    if (newPassword == oldPassword) {
+      passwordError.value = "Password baru tidak boleh sama dengan yang lama.";
       return false;
     }
 
-    await authController.updatePassword(newPassword);
+    if (newPassword.length < 6) {
+      passwordError.value = "Password baru minimal 6 karakter.";
+      return false;
+    }
 
-    passwordLamaController.clear();
-    passwordController.clear();
-    confirmPasswordController.clear();
-    Get.snackbar("Berhasil", "Kata sandi berhasil diperbarui");
+    if (newPassword != confirm) {
+      passwordError.value = "Konfirmasi password tidak cocok.";
+      return false;
+    }
 
-    return true;
-  } catch (e) {
-    passwordError.value = "Gagal mengganti kata sandi.";
-    Get.snackbar("Error", e.toString().replaceFirst("Exception: ", ""));
-    return false;
+    try {
+      final authController = Get.find<AuthController>();
+      final user = authController.currentUser.value;
+
+      if (user == null || user.email == null) {
+        passwordError.value = "Sesi pengguna tidak ditemukan.";
+        return false;
+      }
+
+      final response = await Supabase.instance.client.auth.signInWithPassword(
+        email: user.email!,
+        password: oldPassword,
+      );
+
+      if (response.user == null) {
+        passwordError.value = "Password lama salah.";
+        return false;
+      }
+
+      await authController.updatePassword(newPassword);
+
+      passwordLamaController.clear();
+      passwordController.clear();
+      confirmPasswordController.clear();
+      Get.snackbar("Berhasil", "Kata sandi berhasil diperbarui");
+
+      return true;
+    } catch (e) {
+      passwordError.value = "Gagal mengganti kata sandi.";
+      Get.snackbar("Error", e.toString().replaceFirst("Exception: ", ""));
+      return false;
+    }
   }
-}
 }

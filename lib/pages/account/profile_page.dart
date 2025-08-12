@@ -1,6 +1,6 @@
 import 'package:flutter_svg/svg.dart';
 
-import 'edit_profil_page.dart';
+import 'EditProfil/edit_profil_page.dart';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -9,9 +9,9 @@ import 'package:flutter_web/controllers/auth_controller.dart';
 import 'package:flutter_web/controllers/favorite_controller.dart';
 import 'package:flutter_web/controllers/profile_image_controller.dart';
 import 'package:flutter_web/pages/auth/auth_dialog.dart';
-import 'package:flutter_web/pages/favorite/favorite_page.dart';
-import 'package:flutter_web/pages/history/history.dart';
-import 'package:flutter_web/pages/profile/address_page.dart';
+import 'package:flutter_web/pages/account/favorite/favorite_page.dart';
+import 'package:flutter_web/pages/account/history/history.dart';
+import 'package:flutter_web/pages/account/address_page.dart';
 import 'package:flutter_web/pages/shop/shops.dart';
 import 'package:flutter_web/pages/shoppingcart/cart.dart';
 import 'package:flutter_web/services/cart_service.dart';

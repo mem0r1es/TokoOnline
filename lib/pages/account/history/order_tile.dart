@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_web/extensions/extension.dart';
 import 'package:flutter_web/models/order_history_item.dart';
-import 'package:flutter_web/pages/history/order_detail.dart';
+import 'package:flutter_web/pages/account/history/order_detail.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 

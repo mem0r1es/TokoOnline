@@ -28,7 +28,6 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  // final String initialRoute;
   const MyApp({super.key});
 
   @override
