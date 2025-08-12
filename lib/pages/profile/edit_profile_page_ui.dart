@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_web/controllers/edit_profile_controller.dart';
 import 'package:flutter_web/controllers/profile_image_controller.dart';
-import 'package:flutter_web/controllers/auth_controller.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -89,94 +88,78 @@ class EditProfilePageUI {
   }
 
   static void _showPasswordChangeDialog(BuildContext context) {
-    final oldPasswordController = TextEditingController();
-    final newPasswordController = TextEditingController();
-    final confirmPasswordController = TextEditingController();
-
+    final controller = Get.find<EditProfileController>();
     final obscureOld = true.obs;
     final obscureNew = true.obs;
     final obscureConfirm = true.obs;
 
     Get.dialog(
-      AlertDialog(
-        title: const Text("Ganti Kata Sandi"),
-        content: Obx(() => SingleChildScrollView(
+      Obx(() => AlertDialog(
+            title: const Text("Ganti Kata Sandi"),
+            content: SingleChildScrollView(
               child: Column(
                 children: [
                   TextField(
-                    controller: oldPasswordController,
+                    controller: controller.passwordLamaController,
                     obscureText: obscureOld.value,
                     decoration: InputDecoration(
                       labelText: "Kata sandi lama",
+                      errorText: controller.passwordError.value == "Password lama salah."
+                          ? controller.passwordError.value
+                          : null,
                       suffixIcon: IconButton(
-                        icon: Icon(
-                          obscureOld.value ? Icons.visibility_off : Icons.visibility,
-                        ),
+                        icon: Icon(obscureOld.value ? Icons.visibility_off : Icons.visibility),
                         onPressed: () => obscureOld.toggle(),
                       ),
                     ),
                   ),
                   const SizedBox(height: 12),
                   TextField(
-                    controller: newPasswordController,
+                    controller: controller.passwordController,
                     obscureText: obscureNew.value,
                     decoration: InputDecoration(
                       labelText: "Kata sandi baru",
+                      errorText: controller.passwordError.value == "Password baru tidak boleh sama dengan yang lama." ||
+                              controller.passwordError.value == "Password baru minimal 6 karakter."
+                          ? controller.passwordError.value
+                          : null,
                       suffixIcon: IconButton(
-                        icon: Icon(
-                          obscureNew.value ? Icons.visibility_off : Icons.visibility,
-                        ),
+                        icon: Icon(obscureNew.value ? Icons.visibility_off : Icons.visibility),
                         onPressed: () => obscureNew.toggle(),
                       ),
                     ),
                   ),
                   const SizedBox(height: 12),
                   TextField(
-                    controller: confirmPasswordController,
+                    controller: controller.confirmPasswordController,
                     obscureText: obscureConfirm.value,
                     decoration: InputDecoration(
                       labelText: "Konfirmasi kata sandi",
+                      errorText: controller.passwordError.value == "Konfirmasi password tidak cocok."
+                          ? controller.passwordError.value
+                          : null,
                       suffixIcon: IconButton(
-                        icon: Icon(
-                          obscureConfirm.value ? Icons.visibility_off : Icons.visibility,
-                        ),
+                        icon: Icon(obscureConfirm.value ? Icons.visibility_off : Icons.visibility),
                         onPressed: () => obscureConfirm.toggle(),
                       ),
                     ),
                   ),
                 ],
               ),
-            )),
+            ),
         actions: [
           TextButton(onPressed: () => Get.back(), child: const Text("Batal")),
           ElevatedButton(
             onPressed: () async {
-              final oldPass = oldPasswordController.text.trim();
-              final newPass = newPasswordController.text.trim();
-              final confirmPass = confirmPasswordController.text.trim();
-
-              if (newPass != confirmPass) {
-                Get.snackbar("Error", "Konfirmasi kata sandi tidak cocok");
-                return;
-              }
-
-              if (newPass.length < 6) {
-                Get.snackbar("Error", "Kata sandi minimal 6 karakter");
-                return;
-              }
-
-              try {
-                await Get.find<AuthController>().changePassword(oldPass, newPass);
-                Get.back();
-                Get.snackbar("Berhasil", "Kata sandi berhasil diubah");
-              } catch (e) {
-                Get.snackbar("Error", "Gagal mengubah kata sandi");
+              final success = await controller.changePassword();
+              if (success && context.mounted) {
+                Navigator.of(context).pop(); // ✅ Tutup dialog setelah berhasil
               }
             },
             child: const Text("Simpan"),
           ),
         ],
-      ),
+      )),
     );
   }
 }
@@ -218,42 +201,49 @@ class _ProfileImageSection extends StatelessWidget {
                         : null,
                   ),
             const SizedBox(width: 16),
-            OutlinedButton.icon(
-              onPressed: controller.pickImageTemporarily,
-              icon: const Icon(Icons.edit, size: 18, color: Colors.green),
-              label: Text(
-                (!hasTempImage && !hasNetworkImage) ? "Tambah Foto" : "Ubah Foto",
-                style: GoogleFonts.montserrat(
-                  color: Colors.green,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Colors.green),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              ),
-            ),
-            const SizedBox(width: 8),
-            if (hasTempImage || hasNetworkImage)
-              OutlinedButton.icon(
-                onPressed: () => _showDeleteConfirmation(context, controller),
-                icon: const Icon(Icons.delete, size: 18, color: Colors.red),
-                label: Text(
-                  "Hapus Foto",
-                  style: GoogleFonts.montserrat(
-                    color: Colors.red,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: controller.pickImageTemporarily,
+                  icon: const Icon(Icons.edit, size: 18, color: Colors.green),
+                  label: Text(
+                    (!hasTempImage && !hasNetworkImage) ? "Tambah Foto" : "Ubah Foto",
+                    style: GoogleFonts.montserrat(
+                      color: Colors.green,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.green),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   ),
                 ),
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Colors.red),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                ),
-              ),
+                const SizedBox(height: 8),
+                if (hasTempImage || hasNetworkImage)
+                  OutlinedButton.icon(
+                    onPressed: () => _showDeleteConfirmation(context, controller),
+                    icon: const Icon(Icons.delete, size: 18, color: Colors.red),
+                    label: Text(
+                      "Hapus Foto",
+                      style: GoogleFonts.montserrat(
+                        color: Colors.red,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.red),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    ),
+                  ),
+              ],
+            )
+
           ],
         ),
         const SizedBox(height: 8),

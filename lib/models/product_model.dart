@@ -145,8 +145,8 @@ class Product {
       stock: stock ?? this.stock,
       isActive: isActive ?? this.isActive,
       createdAt: createdAt,
-      sellerId: sellerId ?? this.sellerId,
-      storeName: storeName ?? this.storeName,
+      sellerId: sellerId ?? sellerId,
+      storeName: storeName ?? storeName,
       quantity: quantity ?? this.quantity,
     );
   }

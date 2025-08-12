@@ -84,9 +84,6 @@ class SearchController extends GetxController {
         colorText: Colors.white,
       );
     }
-    void clearSearchInput (){
-      searchInputController.clear();
-    }
   }
   @override
   void onClose() {

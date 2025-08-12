@@ -1,33 +1,71 @@
-// File: services/profile_service.dart
-import 'package:flutter_web/models/profile_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:get/get.dart';
-import 'package:flutter_web/controllers/auth_controller.dart';
+import '../models/info_user.dart';
 
-class ProfileService {
+class AddressService {
   final supabase = Supabase.instance.client;
-
-  Future<void> updateUserProfile({String? name, String? email, String? phone}) async {
+  
+  Future<void> saveAddress(InfoUser address) async {
     final user = supabase.auth.currentUser;
-    if (user == null) throw Exception("User belum login");
+    final userEmail = user?.email ?? '';
 
-    final updates = <String, dynamic>{};
-    if (name != null) updates['full_name'] = name; // gunakan full_name
-    if (email != null) updates['email'] = email;
-    if (phone != null) updates['phone'] = phone;
+    final addressData = {
+      'full_name': address.fullName,
+      'email': userEmail,
+      'phone': address.phone,
+      'address': address.address,
+      'provinsi': address.provinsi,
+      'kota': address.kota,
+      'kecamatan': address.kecamatan,
+      'kode_pos': address.kodepos,
+      'detail': address.detail,
+      'is_active': true,
+      // Anda bisa tambahkan 'provinsi_id', 'kota_id', 'kecamatan_id' di sini
+      // untuk mempermudah saat edit
+    };
 
-    if (updates.isNotEmpty) {
-      await supabase.from('profiles').update(updates).eq('id', user.id);
-      await _refreshProfile();
+    try {
+      if (address.id != null) {
+        await supabase
+            .from('addresses')
+            .update(addressData)
+            .eq('id', address.id!);
+        print('Address updated: ${address.id}');
+      } else {
+        await supabase.from('addresses').insert(addressData);
+        print('Address inserted for $userEmail');
+      }
+    } catch (e) {
+      print('Failed to save or update address: $e');
     }
   }
 
-  Future<void> _refreshProfile() async {
-    final authController = Get.find<AuthController>();
+  Future<List<InfoUser>> fetchAddresses() async {
     final user = supabase.auth.currentUser;
-    if (user == null) return;
+    final userEmail = user?.email?.trim().toLowerCase() ?? '';
 
-    final result = await supabase.from('profiles').select().eq('id', user.id).single();
-    authController.userProfile.value = ProfilModel.fromMap(result);
+    try {
+      final response = await supabase
+          .from('addresses')
+          .select('*')
+          .eq('email', userEmail)
+          .eq('is_active', true);
+
+      return response.map<InfoUser>((data) => InfoUser.fromDatabase(data)).toList();
+    } catch (e) {
+      print('Failed to fetch addresses: $e');
+      return [];
+    }
+  }
+
+  Future<void> deactivateAddress(String id) async {
+    try {
+      await supabase
+          .from('addresses')
+          .update({'is_active': false})
+          .eq('id', id);
+      print('Address $id deactivated');
+    } catch (e) {
+      print('Failed to deactivate address: $e');
+    }
   }
 }

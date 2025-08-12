@@ -1,7 +1,15 @@
+import 'package:flutter_svg/svg.dart';
+
 import 'edit_profil_page.dart';
+import 'dart:typed_data';
+
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web/controllers/auth_controller.dart';
 import 'package:flutter_web/controllers/favorite_controller.dart';
+import 'package:flutter_web/controllers/profile_image_controller.dart';
+import 'package:flutter_web/models/order_history_item.dart';
 import 'package:flutter_web/pages/auth/auth_dialog.dart';
 import 'package:flutter_web/pages/favorite/favorite_page.dart';
 import 'package:flutter_web/pages/history/history.dart';
@@ -12,6 +20,8 @@ import 'package:flutter_web/pages/shoppingcart/cart.dart';
 import 'package:flutter_web/services/cart_service.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_web/services/profile_image_service.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ProfilePage extends GetView<AuthController> {
   static final String TAG = '/profile';
@@ -452,3 +462,88 @@ const String cameraIcon = '''
   <path d="M20 21H4C2.89543 21 2 20.1046 2 19V7C2 5.89543 2.89543 5 4 5H7L9 3H15L17 5H20C21.1046 5 22 5.89543 22 7V19C22 20.1046 21.1046 21 20 21Z" stroke="#000" stroke-width="2"/>
 </svg>
 ''';
+
+class ProfilePic extends StatelessWidget {
+  ProfilePic({super.key});
+
+  final ProfileImageController controller =
+      Get.put(ProfileImageController(), permanent: true); 
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final imageProvider = controller.profileImageUrl.value.isNotEmpty
+          ? NetworkImage(controller.profileImageUrl.value)
+          : const AssetImage('assets/default_profile.png') as ImageProvider;
+
+      return SizedBox(
+        height: 115,
+        width: 115,
+        child: Stack(
+          fit: StackFit.expand,
+          clipBehavior: Clip.none,
+          children: [
+            CircleAvatar(
+              backgroundImage: imageProvider,
+              backgroundColor: Colors.grey[200],
+            ),
+            if (controller.isLoading.value)
+              const Center(child: CircularProgressIndicator()),
+            Positioned(
+              right: -10,
+              bottom: 0,
+              child: SizedBox(
+                height: 46,
+                width: 46,
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: const Color(0xFFF5F6F9),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50),
+                      side: const BorderSide(color: Colors.white),
+                    ),
+                  ),
+                  onPressed: () async {
+                    Uint8List? imageBytes;
+
+                    if (kIsWeb) {
+                      final result = await FilePicker.platform.pickFiles(
+                        type: FileType.image,
+                        withData: true,
+                      );
+                      if (result != null && result.files.first.bytes != null) {
+                        imageBytes = result.files.first.bytes!;
+                      }
+                    } else {
+                      final picker = ImagePicker();
+                      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+                      if (pickedFile != null) {
+                        imageBytes = await pickedFile.readAsBytes();
+                      }
+                    }
+
+                    if (imageBytes != null) {
+                      await controller.updateProfileImage(imageBytes);
+                      if (Get.isSnackbarOpen) {
+                        await Future.delayed(const Duration(seconds: 2));
+                      }
+                    } else {
+                      Get.snackbar(
+                        'Batal',
+                        'Tidak ada gambar yang dipilih',
+                        duration: const Duration(seconds: 2),
+                      );
+                    }
+                  },
+                  child: SvgPicture.string(cameraIcon),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+}
+

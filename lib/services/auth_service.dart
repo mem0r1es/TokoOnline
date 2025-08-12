@@ -199,4 +199,6 @@ class AuthService extends GetxService {
   }
 
   Session? get currentSession => supabase.auth.currentSession;
+
+  getUserEmail() {}
 }

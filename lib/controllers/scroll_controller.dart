@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web/services/scroll_controller_manager.dart';
 import 'package:get/get.dart';
-import '../utils/web_storage.dart';
-import '../services/scroll_controller_manager.dart'; // tetap dipakai jika kamu butuh scrollManager
+import 'package:universal_html/html.dart' as html; // Pakai universal_html untuk kompatibilitas multi-platform
 
 class CustomScrollController extends GetxController {
   final String scrollKey = 'home_scroll';
@@ -12,15 +12,31 @@ class CustomScrollController extends GetxController {
 
   void changePage(int index) {
     selectedIndex.value = index;
-    saveSelectedIndex(index); // ✅ gunakan helper cross-platform
+    if (GetPlatform.isWeb) {
+      // Hanya dijalankan di web
+      html.window.localStorage['selectedIndex'] = index.toString();
+    } else {
+      // Untuk mobile, simpan menggunakan GetStorage atau SharedPreferences
+      // Contoh dengan GetStorage:
+      // GetStorage().write('selectedIndex', index);
+    }
   }
 
   @override
   void onInit() {
     super.onInit();
-
-    selectedIndex.value = loadSelectedIndex() ?? 0; // ✅ gunakan helper cross-platform
-
+    if (GetPlatform.isWeb) {
+      // Hanya dijalankan di web
+      final savedIndex = html.window.localStorage['selectedIndex'];
+      if (savedIndex != null) {
+        selectedIndex.value = int.tryParse(savedIndex) ?? 0;
+      }
+    } else {
+      // Untuk mobile, baca dari GetStorage atau SharedPreferences
+      // Contoh dengan GetStorage:
+      // selectedIndex.value = GetStorage().read('selectedIndex') ?? 0;
+    }
+    
     scrollController = ScrollController(
       initialScrollOffset: scrollManager.getOffset(scrollKey),
     );

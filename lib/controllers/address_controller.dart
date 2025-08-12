@@ -47,6 +47,28 @@ class AddressController extends GetxController {
     fetchAddresses();
   }
 
+  // In your AddressController
+Future<List<Map<String, dynamic>>> fetchProvinces() async {
+  final response = await supabase.from('provinces').select('*');
+  return response;
+}
+
+Future<List<Map<String, dynamic>>> fetchRegencies(String provinceId) async {
+  final response = await supabase
+      .from('regencies')
+      .select('*')
+      .eq('province_id', provinceId);
+  return response;
+}
+
+Future<List<Map<String, dynamic>>> fetchDistricts(String regencyId) async {
+  final response = await supabase
+      .from('districts')
+      .select('*')
+      .eq('regency_id', regencyId);
+  return response;
+}
+
   Future<void> deactivateAddress(String id) async {
     await _addressService.deactivateAddress(id);
     fetchAddresses();

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_web/binding.dart';
+import 'package:flutter_web/routers/get_router.dart';
 import 'package:flutter_web/controllers/scroll_controller.dart';
 import 'package:flutter_web/routers/get_router.dart';
 import 'package:flutter_web/services/scroll_controller_manager.dart';
@@ -10,6 +11,8 @@ import 'pages/homepage/home_page.dart';
 import 'package:url_strategy/url_strategy.dart';  
 
 void main() async {
+  Get.put(ScrollControllerManager()); // ← jika pakai manual, atau pakai Get.lazyPut
+  Get.put(CustomScrollController());
   WidgetsFlutterBinding.ensureInitialized();
 
   setPathUrlStrategy();

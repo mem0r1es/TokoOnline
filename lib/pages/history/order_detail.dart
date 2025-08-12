@@ -18,7 +18,7 @@ class OrderDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final info = order.infoUser.isNotEmpty ? order.infoUser.first : InfoUser();
+    final info = order.infoUser.isNotEmpty ? order.infoUser.first : InfoUser(provinsiId: '', kecamatanId: '', kotaId: '');
 
     final formattedTime = DateFormat('dd MMM yyyy • HH:mm').format(order.timestamp);
 
@@ -58,7 +58,7 @@ class OrderDetailPage extends StatelessWidget {
                     
                     // tileColor: Colors.orange[100],
                     title: Text(
-                      '${order.capitalizedStatus}',
+                      order.capitalizedStatus,
                       style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
                     ),
                     // subtitle: Text(
@@ -76,7 +76,7 @@ class OrderDetailPage extends StatelessWidget {
                       style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
                     ),
                     subtitle: Text(
-                      '${DateFormat('dd MMM yyyy, HH:mm').format(order.estimatedArrival!)}'
+                      DateFormat('dd MMM yyyy, HH:mm').format(order.estimatedArrival!)
                     ),
                   ),
                   const SizedBox(height: 1,),
@@ -229,7 +229,7 @@ class OrderDetailPage extends StatelessWidget {
                       style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      '${order.paymentMethod}',
+                      order.paymentMethod,
                       style: GoogleFonts.poppins(fontSize: 14),
                     ),
                   ],
@@ -243,20 +243,6 @@ class OrderDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _sectionTitle(String text) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        text,
-        style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
-      ),
-    );
-  }
 
   Widget _orderSummarySection() {
   return ListTile(

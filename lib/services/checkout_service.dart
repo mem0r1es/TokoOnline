@@ -217,7 +217,7 @@ Future<void> loadOrderHistoryFromSupabase(String email) async {
           email: entry.value.first['email'],
           phone: entry.value.first['phone'],
           address: entry.value.first['address'],
-          timestamp: DateTime.tryParse(entry.key),
+          timestamp: DateTime.tryParse(entry.key), provinsiId: '', kecamatanId: '', kotaId: '',
         );
 
         orderHistory.add(OrderHistoryItem(

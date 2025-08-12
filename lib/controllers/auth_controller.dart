@@ -77,7 +77,7 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> login(String email, String password) async {
+  Future<bool> login(String email, String password) async {
     try {
       final response = await _authService.signIn(email, password);
       final user = response?.user;
@@ -87,9 +87,12 @@ class AuthController extends GetxController {
         currentUser.value = user;
         await _ensureUserProfileExists();
         await fetchUserProfile();
+        Get.back(); // ← Kembali ke halaman sebelumnya
       }
+      return false; // ← Login gagal
     } catch (e) {
       _showError(e);
+      return false;
     }
   }
 

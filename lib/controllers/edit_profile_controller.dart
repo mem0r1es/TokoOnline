@@ -5,6 +5,7 @@ import 'package:flutter_web/controllers/profile_image_controller.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_web/controllers/auth_controller.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class EditProfileController extends GetxController {
   final isChanged = false.obs;
@@ -15,6 +16,8 @@ class EditProfileController extends GetxController {
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final phoneController = TextEditingController();
+  final passwordLamaController = TextEditingController(); // 🔒 Password lama
+
 
   late RxString currentName;
   late RxString currentEmail;
@@ -211,34 +214,64 @@ class EditProfileController extends GetxController {
   }
 
   // 🔒 Fungsi untuk mengganti kata sandi
-  Future<void> changePassword() async {
-    final password = passwordController.text.trim();
-    final confirm = confirmPasswordController.text.trim();
+Future<bool> changePassword() async {
+  final oldPassword = passwordLamaController.text.trim();
+  final newPassword = passwordController.text.trim();
+  final confirm = confirmPasswordController.text.trim();
 
-    if (password.isEmpty || confirm.isEmpty) {
-      passwordError.value = "Password tidak boleh kosong.";
-      return;
-    }
+  passwordError.value = null;
 
-    if (password.length < 6) {
-      passwordError.value = "Password minimal 6 karakter.";
-      return;
-    }
-
-    if (password != confirm) {
-      passwordError.value = "Konfirmasi password tidak cocok.";
-      return;
-    }
-
-    try {
-      passwordError.value = null;
-      final authController = Get.find<AuthController>();
-      await authController.updatePassword(password);
-      Get.snackbar("Berhasil", "Kata sandi berhasil diperbarui");
-      passwordController.clear();
-      confirmPasswordController.clear();
-    } catch (e) {
-      Get.snackbar("Error", "Gagal mengganti kata sandi");
-    }
+  if (oldPassword.isEmpty || newPassword.isEmpty || confirm.isEmpty) {
+    passwordError.value = "Semua kolom harus diisi.";
+    return false;
   }
+
+  if (newPassword == oldPassword) {
+    passwordError.value = "Password baru tidak boleh sama dengan yang lama.";
+    return false;
+  }
+
+  if (newPassword.length < 6) {
+    passwordError.value = "Password baru minimal 6 karakter.";
+    return false;
+  }
+
+  if (newPassword != confirm) {
+    passwordError.value = "Konfirmasi password tidak cocok.";
+    return false;
+  }
+
+  try {
+    final authController = Get.find<AuthController>();
+    final user = authController.currentUser.value;
+
+    if (user == null || user.email == null) {
+      passwordError.value = "Sesi pengguna tidak ditemukan.";
+      return false;
+    }
+
+    final response = await Supabase.instance.client.auth.signInWithPassword(
+      email: user.email!,
+      password: oldPassword,
+    );
+
+    if (response.user == null) {
+      passwordError.value = "Password lama salah.";
+      return false;
+    }
+
+    await authController.updatePassword(newPassword);
+
+    passwordLamaController.clear();
+    passwordController.clear();
+    confirmPasswordController.clear();
+    Get.snackbar("Berhasil", "Kata sandi berhasil diperbarui");
+
+    return true;
+  } catch (e) {
+    passwordError.value = "Gagal mengganti kata sandi.";
+    Get.snackbar("Error", e.toString().replaceFirst("Exception: ", ""));
+    return false;
+  }
+}
 }

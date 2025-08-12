@@ -24,7 +24,7 @@ class _OrderTileState extends State<OrderTile> {
   @override
   Widget build(BuildContext context) {
     final order = widget.order;
-    final formattedTime = DateFormat('dd MMM yyyy • HH:mm').format(order.timestamp);
+    DateFormat('dd MMM yyyy • HH:mm').format(order.timestamp);
 
     // Tampilkan hanya item pertama kalau belum expand
     final itemsToDisplay = _showAll ? order.items : [order.items.first];
@@ -46,7 +46,7 @@ class _OrderTileState extends State<OrderTile> {
                 ),
               ),
               Text(
-                '${order.capitalizedStatus}',
+                order.capitalizedStatus,
                 style: context.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Colors.purple,
@@ -162,7 +162,7 @@ class _OrderTileState extends State<OrderTile> {
 double _getTotalWithOngkir(OrderHistoryItem order) {
   final totalProduk = order.items.fold<double>(
     0.0,
-    (sum, item) => sum + (item.totalPrice ?? 0),
+    (sum, item) => sum + (item.totalPrice),
   );
   return totalProduk + (order.ongkir ?? 0);
 }
