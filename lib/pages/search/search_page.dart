@@ -3,8 +3,8 @@ import 'package:flutter_web/controllers/favorite_controller.dart';
 // import 'package:flutter_web/controllers/page_controller.dart';
 import 'package:flutter_web/controllers/auth_controller.dart';
 import 'package:flutter_web/controllers/product_controller.dart';
-import 'package:flutter_web/models/cart_item.dart';
-import 'package:flutter_web/pages/auth/auth_dialog.dart';
+// import 'package:flutter_web/models/cart_item.dart';
+// import 'package:flutter_web/pages/auth/auth_dialog.dart';
 import 'package:flutter_web/pages/shop/product_dialog.dart';
 import 'package:flutter_web/services/cart_service.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -167,7 +167,7 @@ class SearchResultPage extends GetView<FavoriteController> {
     AuthController authController,
   ) {
 
-    String productId = product.id ?? product.title;
+    // String productId = product.id ?? product.title;
   
     return SizedBox(
       width: 280,
@@ -312,72 +312,72 @@ class SearchResultPage extends GetView<FavoriteController> {
     );
   }
 
-  void _showAuthDialog() {
-    Get.dialog(AuthDialog());
-  }
+  // void _showAuthDialog() {
+  //   Get.dialog(AuthDialog());
+  // }
 
-  void _handleAddToCart(
-    Product product,
-    String productId,
-    CartService cartService,
-    AuthController authController,
-  ) {
-    if (!authController.isLoggedIn.value) {
-      _showAuthDialog();
-      Get.snackbar(
-        "Login Required",
-        "Please login first to add products to cart",
-        backgroundColor: Colors.orange,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-        icon: Icon(Icons.login, color: Colors.white),
-      );
-      return;
-    }
+  // void _handleAddToCart(
+  //   Product product,
+  //   String productId,
+  //   CartService cartService,
+  //   AuthController authController,
+  // ) {
+  //   if (!authController.isLoggedIn.value) {
+  //     _showAuthDialog();
+  //     Get.snackbar(
+  //       "Login Required",
+  //       "Please login first to add products to cart",
+  //       backgroundColor: Colors.orange,
+  //       colorText: Colors.white,
+  //       snackPosition: SnackPosition.BOTTOM,
+  //       icon: Icon(Icons.login, color: Colors.white),
+  //     );
+  //     return;
+  //   }
 
-    // Check stock
-    if (product.stock != null && product.stock! <= 0) {
-      Get.snackbar(
-        "Out of Stock",
-        "${product.title} is currently out of stock",
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-        icon: Icon(Icons.inventory_2, color: Colors.white),
-      );
-      return;
-    }
+  //   // Check stock
+  //   if (product.stock != null && product.stock! <= 0) {
+  //     Get.snackbar(
+  //       "Out of Stock",
+  //       "${product.title} is currently out of stock",
+  //       backgroundColor: Colors.red,
+  //       colorText: Colors.white,
+  //       snackPosition: SnackPosition.BOTTOM,
+  //       icon: Icon(Icons.inventory_2, color: Colors.white),
+  //     );
+  //     return;
+  //   }
 
-    // Add to cart
-    cartService.addItem(CartItem(
-      id: productId,
-      name: product.title,
-      price: product.price.toDouble(),
-      imageUrl: product.imagePath,
-      quantity: 1, // Default quantity is 1
-      seller: product.storeName ?? 'Toko tidak diketahui',
-      ),
-    );
-  }
+  //   // Add to cart
+  //   cartService.addItem(CartItem(
+  //     id: productId,
+  //     name: product.title,
+  //     price: product.price.toDouble(),
+  //     imageUrl: product.imagePath,
+  //     quantity: 1, // Default quantity is 1
+  //     seller: product.storeName ?? 'Toko tidak diketahui',
+  //     ),
+  //   );
+  // }
 
-  void _handleFavorite(Product product) {
-    controller.toggleFavorite(product);
+  // void _handleFavorite(Product product) {
+  //   controller.toggleFavorite(product);
 
-    Get.snackbar(
-      "Favorites",
-      controller.isFavorite(product)
-          ? "${product.title} added to favorites"
-          : "${product.title} removed from favorites",
-      backgroundColor: controller.isFavorite(product) ? Colors.red : Colors.grey,
-      colorText: Colors.white,
-      snackPosition: SnackPosition.BOTTOM,
-      duration: Duration(seconds: 2),
-      icon: Icon(
-        controller.isFavorite(product) ? Icons.favorite : Icons.favorite_border,
-        color: Colors.white,
-      ),
-    );
-  }
+  //   Get.snackbar(
+  //     "Favorites",
+  //     controller.isFavorite(product)
+  //         ? "${product.title} added to favorites"
+  //         : "${product.title} removed from favorites",
+  //     backgroundColor: controller.isFavorite(product) ? Colors.red : Colors.grey,
+  //     colorText: Colors.white,
+  //     snackPosition: SnackPosition.BOTTOM,
+  //     duration: Duration(seconds: 2),
+  //     icon: Icon(
+  //       controller.isFavorite(product) ? Icons.favorite : Icons.favorite_border,
+  //       color: Colors.white,
+  //     ),
+  //   );
+  // }
 
   factory SearchResultPage.fromArguments() {
   final args = Get.arguments as Map<String, dynamic>;

@@ -47,7 +47,7 @@ class CheckoutPage extends GetView<CheckoutController> {
     );
     final groupedItems = <String, List<CartItem>>{};
     for (final item in itemsToCheckout) {
-      final seller = item.seller ?? 'Toko Tidak Diketahui';
+      final seller = item.seller;
       groupedItems.putIfAbsent(seller, () => []).add(item);
     }
 
@@ -263,7 +263,7 @@ DateTime calculateEstimasiTiba(String kategori) {
                               style: GoogleFonts.poppins(fontSize: 14),
                             ),
                             Text(
-                              'Rp ${_rupiah((ongkir ?? 0).toDouble())}',
+                              'Rp ${_rupiah((ongkir).toDouble())}',
                               style: context.labelLarge,
                             ),
                           ],
@@ -366,7 +366,7 @@ DateTime calculateEstimasiTiba(String kategori) {
                           ),
                         ),
                         Text(
-                          'Rp${_rupiah((ongkir ?? 0).toDouble())}',
+                          'Rp${_rupiah((ongkir).toDouble())}',
                         ),
                       ],
                     ),

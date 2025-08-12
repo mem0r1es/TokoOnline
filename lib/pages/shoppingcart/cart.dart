@@ -63,7 +63,7 @@ class CartPages extends StatelessWidget {
 
         final groupedItems = <String, List<CartItem>>{};
         for (final item in cartService.cartItems) {
-          final seller = item.seller ?? 'Toko Tidak Diketahui';
+          final seller = item.seller;
           groupedItems.putIfAbsent(seller, () => []).add(item);
         }
 

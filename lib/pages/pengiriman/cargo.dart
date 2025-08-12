@@ -64,7 +64,7 @@ class _CargoPageState extends State<CargoPage> {
 
         return Obx(() => ListView(
         children: groupedCargo.entries.map((entry) {
-          final kategoriId = entry.key;
+          // final kategoriId = entry.key;
           final cargos = entry.value;
 
                   // Hitung kisaran harga

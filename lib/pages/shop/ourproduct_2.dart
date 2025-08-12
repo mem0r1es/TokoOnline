@@ -3,7 +3,7 @@ import 'package:flutter_web/controllers/auth_controller.dart';
 import 'package:flutter_web/controllers/favorite_controller.dart';
 import 'package:flutter_web/controllers/product_controller.dart';
 import 'package:flutter_web/controllers/scroll_controller.dart';
-import 'package:flutter_web/pages/auth/auth_dialog.dart';
+// import 'package:flutter_web/pages/auth/auth_dialog.dart';
 import 'package:flutter_web/pages/homepage/home_page.dart';
 import 'package:flutter_web/pages/shop/product_dialog.dart';
 import 'package:flutter_web/services/cart_service.dart';

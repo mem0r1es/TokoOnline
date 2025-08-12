@@ -3,7 +3,6 @@ import 'package:flutter_web/controllers/auth_controller.dart';
 import 'package:flutter_web/controllers/favorite_controller.dart';
 import 'package:flutter_web/controllers/product_controller.dart';
 import 'package:flutter_web/controllers/scroll_controller.dart';
-import 'package:flutter_web/pages/auth/auth_dialog.dart';
 import 'package:flutter_web/pages/homepage/home_page.dart';
 import 'package:flutter_web/pages/shop/product_dialog.dart';
 import 'package:flutter_web/services/cart_service.dart';
@@ -24,10 +23,6 @@ class OurProduct extends GetView<ProductController> {
   final authController= Get.find<AuthController>();
   final scrollController = Get.find<CustomScrollController>();
 
-  // final favC = Get.find<FavoriteController>();
-  // final ProductController productController = Get.put(ProductController());
-
-  // final favC = Get.find<FavoriteController>();
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -36,7 +31,6 @@ class OurProduct extends GetView<ProductController> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // int crossAxisCount = (constraints.maxWidth ~/ 250).clamp(1, 4);
         int crossAxisCount = constraints.maxWidth < 600
       ? 2: constraints.maxWidth < 900 ? 3: 4;
 
@@ -212,16 +206,12 @@ class OurProduct extends GetView<ProductController> {
     CartService cartService,
     AuthController authController,
   ) {
-    // Use database ID if available, fallback to title
-    String productId = product.id ?? product.title;
 
     return SizedBox(
       width: 160,
       child: GestureDetector(
         onTap: (){
           Get.toNamed('${ProductDialog.TAG}?id=${product.id}');
-          // Get.toNamed(ProductDialog.TAG, arguments: product);
-          // Get.to(ProductDialog(product: product));
         },
 
         child: Card(
@@ -355,72 +345,6 @@ class OurProduct extends GetView<ProductController> {
             style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[500]),
           ),
         ],
-      ),
-    );
-  }
-
-  void _showAuthDialog() {
-    Get.dialog(AuthDialog());
-  }
-
-  void _handleAddToCart(
-  Product product,
-  String productId,
-  CartService cartService,
-  AuthController authController,
-) async {
-  final currentUser = authController.currentUser.value;
-
-  if (currentUser == null || currentUser.email == null) {
-    _showAuthDialog();
-    Get.snackbar(
-      "Login Required",
-      "Please login first to add products to cart",
-      backgroundColor: Colors.orange,
-      colorText: Colors.white,
-      snackPosition: SnackPosition.BOTTOM,
-      icon: Icon(Icons.login, color: Colors.white),
-    );
-    return;
-  }
-
-  if (product.stock != null && product.stock! <= 0) {
-    Get.snackbar(
-      "Out of Stock",
-      "${product.title} is currently out of stock",
-      backgroundColor: Colors.red,
-      colorText: Colors.white,
-      snackPosition: SnackPosition.BOTTOM,
-      icon: Icon(Icons.inventory_2, color: Colors.white),
-    );
-    return;
-  }
-
-  // cartService.addItem(CartItem(
-  //   id: productId,
-  //   name: product.title,
-  //   price: product.price.toDouble(),
-  //   imageUrl: product.imagePath,
-  // ));
-
-  await cartService.saveCartToSupabase(currentUser.email!);
-}
-
-  void _handleFavorite(Product product) {
-    favC.toggleFavorite(product);
-
-    Get.snackbar(
-      "Favorites",
-      favC.isFavorite(product)
-          ? "${product.title} added to favorites"
-          : "${product.title} removed from favorites",
-      backgroundColor: favC.isFavorite(product) ? Colors.red : Colors.grey,
-      colorText: Colors.white,
-      snackPosition: SnackPosition.BOTTOM,
-      duration: Duration(seconds: 2),
-      icon: Icon(
-        favC.isFavorite(product) ? Icons.favorite : Icons.favorite_border,
-        color: Colors.white,
       ),
     );
   }
