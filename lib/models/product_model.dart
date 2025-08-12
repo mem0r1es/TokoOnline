@@ -74,7 +74,7 @@ class Product {
     createdAt: data['created_at'] != null
         ? DateTime.parse(data['created_at'])
         : null,
-    sellerId: data['seller_id']?.toString(),
+    sellerId: data['seller_id'],
     storeName: data['seller_store_name'], // ini ambil dari VIEW
     quantity: 1,
   );
@@ -92,7 +92,7 @@ class Product {
       'stock_quantity': stock,
       'is_active': isActive ?? true,
       'seller_id': sellerId,
-      'storeName' : storeName,
+      'store_name' : storeName,
     };
   }
 
@@ -101,7 +101,7 @@ class Product {
     title: json['title'],
     price: json['price'],
     imagePath: json['imagePath'],
-    storeName: json['storeName'],
+    storeName: json['store_name'],
     category: json['category'],
     stock: json['stock_quantity'], description: '', sellerId: '',
   );
@@ -119,7 +119,7 @@ class Product {
       'quantity': quantity,
       'subtotal': subtotal,
       'seller_id': sellerId,
-      'storeName' : storeName,
+      'store_name' : storeName,
     };
   }
 

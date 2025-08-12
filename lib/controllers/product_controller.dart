@@ -44,6 +44,7 @@ class ProductController extends GetxController {
     isLoading.value = true;
     final result = await productService.fetchProducts();
     products.value = result;
+    result.shuffle();
     featuredProducts.value = result.take(8).toList();
     categories.value = result.map((p) => p.category ?? 'Uncategorized').toSet().toList();
     isLoading.value = false;

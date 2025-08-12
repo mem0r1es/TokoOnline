@@ -13,7 +13,7 @@ class OrderHistoryItem {
   final String status;
   final DateTime? estimatedArrival;
   final DateTime? updatedAt;
-  final String? kategoriId; // Tambahkan ini jika perlu
+  final String? kategoriId;
   final double? ongkir;
   final int? totalBayar;
 

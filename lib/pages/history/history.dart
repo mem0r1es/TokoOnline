@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_web/controllers/scroll_controller.dart';
+import 'package:flutter_web/models/order_history_item.dart';
 import 'package:flutter_web/pages/history/order_tile.dart';
 import 'package:flutter_web/pages/homepage/home_page.dart';
 import 'package:flutter_web/controllers/address_controller.dart';

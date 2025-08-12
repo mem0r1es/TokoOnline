@@ -23,7 +23,10 @@ class AuthService extends GetxService {
       final response = await supabase.auth.signUp(
         email: email,
         password: password,
-        data: {'full_name': fullName, 'role': 'buyer'},
+        data: {
+          'full_name': fullName, 
+          'role': 'buyer'
+        },
       );
       return response;
     } catch (e) {

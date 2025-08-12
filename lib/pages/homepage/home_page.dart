@@ -17,9 +17,9 @@ import '../contact/contact_page.dart';
 class HomePage extends GetView<CustomScrollController> {
   static final String TAG = '/';
 
-  const HomePage({super.key});
+  HomePage({super.key});
 
-  final List <Widget> _pages = const [
+  final List <Widget> _pages = [
     _HomeContent(),
     // AfterCheckout(),
     ShopsPage(),
@@ -73,7 +73,7 @@ class _HomeContent extends GetView<CustomScrollController>{
           children: [
             const HeaderPages(),
             const Isi(),
-            OurProduct(),
+            OurProduct(productLimit: 3),
         
             const SizedBox(height: 60), // Jarak sebelum footer
         

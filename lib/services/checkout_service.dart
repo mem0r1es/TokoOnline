@@ -2,6 +2,7 @@ import 'package:flutter_web/models/cargo_model.dart';
 import 'package:flutter_web/models/info_user.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 import '../models/order_history_item.dart';
 // import '../models/info_user.dart';
 import '../services/cart_service.dart';
@@ -9,6 +10,7 @@ import '../models/cart_item.dart';
 
 class CheckoutService extends GetxService {
   var orderHistory = <OrderHistoryItem>[].obs;
+  final _uuid = const Uuid();
 
   String? userId;
 
@@ -24,6 +26,9 @@ class CheckoutService extends GetxService {
 
   Future<void> saveOrderToSupabase(OrderHistoryItem order, String paymentMethod, CargoModel cargo)async {
   try {
+    final orderId = _uuid.v4();
+    print('🟢 Saving order with ID: $orderId');
+
     final info = order.infoUser.first;
     final timestamp = order.timestamp.toIso8601String();
     final fullAddress = '${info.address}, '
@@ -52,6 +57,7 @@ class CheckoutService extends GetxService {
     // Simpan setiap item sebagai 1 row
     for (final item in order.items) {
       print('🟢 Inserting order: ${{
+        'order_id': orderId,
         'timestamp': timestamp,
         'full_name': info.fullName,
         'email': info.email,
@@ -78,6 +84,7 @@ class CheckoutService extends GetxService {
       print('📦 cargo.kategori = ${cargo.kategoriId}');
 
       await supabase.from('order_history').insert({
+        'order_id': orderId,
         'timestamp': timestamp,
         'full_name': info.fullName,
         'email': info.email,
@@ -118,7 +125,7 @@ class CheckoutService extends GetxService {
 
     }
 
-    print('✅ Order saved per item!');
+    print('✅ Order with ID $orderId save successfully!');
   } catch (e) {
     print('❌ Error saving order: $e');
   }
@@ -225,7 +232,8 @@ Future<void> loadOrderHistoryFromSupabase(String email) async {
           paymentMethod: entry.value.first['payment_method'] ?? '',
           infoUser: [infoUser],
           items: sellerItems,
-          id: '', 
+          // id: '',
+          id: entry.value.first['order_id'], // ditambahkan
           cargoCategory: entry.value.first['cargo_category'], 
           cargoName: entry.value.first['cargo_name'], 
           status: entry.value.first['status'] ?? 'menunggu konfirmasi',
