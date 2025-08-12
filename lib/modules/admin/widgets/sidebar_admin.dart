@@ -13,20 +13,45 @@ class SidebarAdmin extends StatelessWidget {
     
     return Container(
       width: 250,
-      color: Colors.white,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(3, 0),
+          ),
+        ],
+      ),
       child: Column(
         children: [
-          // Logo Section
+          // Logo/Header
           Container(
-            height: 60,
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.red,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.red.withOpacity(0.3),
+                  spreadRadius: 1,
+                  blurRadius: 5,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
             child: Row(
-              children: [
-                const Icon(Icons.admin_panel_settings, color: Colors.red, size: 32),
-                const SizedBox(width: 12),
-                const Text(
+              children: const [
+                Icon(
+                  Icons.admin_panel_settings,
+                  color: Colors.white,
+                  size: 32,
+                ),
+                SizedBox(width: 12),
+                Text(
                   'Admin Portal',
                   style: TextStyle(
+                    color: Colors.white,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -35,77 +60,94 @@ class SidebarAdmin extends StatelessWidget {
             ),
           ),
           
-          const Divider(height: 1),
-          
           // Menu Items
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Obx(() => ListView(
+              padding: const EdgeInsets.symmetric(vertical: 8),
               children: [
                 _buildMenuItem(
-                  'dashboard',
-                  'Dashboard',
-                  Icons.dashboard_outlined,
+                  icon: Icons.dashboard_outlined,
+                  title: 'Dashboard',
+                  menuKey: 'dashboard',
+                  isSelected: controller.selectedMenu.value == 'dashboard',
+                  onTap: () => controller.changeMenu('dashboard'),
                 ),
                 _buildMenuItem(
-                  'users',
-                  'Users Management',
-                  Icons.people_outline,
+                  icon: Icons.people_outline,
+                  title: 'Users Management',
+                  menuKey: 'users',
+                  isSelected: controller.selectedMenu.value == 'users',
+                  onTap: () => controller.changeMenu('users'),
                 ),
                 _buildMenuItem(
-                  'sellers',
-                  'Sellers Management',
-                  Icons.store_outlined,
+                  icon: Icons.store_outlined,
+                  title: 'Sellers Management',
+                  menuKey: 'sellers',
+                  isSelected: controller.selectedMenu.value == 'sellers',
+                  onTap: () => controller.changeMenu('sellers'),
                 ),
                 _buildMenuItem(
-                  'products',
-                  'All Products',
-                  Icons.inventory_2_outlined,
+                  icon: Icons.inventory_2_outlined,
+                  title: 'All Products',
+                  menuKey: 'products',
+                  isSelected: controller.selectedMenu.value == 'products',
+                  onTap: () => controller.changeMenu('products'),
                 ),
                 _buildMenuItem(
-                  'orders',
-                  'All Orders',
-                  Icons.shopping_cart_outlined,
+                  icon: Icons.shopping_cart_outlined,
+                  title: 'All Orders',
+                  menuKey: 'orders',
+                  isSelected: controller.selectedMenu.value == 'orders',
+                  onTap: () => controller.changeMenu('orders'),
                 ),
                 _buildMenuItem(
-                  'categories',
-                  'Categories',
-                  Icons.category_outlined,
+                  icon: Icons.category_outlined,
+                  title: 'Categories',
+                  menuKey: 'categories',
+                  isSelected: controller.selectedMenu.value == 'categories',
+                  onTap: () => controller.changeMenu('categories'),
                 ),
                 _buildMenuItem(
-                  'payments',
-                  'Payments',
-                  Icons.payment_outlined,
+                  icon: Icons.payment_outlined,
+                  title: 'Payments',
+                  menuKey: 'payments',
+                  isSelected: controller.selectedMenu.value == 'payments',
+                  onTap: () => controller.changeMenu('payments'),
                 ),
                 _buildMenuItem(
-                  'reports',
-                  'Reports',
-                  Icons.analytics_outlined,
+                  icon: Icons.analytics_outlined,
+                  title: 'Reports',
+                  menuKey: 'reports',
+                  isSelected: controller.selectedMenu.value == 'reports',
+                  onTap: () => controller.changeMenu('reports'),
                 ),
                 _buildMenuItem(
-                  'settings',
-                  'System Settings',
-                  Icons.settings_outlined,
+                  icon: Icons.settings_outlined,
+                  title: 'System Settings',
+                  menuKey: 'settings',
+                  isSelected: controller.selectedMenu.value == 'settings',
+                  onTap: () => controller.changeMenu('settings'),
                 ),
               ],
-            ),
+            )),
           ),
-          
-          const Divider(height: 1),
           
           // Logout Button
           Container(
             padding: const EdgeInsets.all(16),
-            child: OutlinedButton.icon(
-              onPressed: controller.logout,
-              icon: const Icon(Icons.logout, color: Colors.red),
-              label: const Text(
-                'Logout',
-                style: TextStyle(color: Colors.red),
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(color: Colors.grey[200]!),
               ),
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 48),
-                side: const BorderSide(color: Colors.red),
+            ),
+            child: ElevatedButton.icon(
+              onPressed: () => controller.logout(),
+              icon: const Icon(Icons.logout),
+              label: const Text('Logout'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red[50],
+                foregroundColor: Colors.red,
+                minimumSize: const Size(double.infinity, 45),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -117,43 +159,39 @@ class SidebarAdmin extends StatelessWidget {
     );
   }
   
-  Widget _buildMenuItem(String key, String title, IconData icon) {
-    final AdminDashboardController controller = Get.find<AdminDashboardController>();
-    
-    return Obx(() {
-      final isSelected = controller.selectedMenu.value == key;
-      
-      return Container(
-        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-        child: Material(
-          color: isSelected ? Colors.red.withOpacity(0.1) : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-          child: InkWell(
-            onTap: () => controller.changeMenu(key),
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                children: [
-                  Icon(
-                    icon,
-                    size: 22,
-                    color: isSelected ? Colors.red : Colors.grey[600],
-                  ),
-                  const SizedBox(width: 16),
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: isSelected ? Colors.red : Colors.grey[800],
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+  Widget _buildMenuItem({
+    required IconData icon,
+    required String title,
+    required String menuKey,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        color: isSelected ? Colors.red[50] : Colors.transparent,
+      ),
+      child: ListTile(
+        leading: Icon(
+          icon,
+          color: isSelected ? Colors.red : Colors.grey[700],
+          size: 22,
+        ),
+        title: Text(
+          title,
+          style: TextStyle(
+            color: isSelected ? Colors.red : Colors.grey[700],
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+            fontSize: 14,
           ),
         ),
-      );
-    });
+        onTap: onTap,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        hoverColor: Colors.red[50],
+      ),
+    );
   }
 }

@@ -22,7 +22,7 @@ class AdminDashboardController extends GetxController {
   final RxDouble totalRevenue = 0.0.obs;
   final RxInt pendingOrders = 0.obs;
   
-  // Menu states
+  // Menu states - TAMBAHAN BARU
   final RxString selectedMenu = 'dashboard'.obs;
   
   @override
@@ -96,8 +96,26 @@ class AdminDashboardController extends GetxController {
     }
   }
   
+  // TAMBAHAN BARU - Method untuk ganti menu
   void changeMenu(String menu) {
     selectedMenu.value = menu;
+    print('Menu changed to: $menu');
+    
+    // Optional: Load specific data when menu changes
+    switch(menu) {
+      case 'dashboard':
+        // Reload dashboard stats when returning to dashboard
+        loadDashboardStats();
+        break;
+      case 'users':
+        // Users controller will handle its own data loading
+        print('Loading users data...');
+        break;
+      case 'sellers':
+        print('Loading sellers data...');
+        break;
+      // Add other cases as needed
+    }
   }
   
   Future<void> logout() async {
@@ -141,20 +159,22 @@ class AdminDashboardController extends GetxController {
     loadDashboardStats();
   }
   
-Future<List<Map<String, dynamic>>> getRecentActivities() async {
-  try {
-    // Fix: user_id dan seller_id harus reference yang benar
-    final recentOrders = await _supabaseService.client
-        .from('orders_order')
-        .select('*, profiles:user_id(full_name)')  // Fix foreign key reference
-        .order('created_at', ascending: false)
-        .limit(5);
-    
-    final recentProducts = await _supabaseService.client
-        .from('products')
-        .select('*, profiles:seller_id(store_name)')  // Use store_name, not shop_name
-        .order('created_at', ascending: false)
-        .limit(5);
+  // Get recent activities (for dashboard feed)
+  Future<List<Map<String, dynamic>>> getRecentActivities() async {
+    try {
+      // Get recent orders
+      final recentOrders = await _supabaseService.client
+          .from('orders_order')
+          .select('*, profiles!user_id(full_name)')
+          .order('created_at', ascending: false)
+          .limit(5);
+      
+      // Get recent products
+      final recentProducts = await _supabaseService.client
+          .from('products')
+          .select('*, profiles!seller_id(store_name)')
+          .order('created_at', ascending: false)
+          .limit(5);
       
       // Combine and sort by date
       List<Map<String, dynamic>> activities = [];
@@ -177,7 +197,7 @@ Future<List<Map<String, dynamic>>> getRecentActivities() async {
           activities.add({
             'type': 'product',
             'title': product['name'],
-            'description': 'Added by ${product['profiles']?['shop_name'] ?? 'Seller'}',
+            'description': 'Added by ${product['profiles']?['store_name'] ?? 'Seller'}',
             'price': product['price'],
             'created_at': product['created_at'],
           });

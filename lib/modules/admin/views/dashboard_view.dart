@@ -40,7 +40,7 @@ class AdminDashboardView extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Welcome Message
+                      // Welcome Message with Dynamic Title
                       Obx(() => Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,7 +53,7 @@ class AdminDashboardView extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            'Admin Dashboard',
+                            _getPageTitle(controller.selectedMenu.value),
                             style: TextStyle(
                               fontSize: 14,
                               color: Colors.grey[600],
@@ -142,205 +142,75 @@ class AdminDashboardView extends StatelessWidget {
                   ),
                 ),
                 
-                // Dashboard Content
+                // Dynamic Content Area
                 Expanded(
                   child: Container(
                     color: Colors.grey[100],
                     child: Obx(() {
-                      if (controller.isLoading.value) {
-                        return const Center(child: CircularProgressIndicator());
+                      // Show different content based on selected menu
+                      switch(controller.selectedMenu.value) {
+                        case 'dashboard':
+                          return _buildDashboardContent(controller);
+                        case 'users':
+                          // TODO: Return UsersManagementView() when created
+                          return Center(
+                            child: Text(
+                              'Users Management - Coming Soon',
+                              style: TextStyle(fontSize: 24, color: Colors.grey),
+                            ),
+                          );
+                        case 'sellers':
+                          return Center(
+                            child: Text(
+                              'Sellers Management - Coming Soon',
+                              style: TextStyle(fontSize: 24, color: Colors.grey),
+                            ),
+                          );
+                        case 'products':
+                          return Center(
+                            child: Text(
+                              'Products Management - Coming Soon',
+                              style: TextStyle(fontSize: 24, color: Colors.grey),
+                            ),
+                          );
+                        case 'orders':
+                          return Center(
+                            child: Text(
+                              'Orders Management - Coming Soon',
+                              style: TextStyle(fontSize: 24, color: Colors.grey),
+                            ),
+                          );
+                        case 'categories':
+                          return Center(
+                            child: Text(
+                              'Categories Management - Coming Soon',
+                              style: TextStyle(fontSize: 24, color: Colors.grey),
+                            ),
+                          );
+                        case 'payments':
+                          return Center(
+                            child: Text(
+                              'Payments Management - Coming Soon',
+                              style: TextStyle(fontSize: 24, color: Colors.grey),
+                            ),
+                          );
+                        case 'reports':
+                          return Center(
+                            child: Text(
+                              'Reports - Coming Soon',
+                              style: TextStyle(fontSize: 24, color: Colors.grey),
+                            ),
+                          );
+                        case 'settings':
+                          return Center(
+                            child: Text(
+                              'System Settings - Coming Soon',
+                              style: TextStyle(fontSize: 24, color: Colors.grey),
+                            ),
+                          );
+                        default:
+                          return _buildDashboardContent(controller);
                       }
-                      
-                      return RefreshIndicator(
-                        onRefresh: () async => controller.refreshDashboard(),
-                        child: SingleChildScrollView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Page Title
-                              const Text(
-                                'Admin Dashboard Overview',
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 24),
-                              
-                              // Stats Cards - Row 1
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: _buildStatCard(
-                                      'Total Users',
-                                      controller.totalUsers.value.toString(),
-                                      Icons.people_outline,
-                                      Colors.blue,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: _buildStatCard(
-                                      'Active Sellers',
-                                      controller.totalSellers.value.toString(),
-                                      Icons.store_outlined,
-                                      Colors.purple,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: _buildStatCard(
-                                      'Total Products',
-                                      controller.totalProducts.value.toString(),
-                                      Icons.inventory_2_outlined,
-                                      Colors.green,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              
-                              // Stats Cards - Row 2
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: _buildStatCard(
-                                      'Total Orders',
-                                      controller.totalOrders.value.toString(),
-                                      Icons.shopping_cart_outlined,
-                                      Colors.orange,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: _buildStatCard(
-                                      'Total Revenue',
-                                      'Rp ${controller.totalRevenue.value.toStringAsFixed(0)}',
-                                      Icons.attach_money,
-                                      Colors.teal,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: _buildStatCard(
-                                      'Pending Orders',
-                                      controller.pendingOrders.value.toString(),
-                                      Icons.pending_actions,
-                                      Colors.red,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              
-                              const SizedBox(height: 32),
-                              
-                              // Quick Actions
-                              const Text(
-                                'Quick Actions',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              Row(
-                                children: [
-                                  _buildQuickAction(
-                                    'Manage Users',
-                                    Icons.people_outline,
-                                    () {
-                                      // TODO: Navigate to users
-                                    },
-                                  ),
-                                  const SizedBox(width: 16),
-                                  _buildQuickAction(
-                                    'Manage Sellers',
-                                    Icons.store_outlined,
-                                    () {
-                                      // TODO: Navigate to sellers
-                                    },
-                                  ),
-                                  const SizedBox(width: 16),
-                                  _buildQuickAction(
-                                    'View Reports',
-                                    Icons.analytics_outlined,
-                                    () {
-                                      // TODO: Navigate to reports
-                                    },
-                                  ),
-                                  const SizedBox(width: 16),
-                                  _buildQuickAction(
-                                    'System Settings',
-                                    Icons.settings_outlined,
-                                    () {
-                                      // TODO: Navigate to settings
-                                    },
-                                  ),
-                                ],
-                              ),
-                              
-                              const SizedBox(height: 32),
-                              
-                              // Recent Activities Section
-                              Card(
-                                elevation: 2,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(24),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          const Text(
-                                            'Recent Activities',
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          TextButton(
-                                            onPressed: () {
-                                              // TODO: View all activities
-                                            },
-                                            child: const Text('View All'),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 16),
-                                      
-                                      // Activity items would be loaded from controller
-                                      _buildActivityItem(
-                                        'New seller registered',
-                                        'Tech Store joined the platform',
-                                        Icons.store,
-                                        '5 minutes ago',
-                                      ),
-                                      _buildActivityItem(
-                                        'New order placed',
-                                        'Order #12345 - Rp 250,000',
-                                        Icons.shopping_cart,
-                                        '15 minutes ago',
-                                      ),
-                                      _buildActivityItem(
-                                        'Product reported',
-                                        'iPhone 15 Pro Max - Policy violation',
-                                        Icons.report,
-                                        '1 hour ago',
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
                     }),
                   ),
                 ),
@@ -350,6 +220,214 @@ class AdminDashboardView extends StatelessWidget {
         ],
       ),
     );
+  }
+  
+  // Helper method untuk mendapatkan title berdasarkan menu
+  String _getPageTitle(String menu) {
+    switch(menu) {
+      case 'dashboard': return 'Admin Dashboard';
+      case 'users': return 'Users Management';
+      case 'sellers': return 'Sellers Management';
+      case 'products': return 'Products Management';
+      case 'orders': return 'Orders Management';
+      case 'categories': return 'Categories Management';
+      case 'payments': return 'Payments Management';
+      case 'reports': return 'Reports';
+      case 'settings': return 'System Settings';
+      default: return 'Admin Dashboard';
+    }
+  }
+  
+  // Dashboard Content Widget
+  Widget _buildDashboardContent(AdminDashboardController controller) {
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      
+      return RefreshIndicator(
+        onRefresh: () async => controller.refreshDashboard(),
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Page Title
+              const Text(
+                'Admin Dashboard Overview',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 24),
+              
+              // Stats Cards - Row 1
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildStatCard(
+                      'Total Users',
+                      controller.totalUsers.value.toString(),
+                      Icons.people_outline,
+                      Colors.blue,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildStatCard(
+                      'Active Sellers',
+                      controller.totalSellers.value.toString(),
+                      Icons.store_outlined,
+                      Colors.purple,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildStatCard(
+                      'Total Products',
+                      controller.totalProducts.value.toString(),
+                      Icons.inventory_2_outlined,
+                      Colors.green,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              
+              // Stats Cards - Row 2
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildStatCard(
+                      'Total Orders',
+                      controller.totalOrders.value.toString(),
+                      Icons.shopping_cart_outlined,
+                      Colors.orange,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildStatCard(
+                      'Total Revenue',
+                      'Rp ${controller.totalRevenue.value.toStringAsFixed(0)}',
+                      Icons.attach_money,
+                      Colors.teal,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildStatCard(
+                      'Pending Orders',
+                      controller.pendingOrders.value.toString(),
+                      Icons.pending_actions,
+                      Colors.red,
+                    ),
+                  ),
+                ],
+              ),
+              
+              const SizedBox(height: 32),
+              
+              // Quick Actions
+              const Text(
+                'Quick Actions',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  _buildQuickAction(
+                    'Manage Users',
+                    Icons.people_outline,
+                    () => controller.changeMenu('users'),
+                  ),
+                  const SizedBox(width: 16),
+                  _buildQuickAction(
+                    'Manage Sellers',
+                    Icons.store_outlined,
+                    () => controller.changeMenu('sellers'),
+                  ),
+                  const SizedBox(width: 16),
+                  _buildQuickAction(
+                    'View Reports',
+                    Icons.analytics_outlined,
+                    () => controller.changeMenu('reports'),
+                  ),
+                  const SizedBox(width: 16),
+                  _buildQuickAction(
+                    'System Settings',
+                    Icons.settings_outlined,
+                    () => controller.changeMenu('settings'),
+                  ),
+                ],
+              ),
+              
+              const SizedBox(height: 32),
+              
+              // Recent Activities Section
+              Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Recent Activities',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              // TODO: View all activities
+                            },
+                            child: const Text('View All'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      // Activity items would be loaded from controller
+                      _buildActivityItem(
+                        'New seller registered',
+                        'Tech Store joined the platform',
+                        Icons.store,
+                        '5 minutes ago',
+                      ),
+                      _buildActivityItem(
+                        'New order placed',
+                        'Order #12345 - Rp 250,000',
+                        Icons.shopping_cart,
+                        '15 minutes ago',
+                      ),
+                      _buildActivityItem(
+                        'Product reported',
+                        'iPhone 15 Pro Max - Policy violation',
+                        Icons.report,
+                        '1 hour ago',
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    });
   }
   
   Widget _buildStatCard(String title, String value, IconData icon, Color color) {

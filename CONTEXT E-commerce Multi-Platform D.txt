@@ -115,3 +115,21 @@ Product Management
 Order Management
 Category Management
 User Management (Admin only)
+
+lib/modules/admin/
+├── controllers/
+│   ├── dashboard_controller.dart ✅
+│   └── users_controller.dart 🆕
+├── views/
+│   ├── dashboard_view.dart ✅ (update)
+│   ├── users/
+│   │   ├── users_management_view.dart 🆕
+│   │   └── widgets/
+│   │       ├── users_table.dart 🆕
+│   │       ├── user_detail_dialog.dart 🆕
+│   │       └── user_filter_bar.dart 🆕
+│   └── widgets/
+│       ├── sidebar_admin.dart ✅
+│       └── dashboard_content.dart 🆕
+└── models/
+    └── user_model.dart 🆕
