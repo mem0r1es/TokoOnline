@@ -1,0 +1,135 @@
+CONTEXT: E-commerce Multi-Platform Development Project
+Saya sedang mengembangkan sistem e-commerce yang terdiri dari 2 platform terpisah:
+
+Web untuk Buyer (sudah ada, dibuat oleh rekan)
+Web untuk Seller/Admin (yang sedang kita kerjakan sekarang)
+
+TEKNOLOGI STACK:
+
+Backend: Supabase (Auth + Database)
+Frontend: Flutter Web
+State Management: GetX
+Authentication: Supabase Auth dengan Row Level Security
+
+SISTEM YANG TELAH DIBANGUN:
+1. DATABASE ARCHITECTURE (✅ SELESAI):
+sql-- Tabel profiles dengan multi-role system
+CREATE TABLE profiles (
+  id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
+  email TEXT,
+  full_name TEXT,
+  shop_name TEXT,
+  shop_description TEXT,
+  phone TEXT,
+  roles TEXT[] DEFAULT ARRAY['buyer'],
+  status TEXT CHECK (status IN ('active', 'inactive', 'pending')) DEFAULT 'active',
+  business_info TEXT,
+  address TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+2. MULTI-ROLE SYSTEM:
+
+roles: Array yang bisa berisi ['buyer'], ['seller'], ['admin'], atau kombinasi ['buyer', 'seller', 'admin']
+Auto-trigger: Saat user register, otomatis dapat role 'buyer' dengan status 'active'
+Role upgrade: User bisa upgrade dari buyer ke seller tanpa approval (langsung active)
+
+3. AUTHENTICATION FLOW:
+
+Register di web seller: User otomatis dapat role ['buyer', 'seller']
+Login logic:
+
+Admin → Admin Dashboard
+Seller → Seller Dashboard
+Buyer saja → Tidak bisa akses web seller
+
+
+No approval system: Seller langsung aktif setelah register
+
+
+4. REGISTER FORM FIELDS:
+Untuk seller registration, form berisi:
+
+Full Name (required)
+Shop Name (required)
+Email (required)
+Password (required)
+Phone Number (optional)
+Shop Description (optional)
+
+
+Centralized Supabase operations
+Auth methods (login, register, logout)
+Profile methods (getProfile, updateProfile)
+Product methods (getProducts, addProduct, updateProduct, deleteProduct)
+Order methods, Category methods, dll
+
+YANG BELUM DIKERJAKAN:
+
+Implementation supabase_service.dart
+auth_controller.dart dengan GetX
+Login/Register UI implementation
+Routing system (app_routes.dart, app_pages.dart)
+Dashboard untuk Admin & Seller
+Product management features
+Order management features
+
+BUSINESS LOGIC:
+
+Admin: Full control semua fitur
+Seller: Hanya bisa manage produk & pesanan mereka sendiri
+Buyer: Tidak bisa akses web seller/admin (redirect atau upgrade option)
+
+DEVELOPMENT APPROACH:
+Kita sepakat untuk develop sistem/logic dulu, baru kemudian UI. Step by step approach untuk maintainable code.
+
+GOAL:
+Membuat web platform yang memungkinkan seller mengelola toko mereka dan admin mengontrol seluruh sistem dengan clean architecture, scalable code, dan user-friendly interface.
+
+Lanjutkan development dari titik ini dengan pendekatan step-by-step yang jelas dan mudah dimengerti, dari mana baiknya kita mulai?
+
+###############################################################################################################
+
+PHASE 1: Core Services & Authentication (Prioritas Tinggi)
+
+Supabase Service Implementation
+Auth Controller dengan GetX
+Auth Bindings
+Login & Register Flow
+
+PHASE 2: Routing & Navigation
+
+App Routes & Pages Setup
+Auth Guard/Middleware
+Role-based Routing
+
+PHASE 3: Dashboard Foundation
+
+Admin Dashboard Controller & View
+Seller Dashboard Controller & View
+Sidebar Navigation Components
+
+PHASE 4: Features Implementation
+
+Product Management
+Order Management
+Category Management
+User Management (Admin only)
+
+lib/modules/admin/
+├── controllers/
+│   ├── dashboard_controller.dart ✅
+│   └── users_controller.dart 🆕
+├── views/
+│   ├── dashboard_view.dart ✅ (update)
+│   ├── users/
+│   │   ├── users_management_view.dart 🆕
+│   │   └── widgets/
+│   │       ├── users_table.dart 🆕
+│   │       ├── user_detail_dialog.dart 🆕
+│   │       └── user_filter_bar.dart 🆕
+│   └── widgets/
+│       ├── sidebar_admin.dart ✅
+│       └── dashboard_content.dart 🆕
+└── models/
+    └── user_model.dart 🆕
