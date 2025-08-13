@@ -12,6 +12,11 @@ import 'package:toko_online_getx/routes/app_routes.dart';
 import 'package:toko_online_getx/routes/middlewares/auth_guard.dart';
 import 'package:toko_online_getx/routes/middlewares/guest_guard.dart';
 import 'package:toko_online_getx/routes/middlewares/role_guard.dart';
+import 'package:toko_online_getx/modules/admin/views/products_management_view.dart';
+import 'package:toko_online_getx/modules/admin/controllers/products_controller.dart';
+import 'package:toko_online_getx/modules/admin/views/orders_management_view.dart';
+import 'package:toko_online_getx/modules/admin/controllers/orders_controller.dart';
+
 
 List<GetPage> get getRoutePages => _routes;
 
@@ -55,6 +60,22 @@ List<GetPage> _routes = [
     page: () => AdminDashboardView(),
     transition: Transition.fadeIn,
     middlewares: [AuthGuard(), AdminGuard(),],
+  ),
+  GetPage(
+  name: '/admin/products',
+  page: () => ProductsManagementView(),
+  binding: BindingsBuilder(() {
+    Get.lazyPut(() => ProductsController());
+  }),
+  middlewares: [AuthGuard(), AdminGuard()],
+  ),
+  GetPage(
+  name: '/admin/orders',
+  page: () => OrdersManagementView(),
+  binding: BindingsBuilder(() {
+    Get.lazyPut(() => OrdersController());
+  }),
+  middlewares: [AuthGuard(), AdminGuard()],
   ),
   // Add other routes here...
 ];
