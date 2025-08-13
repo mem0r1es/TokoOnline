@@ -72,7 +72,10 @@ class AfterCheckout extends StatelessWidget {
                               borderRadius: BorderRadiusGeometry.circular(10)
                             )
                           ),
-                          onPressed:() => Get.toNamed(HomePage.TAG), 
+                          onPressed: () {
+                            scrollController.selectedIndex.value = 1;
+                            Get.offAllNamed(HomePage.TAG);
+                          }, 
                           child: Text(
                             'Lanjut Berbelanja',
                             style: context.labelMedium,
