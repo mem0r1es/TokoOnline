@@ -13,6 +13,7 @@ class AdminDashboardController extends GetxController {
   final RxString userName = ''.obs;
   final RxString userEmail = ''.obs;
   final RxBool isLoading = false.obs;
+  final RxBool isMenuLoading = false.obs;
   
   // Dashboard stats
   final RxInt totalUsers = 0.obs;
@@ -97,9 +98,16 @@ class AdminDashboardController extends GetxController {
   }
   
   // TAMBAHAN BARU - Method untuk ganti menu
-  void changeMenu(String menu) {
+  void changeMenu(String menu) async {
+
+    if (selectedMenu.value == menu) return;
+
+    isMenuLoading.value = true;
     selectedMenu.value = menu;
     print('Menu changed to: $menu');
+
+  // Add small delay for smooth transition
+  await Future.delayed(Duration(milliseconds: 200));
     
     // Optional: Load specific data when menu changes
     switch(menu) {
@@ -116,6 +124,8 @@ class AdminDashboardController extends GetxController {
         break;
       // Add other cases as needed
     }
+    // Stop loading
+    isMenuLoading.value = false;
   }
   
   Future<void> logout() async {

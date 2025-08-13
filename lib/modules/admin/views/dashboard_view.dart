@@ -148,6 +148,28 @@ class AdminDashboardView extends StatelessWidget {
                   child: Container(
                     color: Colors.grey[100],
                     child: Obx(() {
+                      // Show loading overlay when changing menu
+                      if (controller.isMenuLoading.value) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+                              ),
+                              SizedBox(height: 16),
+                              Text(
+                                'Loading...',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+
                       // Show different content based on selected menu
                       switch(controller.selectedMenu.value) {
                         case 'dashboard':
