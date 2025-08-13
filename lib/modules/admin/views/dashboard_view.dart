@@ -9,7 +9,7 @@ import 'package:toko_online_getx/modules/admin/views/products_management_view.da
 import 'package:toko_online_getx/modules/admin/views/orders_management_view.dart';
 
 class AdminDashboardView extends StatelessWidget {
-  const AdminDashboardView({Key? key}) : super(key: key);
+  const AdminDashboardView({super.key});
 
   @override
   Widget build(BuildContext context) {

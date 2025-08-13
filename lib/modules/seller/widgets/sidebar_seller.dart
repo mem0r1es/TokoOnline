@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../controllers/dashboard_controller.dart';
 
 class SidebarSeller extends GetView<SellerDashboardController> {
-  const SidebarSeller({Key? key}) : super(key: key);
+  const SidebarSeller({super.key});
 
   @override
   Widget build(BuildContext context) {

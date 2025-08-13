@@ -3,7 +3,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:get/get.dart';
 import 'package:toko_online_getx/routes/app_routes.dart';
-import 'package:toko_online_getx/service/add_productservice.dart';
 
 class SupabaseService extends GetxService {
   static SupabaseService get to => Get.find();

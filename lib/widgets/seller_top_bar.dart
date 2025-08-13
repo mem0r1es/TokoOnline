@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:toko_online_getx/modules/seller/controllers/dashboard_controller.dart';
 
 class SellerTopBar extends GetView<SellerDashboardController> {
-  const SellerTopBar({Key? key}) : super(key: key);
+  const SellerTopBar({super.key});
 
   @override
   Widget build(BuildContext context) {

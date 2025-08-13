@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:get/get_navigation/src/routes/get_route.dart';
 import 'package:toko_online_getx/binding.dart';
 import 'package:toko_online_getx/controller/add_productcontroller.dart';
 import 'package:toko_online_getx/modules/admin/views/dashboard_view.dart';
@@ -7,6 +6,7 @@ import 'package:toko_online_getx/modules/auth/views/login_view.dart';
 import 'package:toko_online_getx/modules/auth/views/register_view.dart';
 import 'package:toko_online_getx/modules/seller/views/dashboard_view.dart';
 import 'package:toko_online_getx/pages/add_product.dart';
+import 'package:toko_online_getx/pages/order_page.dart';
 import 'package:toko_online_getx/pages/product_view.dart';
 import 'package:toko_online_getx/routes/app_routes.dart';
 import 'package:toko_online_getx/routes/middlewares/auth_guard.dart';
@@ -60,6 +60,12 @@ List<GetPage> _routes = [
     page: () => AdminDashboardView(),
     transition: Transition.fadeIn,
     middlewares: [AuthGuard(), AdminGuard(),],
+  ),
+  GetPage(
+    name: OrderPage.TAG,
+    page: () => OrderPage(),
+    transition: Transition.rightToLeft,
+    middlewares: [AuthGuard(), SellerGuard()],
   ),
   GetPage(
   name: '/admin/products',

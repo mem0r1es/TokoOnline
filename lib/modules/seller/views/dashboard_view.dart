@@ -9,7 +9,7 @@ import '../widgets/sidebar_seller.dart';
 class SellerDashboardView extends GetView<SellerDashboardController> {
   final SupabaseService _supabaseService = Get.find<SupabaseService>();
   static final String TAG = '/seller-dashboard';
-  SellerDashboardView({Key? key}) : super(key: key);
+  SellerDashboardView({super.key});
 
   @override
   Widget build(BuildContext context) {

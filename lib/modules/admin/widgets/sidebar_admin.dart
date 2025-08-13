@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import '../controllers/dashboard_controller.dart';
 
 class SidebarAdmin extends StatelessWidget {
-  const SidebarAdmin({Key? key}) : super(key: key);
+  const SidebarAdmin({super.key});
 
   @override
   Widget build(BuildContext context) {

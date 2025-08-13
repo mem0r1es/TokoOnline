@@ -67,7 +67,7 @@ class AddProductService extends GetxService {
   Future<void> addProductToDatabase(AddProductmodel newProduct, {String? filePath}) async {
     print('🚀 Memulai proses tambah produk');
 
-    if (newProduct.filePath == null || newProduct.filePath!.isEmpty) {
+    if (newProduct.filePath.isEmpty) {
     print('❌ URL gambar tidak ditemukan, proses dibatalkan.');
     // Tampilkan pesan error ke pengguna
     Get.snackbar('Error', 'Please upload an image first.');

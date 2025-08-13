@@ -6,7 +6,7 @@ class LoginView extends GetView<AuthController> {
   static final String TAG = '/login';
   // final AuthController controller = Get.find<AuthController>();
   
-  LoginView({Key? key}) : super(key: key);
+  const LoginView({super.key});
 
   @override
   Widget build(BuildContext context) {

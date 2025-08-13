@@ -8,7 +8,7 @@ import 'package:toko_online_getx/models/add_productmodel.dart';
 class AddProduct extends GetView<AddProductController> {
   static final String TAG = '/add-product';
 
-  AddProduct({super.key});
+  const AddProduct({super.key});
 
   @override
   Widget build(BuildContext context) {

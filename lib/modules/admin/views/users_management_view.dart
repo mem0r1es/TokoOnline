@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:toko_online_getx/modules/admin/controllers/users_controller.dart';
 
 class UsersManagementView extends StatelessWidget {
-  UsersManagementView({Key? key}) : super(key: key);
+  UsersManagementView({super.key});
   
   // Initialize controller
   final UsersController controller = Get.put(UsersController());
@@ -188,7 +188,7 @@ class UsersManagementView extends StatelessWidget {
                     scrollDirection: Axis.horizontal,
                     child: SingleChildScrollView(
                       child: DataTable(
-                        headingRowColor: MaterialStateProperty.all(Colors.grey[100]),
+                        headingRowColor: WidgetStateProperty.all(Colors.grey[100]),
                         columns: const [
                           DataColumn(label: Text('#')),
                           DataColumn(label: Text('Name')),

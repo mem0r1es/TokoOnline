@@ -17,6 +17,7 @@ abstract class AppRoutes {
   static const String sellerOrderDetail = '/seller/orders/:id';
   static const String sellerProfile = '/seller/profile';
   static const String sellerSettings = '/seller/settings';
+  static const String sellerNotifications = '/seller/order-view';
   
   // Admin Features Routes (untuk nanti)
   static const String adminUsers = '/admin/users';

@@ -41,12 +41,10 @@ class UsersController extends GetxController {
           .from('profiles')
           .select('*');
       
-      if (response != null) {
-        allUsers.value = List<Map<String, dynamic>>.from(response);
-        filteredUsers.value = allUsers;
-        print('Loaded ${allUsers.length} users');
-      }
-    } catch (e) {
+      allUsers.value = List<Map<String, dynamic>>.from(response);
+      filteredUsers.value = allUsers;
+      print('Loaded ${allUsers.length} users');
+        } catch (e) {
       print('Error loading users: $e');
       Get.snackbar(
         'Error',
