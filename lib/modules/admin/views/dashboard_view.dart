@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 import '../controllers/dashboard_controller.dart';
 import '../widgets/sidebar_admin.dart';
 import 'package:toko_online_getx/modules/admin/views/users_management_view.dart';
+import 'package:toko_online_getx/modules/admin/views/products_management_view.dart';
+import 'package:toko_online_getx/modules/admin/views/orders_management_view.dart';
 
 class AdminDashboardView extends StatelessWidget {
   const AdminDashboardView({Key? key}) : super(key: key);
@@ -162,18 +164,18 @@ class AdminDashboardView extends StatelessWidget {
                             ),
                           );
                         case 'products':
-                          return Center(
-                            child: Text(
-                              'Products Management - Coming Soon',
-                              style: TextStyle(fontSize: 24, color: Colors.grey),
-                            ),
+                          return ProductsManagementView(
+                            // child: Text(
+                            //   'Products Management - Coming Soon',
+                            //   style: TextStyle(fontSize: 24, color: Colors.grey),
+                            // ),
                           );
                         case 'orders':
-                          return Center(
-                            child: Text(
-                              'Orders Management - Coming Soon',
-                              style: TextStyle(fontSize: 24, color: Colors.grey),
-                            ),
+                          return OrdersManagementView(
+                            // child: Text(
+                            //   'Orders Management - Coming Soon',
+                            //   style: TextStyle(fontSize: 24, color: Colors.grey),
+                            // ),
                           );
                         case 'categories':
                           return Center(
